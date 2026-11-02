@@ -1,0 +1,179 @@
+@font-face { font-family: Spectral; src: url(fonts/Spectral-ExtraLight.woff2) format("woff2"); font-weight: 200; font-display: swap; }
+@font-face { font-family: Spectral; src: url(fonts/Spectral-ExtraLightItalic.woff2) format("woff2"); font-weight: 200; font-style: italic; font-display: swap; }
+@font-face { font-family: Spectral; src: url(fonts/Spectral-Light.woff2) format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: Spectral; src: url(fonts/Spectral-LightItalic.woff2) format("woff2"); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: Spectral; src: url(fonts/Spectral-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: Spectral; src: url(fonts/Spectral-Italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+
+:root {
+  --mark: #e03c1f;
+  --paper: #eeece5; --paper-ink: #17171b;
+  --dusk: #3c4256; --dusk-ink: #f0ede4;
+  --night: #0b0c12; --night-ink: #ece8dd;
+  --blank: #ffffff; --blank-ink: #111114;
+  --gutter: clamp(1.25rem, 5vw, 5.5rem);
+  --bg: var(--paper); --ink: var(--paper-ink);
+  color-scheme: light;
+}
+[data-tone="paper"] { --bg: var(--paper); --ink: var(--paper-ink); }
+[data-tone="dusk"]  { --bg: var(--dusk);  --ink: var(--dusk-ink); }
+[data-tone="night"] { --bg: var(--night); --ink: var(--night-ink); }
+[data-tone="blank"] { --bg: var(--blank); --ink: var(--blank-ink); }
+[data-tone="dusk"], [data-tone="night"] { --mark: #ff5a3a; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 300 clamp(1.08rem, .98rem + .4vw, 1.28rem)/1.62 Spectral, Georgia, "Times New Roman", serif;
+  font-feature-settings: "kern", "liga", "onum";
+  transition: background-color .9s ease, color .9s ease;
+  overflow-x: clip;
+}
+/* With JS the body carries the colour, and sections fade through it. Without JS, sections paint themselves. */
+html:not(.js) section, html:not(.js) .foot { background: var(--bg); color: var(--ink); }
+.js section[data-tone], .js .foot[data-tone] { --bg: transparent; color: inherit; }
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: .2em; }
+a:hover { color: var(--mark); }
+:focus-visible { outline: 2px solid var(--mark); outline-offset: 3px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: fixed; left: 1rem; top: -4rem; z-index: 30; background: var(--paper-ink); color: var(--paper); padding: .5rem 1rem; }
+.skip:focus { top: 1rem; }
+
+.bar {
+  position: fixed; inset: 0 0 auto; z-index: 20; display: flex; justify-content: space-between; align-items: baseline;
+  padding: .7rem var(--gutter); background: var(--bg); color: var(--ink); font-size: 1rem; font-weight: 400; transition: background-color .9s ease, color .9s ease;
+}
+.bar a, .bar summary { text-decoration: none; cursor: pointer; }
+.bar a:hover, .bar summary:hover { color: var(--mark); }
+.wordmark { font-style: italic; font-size: 1.15rem; }
+.bar nav { display: flex; gap: clamp(1rem, 3vw, 2.25rem); align-items: baseline; }
+.motion { background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
+.motion:hover { color: var(--mark); }
+.thread-menu summary { list-style: none; }
+.thread-menu summary::-webkit-details-marker { display: none; }
+.thread-menu[open] summary { position: relative; z-index: 50; color: #111114; text-decoration: underline; text-underline-offset: .2em; }
+.thread-panel {
+  position: fixed; inset: 0 0 0 auto; width: min(38rem, 100vw); overflow-y: auto; z-index: 40;
+  background: #fff; color: #111114; padding: 4rem clamp(1.25rem, 4vw, 3rem) 3rem; font-weight: 300; font-size: 1.05rem;
+}
+.thread-title { font-style: italic; margin: 0 0 1.5rem; }
+.thread-panel ol { list-style: none; margin: 0; padding: 0; }
+.thread-panel li { border-top: 1px solid #1111142b; }
+.thread-panel a { display: grid; grid-template-columns: 2.4rem 1fr; padding: .7rem 0; line-height: 1.35; }
+.thread-panel a:hover { color: #e03c1f; text-decoration: none; }
+.thread-panel span { font-size: .85rem; padding-top: .15rem; opacity: .6; }
+
+.progress { position: fixed; left: clamp(.45rem, 1.8vw, 1.8rem); top: 0; bottom: 0; width: 1px; z-index: 10; background: color-mix(in srgb, currentColor 22%, transparent); }
+.progress i { position: absolute; left: -4px; top: calc(var(--p, 0) * (100% - 9px)); width: 9px; height: 9px; border-radius: 50%; background: var(--mark); }
+
+/* Opening */
+.opening { min-height: 100svh; padding: 5rem var(--gutter) 2.5rem; display: grid; grid-template: 1fr auto / minmax(0, 7fr) minmax(0, 4fr); gap: 2rem clamp(1.5rem, 5vw, 5rem); align-items: center; }
+.opening-ask { margin: 0; font-weight: 200; font-size: clamp(2.9rem, 6.6vw, 7.4rem); line-height: 1.02; letter-spacing: -.028em; }
+.opening-grid { align-self: center; }
+.parts { grid-column: 1 / -1; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 clamp(1rem, 2.5vw, 2.5rem); }
+.parts a { display: grid; grid-template-columns: auto 1fr; gap: .1rem .6rem; padding: .7rem 0; border-top: 1px solid color-mix(in srgb, currentColor 35%, transparent); text-decoration: none; font-size: 1.05rem; line-height: 1.25; }
+.parts span { font-size: .8rem; color: var(--mark); padding-top: .2rem; }
+.parts small { grid-column: 2; font-size: .78rem; font-style: italic; opacity: .7; }
+.opening-foot { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(1.5rem, 5vw, 5rem); align-items: end; border-top: 1px solid currentColor; padding-top: 1rem; }
+.opening-foot p { margin: 0; max-width: 44rem; }
+.opening-foot a { font-style: italic; font-size: 1.3em; }
+
+/* Chapters */
+.chapter {
+  scroll-margin-top: 1rem;
+  padding: clamp(5rem, 12vh, 9rem) var(--gutter); display: grid; gap: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 6vw, 6rem);
+  grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start;
+}
+.chapter-head { grid-column: 1 / -1; }
+.count { margin: 0 0 1.4rem; font-size: 1rem; font-weight: 400; }
+.count span { font-style: italic; font-weight: 300; }
+.ask { margin: 0; max-width: 17em; font-weight: 200; font-size: clamp(2.3rem, 5.8vw, 6rem); line-height: 1.04; letter-spacing: -.022em; text-wrap: balance; }
+.fig { margin: 0; grid-column: 1 / span 5; position: sticky; top: 5rem; }
+.text { grid-column: 7 / -1; max-width: 37rem; }
+.even .fig { grid-column: 8 / -1; grid-row: 2; }
+.even .text { grid-column: 1 / span 6; grid-row: 2; }
+.text p { margin: 0 0 1.1em; hanging-punctuation: first; }
+.text blockquote { margin: 1.5em 0; font-weight: 300; font-style: italic; font-size: clamp(1.55rem, 2.6vw, 2.35rem); line-height: 1.16; letter-spacing: -.01em; color: var(--mark); }
+.caveat { margin-top: 2em !important; font-size: .86em; line-height: 1.45; padding-top: .7em; border-top: 1px solid color-mix(in srgb, currentColor 40%, transparent); }
+.caveat span { display: block; font-style: italic; }
+
+.echoes { margin-top: 1.6em; font-size: .78em; line-height: 1.45; }
+.echoes p { margin: 0 0 .5em; font-style: italic; color: var(--mark); }
+.echoes ul { margin: 0; padding: 0; list-style: none; }
+.echoes li { margin: 0 0 .6em; }
+.echoes b { font-weight: 400; }
+.echoes cite { font-style: italic; }
+
+/* Figures */
+.fig canvas { display: block; width: 100%; aspect-ratio: 1; }
+.fig canvas[hidden] { display: none; }
+.fig img { display: block; width: 100%; height: auto; }
+
+
+.opening-grid.fig { grid-column: 2; grid-row: 1; position: static; width: 100%; align-self: center; }
+
+/* Two fractals: full width */
+.fig-wide .fig { grid-column: 1 / -1; grid-row: auto; position: static; max-width: min(100%, 86vh); justify-self: center; width: 100%; }
+.fig-wide .text { grid-column: 4 / span 7; grid-row: auto; }
+
+/* 25 is not the limit */
+.limit { margin-top: 1.4rem; display: grid; grid-template-columns: 1fr auto; gap: .35rem; align-items: baseline; }
+.limit output { font-style: italic; font-size: 1.3em; }
+.limit input { grid-column: 1 / -1; width: 100%; accent-color: var(--mark); height: 2rem; cursor: pointer; }
+
+/* Ending */
+.ending { min-height: 100svh; padding: clamp(6rem, 16vh, 12rem) var(--gutter); }
+.ending h2 { margin: 0 0 1.2rem; font-size: 1rem; font-weight: 400; }
+.ending ol { margin: 0 0 clamp(6rem, 20vh, 14rem); padding: 0; list-style: none; max-width: 44rem; }
+.ending li { padding: .8rem 0; border-top: 1px solid currentColor; line-height: 1.35; }
+.last-note { margin: 0 0 1.5rem; font-style: italic; }
+.last { margin: 0; font-weight: 200; font-size: clamp(2.3rem, 6.2vw, 6.4rem); line-height: 1.03; letter-spacing: -.024em; max-width: 16em; text-wrap: balance; }
+.point { display: block; width: 14px; height: 14px; border-radius: 50%; background: var(--mark); margin-top: clamp(4rem, 12vh, 8rem); }
+
+/* Lexicon */
+.lexicon { padding: clamp(5rem, 12vh, 9rem) var(--gutter); display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2rem clamp(2rem, 6vw, 6rem); align-items: start; }
+.lexicon-head { grid-column: 1 / span 4; position: sticky; top: 5rem; }
+.lexicon h2 { margin: 0 0 .8rem; font-weight: 200; font-size: clamp(2.3rem, 5vw, 4.6rem); line-height: 1.05; letter-spacing: -.02em; }
+.lexicon-head p { margin: 0; font-style: italic; }
+.lexicon dl { grid-column: 6 / -1; margin: 0; }
+.lexicon dl div { display: grid; grid-template-columns: minmax(7rem, 1fr) 3fr; gap: 1.5rem; padding: .8rem 0; border-top: 1px solid color-mix(in srgb, currentColor 40%, transparent); }
+.lexicon dt { font-weight: 400; }
+.lexicon dd { margin: 0; line-height: 1.4; }
+.lexicon-note { grid-column: 6 / -1; margin: 1rem 0 0; font-size: .86em; font-style: italic; }
+
+/* Book */
+.book { padding: clamp(4rem, 10vh, 7rem) var(--gutter); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2rem clamp(2rem, 5vw, 4rem); align-items: end; border-top: 1px solid currentColor; }
+.cover { display: block; width: clamp(8rem, 14vw, 12rem); box-shadow: 0 1.2rem 2.4rem -1rem #0b0c1288, 0 .2rem .5rem #0b0c1233; transform: rotate(-2deg); transition: transform .4s ease; }
+.cover:hover { transform: rotate(0) translateY(-4px); }
+.cover img { display: block; width: 100%; height: auto; }
+.book h2 { margin: 0 0 .4rem; font-weight: 200; font-size: clamp(2.3rem, 5vw, 4.6rem); line-height: 1.05; letter-spacing: -.02em; }
+.book p { margin: 0; }
+.book-links { display: flex; flex-wrap: wrap; gap: 1rem 1.75rem; align-items: center; justify-content: flex-start; }
+.primary { background: var(--mark); color: #fff; padding: .65rem 1.2rem; text-decoration: none; font-weight: 400; }
+.primary:hover { color: #fff; background: #111114; }
+.foot { padding: 1.2rem var(--gutter) 1.8rem; display: flex; flex-wrap: wrap; gap: .5rem 2rem; justify-content: space-between; font-size: .88rem; }
+
+@media (max-width: 760px) {
+  body { font-size: 1.1rem; }
+  .opening { grid-template: auto auto auto / 1fr; align-content: start; padding-top: 4.2rem; }
+  .opening-grid.fig { grid-column: 1; grid-row: auto; max-width: 72vw; margin: 0 auto; }
+  .opening-foot { grid-template-columns: 1fr; }
+  .chapter { display: block; }
+  .ask { margin-bottom: 2.2rem; }
+  .fig, .even .fig { position: static; max-width: 30rem; margin: 0 auto 2.2rem; }
+  .text { max-width: none; }
+  .progress { display: none; }
+  .lexicon { display: block; }
+  .lexicon-head { position: static; margin-bottom: 2rem; }
+  .lexicon dl div { grid-template-columns: 1fr; gap: .2rem; }
+  .nav-lexicon { display: none; }
+  .parts { grid-template-columns: 1fr 1fr; }
+  .book { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  body { transition: none; }
+}
+@media print { .bar, .progress { display: none; } }

@@ -1,0 +1,925 @@
+{
+ "version": 4,
+ "chapters": [
+  {
+   "id": "source",
+   "figure": "source",
+   "tone": "night",
+   "part": "I",
+   "fr": {
+    "title": "La Source",
+    "thesis": "Tout part d'un même point, et tout y revient.",
+    "body": [
+     "Une rivière, on peut la remonter jusqu'à un filet d'eau entre deux pierres. L'intuition est la même à l'échelle de tout ce qui existe : remonter les consciences, les mondes et la matière jusqu'à une origine commune. C'est ce que désigne ici la Source. Certains l'appelleraient Dieu, et le mot importe moins que l'idée.",
+     "Cette origine ne se tiendrait pas au-dessus du monde pour le regarder. Elle n'aurait pas non plus toutes les réponses dès le départ : elle découvrirait ce qu'elle est à mesure que quelque chose existe, de l'intérieur, à travers chaque regard.",
+     "> Exister serait sa manière d'apprendre ce qu'elle est.",
+     "L'image de la rivière s'arrête là, car l'eau ne remonte pas à sa source. Ici, tout reviendrait. Trois mouvements organisent la suite : le déploiement, l'expérience, le retour."
+    ],
+    "open": "Si la Source est à l'origine de tout, d'où vient-elle elle-même ?",
+    "echoes": [
+     [
+      "Plotin",
+      "*Ennéades*, IIIe siècle",
+      "Tout procède de l'Un, et tout aspire à se retourner vers lui."
+     ],
+     [
+      "Spinoza",
+      "*Éthique*, 1677",
+      "Dieu ou la Nature : une seule substance, dont chaque chose est une manière d'être."
+     ]
+    ]
+   },
+   "en": {
+    "title": "The Source",
+    "thesis": "Everything starts from one point, and everything returns to it.",
+    "body": [
+     "A river can be followed back to a trickle of water between two stones. The intuition is the same at the scale of everything that exists: follow consciousnesses, worlds and matter back to a shared origin. That is what the Source names here. Some would call it God, and the word matters less than the idea.",
+     "This origin would not stand above the world looking on. Nor would it hold every answer from the start: it would discover what it is as things come to exist, from within, through each point of view.",
+     "> Existing would be its way of learning what it is.",
+     "The image of the river stops there, because water does not flow back to its source. Here, everything would return. Three movements organise what follows: unfolding, experience, return."
+    ],
+    "open": "If the Source is the origin of everything, where does it come from?",
+    "echoes": [
+     [
+      "Plotinus",
+      "*Enneads*, 3rd century",
+      "Everything proceeds from the One, and everything longs to turn back toward it."
+     ],
+     [
+      "Spinoza",
+      "*Ethics*, 1677",
+      "God or Nature: a single substance, of which each thing is a way of being."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "fractales",
+   "figure": "fractal",
+   "tone": "night",
+   "part": "I",
+   "fr": {
+    "title": "Deux fractales",
+    "thesis": "Deux infinis partagent une seule singularité.",
+    "body": [
+     "Une fractale répète un même motif à toutes les échelles. Imaginons-en deux, nées d'un même point. L'une s'ouvre vers l'infiniment grand : univers, multivers, consciences toujours plus vastes. L'autre descend vers l'infiniment petit : matière, structures, niveaux toujours plus profonds.",
+     "La Source se tient à leur jonction. Elle n'est ni le plus grand ni le plus petit des éléments, mais ce qui relie les deux directions et leur donne naissance.",
+     "> Tout émane, tout revient, et tout se transforme en chemin.",
+     "Le mouvement ressemble à une respiration. L'existence cesse d'être une ligne droite allant d'un début à une fin : elle devient une fractale vivante, où le même principe agit partout."
+    ],
+    "open": "Rien ne montre que l'univers soit fractal. L'image éclaire-t-elle le réel, ou seulement notre façon de le penser ?",
+    "echoes": [
+     [
+      "Pascal",
+      "*Pensées*, 1670",
+      "L'homme suspendu entre deux infinis, l'infiniment grand et l'infiniment petit."
+     ],
+     [
+      "Benoît Mandelbrot",
+      "*Les Objets fractals*, 1975",
+      "Le mot fractal, pour des formes qui se répètent à toutes les échelles."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Two fractals",
+    "thesis": "Two infinities share a single singularity.",
+    "body": [
+     "A fractal repeats one pattern at every scale. Imagine two of them, born from one point. One opens toward the infinitely large: universes, multiverses, ever vaster consciousnesses. The other descends toward the infinitely small: matter, structures, ever deeper levels.",
+     "The Source stands at their junction. It is neither the largest nor the smallest element, but what connects the two directions and gives birth to them.",
+     "> Everything emerges, everything returns, and everything changes on the way.",
+     "The movement resembles breathing. Existence stops being a straight line from a beginning to an end: it becomes a living fractal, where one principle acts everywhere."
+    ],
+    "open": "Nothing shows that the universe is fractal. Does the image illuminate reality, or only how we think about it?",
+    "echoes": [
+     [
+      "Pascal",
+      "*Pensées*, 1670",
+      "Humanity suspended between two infinities, the infinitely large and the infinitely small."
+     ],
+     [
+      "Benoît Mandelbrot",
+      "*Les Objets fractals*, 1975",
+      "The word fractal, for shapes that repeat at every scale."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "tout-et-rien",
+   "figure": "void",
+   "tone": "blank",
+   "part": "I",
+   "fr": {
+    "title": "Tout et rien",
+    "thesis": "La Source est tout et rien à la fois.",
+    "body": [
+     "Tout, parce que chaque univers, chaque conscience et chaque particule en seraient des expressions. Rien, parce qu'avant toute forme elle ne serait aucune chose en particulier.",
+     "Ce rien n'est pas le néant. C'est une absence de forme définie, une réserve de possibles, proche de ce qu'ont exploré le taoïsme et les pensées de la non-dualité.",
+     "Le paradoxe donne son moteur à tout le modèle. Étant tout, la Source n'a rien à chercher hors d'elle. Étant indéterminée, elle a une infinité de choses à découvrir en elle.",
+     "> Créer, c'est passer de la possibilité à l'expérience."
+    ],
+    "open": "Peut-on dire quoi que ce soit d'une origine qu'aucune forme ne définit ?",
+    "echoes": [
+     [
+      "Lao-tseu",
+      "*Tao-tö-king*",
+      "C'est le vide au centre de la roue qui la rend utile."
+     ],
+     [
+      "Nicolas de Cues",
+      "*La Docte Ignorance*, 1440",
+      "Dans l'infini, les contraires coïncident."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Everything and nothing",
+    "thesis": "The Source is everything and nothing at once.",
+    "body": [
+     "Everything, because each universe, consciousness and particle would be an expression of it. Nothing, because before any form it would be no thing in particular.",
+     "This nothing is not nonexistence. It is an absence of defined form, a reserve of possibilities, close to what Taoism and non-dual thought have explored.",
+     "The paradox gives the whole model its engine. Being everything, the Source has nothing to look for outside itself. Being undetermined, it has an infinity of things to discover within.",
+     "> To create is to pass from possibility to experience."
+    ],
+    "open": "Can anything be said of an origin that no form defines?",
+    "echoes": [
+     [
+      "Laozi",
+      "*Tao Te Ching*",
+      "It is the empty centre of the wheel that makes it useful."
+     ],
+     [
+      "Nicholas of Cusa",
+      "*On Learned Ignorance*, 1440",
+      "In the infinite, opposites coincide."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "echelles",
+   "figure": "nested",
+   "tone": "paper",
+   "part": "II",
+   "fr": {
+    "title": "Les échelles",
+    "thesis": "Il n'y a pas de frontière nette entre l'individu et le tout.",
+    "body": [
+     "Le motif se répète à chaque niveau. Une vie appartient à une conscience plus vaste, qu'on peut appeler âme. Cette âme appartient à une conscience plus vaste encore, et ainsi de suite jusqu'à la Source.",
+     "Plus large ne veut pas dire meilleur. Aucun niveau ne vaut plus qu'un autre : chacun est une façon différente de regarder la même chose.",
+     "> Où s'arrête l'individu, et où commence la conscience universelle ?",
+     "La question n'a peut-être pas de réponse tranchée. Il n'y aurait alors qu'une seule conscience, qui se découvre à travers une infinité de regards, sans qu'aucun de ces regards cesse d'être singulier."
+    ],
+    "open": "Si une conscience plus vaste oriente les vies qu'elle rassemble, que devient la liberté de chacune ?",
+    "echoes": [
+     [
+      "Arthur Koestler",
+      "*Le Cheval dans la locomotive*, 1967",
+      "Le holon : tout ce qui existe est à la fois un tout et la partie d'un tout plus grand."
+     ],
+     [
+      "Le filet d'Indra",
+      "bouddhisme Huayan, VIIe siècle",
+      "Un filet sans fin dont chaque perle reflète toutes les autres."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Scales",
+    "thesis": "There is no clear border between the individual and the whole.",
+    "body": [
+     "The pattern repeats at each level. A life belongs to a vaster consciousness, which we can call a soul. That soul belongs to a vaster one still, and so on up to the Source.",
+     "Wider does not mean better. No level is worth more than another: each is a different way of looking at the same thing.",
+     "> Where does the individual end, and universal consciousness begin?",
+     "The question may have no clear-cut answer. There would then be a single consciousness, discovering itself through an infinity of points of view, none of which stops being unique."
+    ],
+    "open": "If a vaster consciousness guides the lives it gathers, what becomes of each one's freedom?",
+    "echoes": [
+     [
+      "Arthur Koestler",
+      "*The Ghost in the Machine*, 1967",
+      "The holon: everything that exists is at once a whole and part of a larger whole."
+     ],
+     [
+      "Indra's net",
+      "Huayan Buddhism, 7th century",
+      "An endless net in which each jewel reflects all the others."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "vies",
+   "figure": "lives",
+   "tone": "paper",
+   "part": "II",
+   "fr": {
+    "title": "Plusieurs vies à la fois",
+    "thesis": "Une âme pourrait vivre plusieurs existences en même temps.",
+    "body": [
+     "Prenons vingt-cinq vies, pour fixer les idées. Vingt-cinq personnes distinctes, qui ont chacune leurs émotions et leurs décisions et ne savent rien les unes des autres. Toutes nourrissent pourtant une même conscience.",
+     "Le parallélisme a une raison d'être : apprendre davantage que ne le permet un seul point de vue. Une vie découvre le courage, une autre le pardon, une autre l'attachement.",
+     "Aucune n'est la copie d'une autre, et aucune ne peut être remplacée. Chaque point de la grille voit ce que les autres ne verront jamais.",
+     "> Vingt-cinq est une image. Rien n'impose de limite."
+    ],
+    "open": "Aucune preuve ne soutient l'idée de vies partagées. Que vaut-elle alors, comme manière de regarder les autres ?",
+    "echoes": [
+     [
+      "Leibniz",
+      "*Monadologie*, 1714",
+      "Chaque substance est un miroir de l'univers, vu d'un point de vue qui n'appartient qu'à elle."
+     ],
+     [
+      "Fernando Pessoa",
+      "les hétéronymes, à partir de 1914",
+      "Un seul poète, plusieurs auteurs complets, chacun avec sa vie et son œuvre."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Several lives at once",
+    "thesis": "A soul could live several existences at the same time.",
+    "body": [
+     "Take twenty-five lives, to make it concrete. Twenty-five distinct people, each with their own emotions and decisions, knowing nothing of one another. All of them still feed a single consciousness.",
+     "The parallelism has a purpose: to learn more than a single point of view allows. One life discovers courage, another forgiveness, another attachment.",
+     "None is a copy of another, and none can be replaced. Each point on the grid sees what the others will never see.",
+     "> Twenty-five is an image. Nothing imposes a limit."
+    ],
+    "open": "No evidence supports the idea of shared lives. What is it worth, then, as a way of looking at others?",
+    "echoes": [
+     [
+      "Leibniz",
+      "*Monadology*, 1714",
+      "Each substance mirrors the universe, from a point of view that belongs to it alone."
+     ],
+     [
+      "Fernando Pessoa",
+      "the heteronyms, from 1914",
+      "One poet, several complete authors, each with a life and a body of work."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "temps",
+   "figure": "time",
+   "tone": "paper",
+   "part": "II",
+   "fr": {
+    "title": "Hors du temps",
+    "thesis": "Toutes les pages du livre existent en même temps.",
+    "body": [
+     "Nous lisons un livre page après page, et c'est ainsi que nous vivons le temps. Mais le lecteur qui avance n'empêche pas les autres pages d'être là, ensemble, entre les deux couvertures.",
+     "À l'échelle d'une âme, le passé, le présent et le futur pourraient avoir cette simultanéité. Des vies séparées par des siècles seraient voisines : deux pages d'un même volume, qui ne se lisent pas l'une l'autre.",
+     "> Le passé ne serait pas derrière nous : seulement à une autre page.",
+     "Elles ne se commanderaient pas. Ce qu'une vie comprend enrichirait seulement l'ensemble, et les autres en bénéficieraient sans en connaître l'origine."
+    ],
+    "open": "Le livre est une image : il ne montre pas que le futur existe déjà. Que reste-t-il du choix si toutes les pages sont écrites ?",
+    "echoes": [
+     [
+      "Augustin",
+      "*Confessions*, livre XI, vers 400",
+      "Passé et avenir n'existent que présents à l'esprit : mémoire, attention, attente."
+     ],
+     [
+      "Hermann Minkowski",
+      "*Espace et temps*, 1908",
+      "Le temps devient une dimension parmi quatre, et toute une histoire tient sur une seule ligne."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Outside time",
+    "thesis": "Every page of the book exists at the same time.",
+    "body": [
+     "We read a book page after page, and that is how we live time. But the reader moving forward does not stop the other pages from being there, together, between the two covers.",
+     "At the scale of a soul, past, present and future could have this simultaneity. Lives separated by centuries would be neighbours: two pages of one volume, which do not read each other.",
+     "> The past would not be behind us: only on another page.",
+     "They would not command one another. What one life understands would simply enrich the whole, and the others would benefit without knowing its source."
+    ],
+    "open": "The book is an image: it does not show that the future already exists. What is left of choice if all the pages are written?",
+    "echoes": [
+     [
+      "Augustine",
+      "*Confessions*, book XI, c. 400",
+      "Past and future exist only as present to the mind: memory, attention, expectation."
+     ],
+     [
+      "Hermann Minkowski",
+      "*Space and Time*, 1908",
+      "Time becomes one dimension among four, and a whole history fits on a single line."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "mondes",
+   "figure": "worlds",
+   "tone": "dusk",
+   "part": "II",
+   "fr": {
+    "title": "Une infinité de mondes",
+    "thesis": "Une exploration sans limite n'a aucune raison de s'arrêter à un seul monde.",
+    "body": [
+     "Si la Source explore pour apprendre, s'en tenir à une planète, une époque ou un univers n'aurait pas de sens. Chaque monde offrirait d'autres conditions d'existence, donc d'autres expériences possibles.",
+     "L'unité de cet ensemble ne viendrait pas de la ressemblance entre les mondes, mais de leur origine commune.",
+     "> Il resterait toujours quelque chose à découvrir.",
+     "Il n'y aurait donc jamais de perfection finale. La perfection n'est plus ici un état de départ ni un point d'arrivée, mais une direction."
+    ],
+    "open": "L'existence d'une infinité d'univers n'est pas démontrée. Et l'infini répond-il à la question, ou la repousse-t-il ?",
+    "echoes": [
+     [
+      "Giordano Bruno",
+      "*De l'infini, de l'univers et des mondes*, 1584",
+      "Des mondes innombrables, dans un univers sans bord."
+     ],
+     [
+      "Hugh Everett",
+      "thèse, 1957",
+      "Une lecture de la physique quantique où chaque possibilité se réalise dans une branche."
+     ]
+    ]
+   },
+   "en": {
+    "title": "An infinity of worlds",
+    "thesis": "A limitless exploration has no reason to stop at one world.",
+    "body": [
+     "If the Source explores in order to learn, keeping to one planet, one era or one universe would make no sense. Each world would offer other conditions of existence, and so other possible experiences.",
+     "The unity of this whole would come not from any resemblance between worlds, but from their shared origin.",
+     "> Something would always remain to be discovered.",
+     "There would then never be a final perfection. Perfection is here neither a starting state nor a point of arrival, but a direction."
+    ],
+    "open": "The existence of an infinity of universes has not been demonstrated. And does infinity answer the question, or push it away?",
+    "echoes": [
+     [
+      "Giordano Bruno",
+      "*On the Infinite Universe and Worlds*, 1584",
+      "Countless worlds, in a universe without edge."
+     ],
+     [
+      "Hugh Everett",
+      "doctoral thesis, 1957",
+      "A reading of quantum physics in which each possibility is realised in a branch."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "savoir-vivre",
+   "figure": "knowing",
+   "tone": "dusk",
+   "part": "III",
+   "fr": {
+    "title": "Savoir et vivre",
+    "thesis": "Connaître n'est pas vivre.",
+    "body": [
+     "Comment un infini pourrait-il encore apprendre ? Parce qu'infini ne veut pas dire tout savoir. La Source contiendrait tous les possibles, mais contenir un possible ne revient pas à l'avoir traversé.",
+     "Elle pourrait connaître la définition de l'amour sans avoir jamais tremblé pour quelqu'un, et celle du chagrin sans avoir jamais attendu quelqu'un qui ne reviendra pas. Le savoir lui donnerait la carte de toute chose. Il ne lui en donnerait pas le poids.",
+     "> Il lui manquerait ce que seule une vie peut donner : une fois, ici, sans savoir la suite.",
+     "Une existence n'aurait donc rien d'un scénario connu d'avance. Le matin ordinaire d'un inconnu, sa peur avant d'ouvrir une lettre, le goût d'un fruit : rien de cela ne pouvait être déduit. Cela ne pouvait qu'arriver."
+    ],
+    "open": "La Source ressent-elle vraiment ce que vivent ses formes ? Le modèle le suppose, sans pouvoir l'établir.",
+    "echoes": [
+     [
+      "Frank Jackson",
+      "*What Mary Didn't Know*, 1986",
+      "Une savante sait tout de la couleur sans l'avoir jamais vue. Le jour où elle voit le rouge, apprend-elle quelque chose ?"
+     ],
+     [
+      "Henri Bergson",
+      "*Introduction à la métaphysique*, 1903",
+      "Tourner autour d'une chose, ou entrer en elle : deux manières de connaître."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Knowing and living",
+    "thesis": "To know is not to live.",
+    "body": [
+     "How could something infinite still learn? Because infinite does not mean knowing everything. The Source would contain every possibility, but containing a possibility is not the same as having passed through it.",
+     "It could know the definition of love without ever having trembled for someone, and the definition of grief without ever having waited for someone who will not come back. Knowledge would give it the map of everything. It would not give it the weight.",
+     "> It would lack what only a life can give: once, here, without knowing what comes next.",
+     "An existence would then be nothing like a script known in advance. A stranger's ordinary morning, their fear before opening a letter, the taste of a piece of fruit: none of this could be deduced. It could only happen."
+    ],
+    "open": "Does the Source really feel what its forms live through? The model assumes so, without being able to establish it.",
+    "echoes": [
+     [
+      "Frank Jackson",
+      "*What Mary Didn't Know*, 1986",
+      "A scientist knows everything about colour without ever having seen it. The day she sees red, does she learn something?"
+     ],
+     [
+      "Henri Bergson",
+      "*An Introduction to Metaphysics*, 1903",
+      "Moving around a thing, or entering into it: two ways of knowing."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "balance",
+   "figure": "balance",
+   "tone": "dusk",
+   "part": "III",
+   "fr": {
+    "title": "La balance",
+    "thesis": "En explorant, la Source affine son équilibre.",
+    "body": [
+     "Qu'est-ce que devenir meilleur ? Personne ne le décide de l'extérieur. La mesure s'élabore en chemin, à travers ce qui est vécu.",
+     "La balance porte toutes les polarités : amour et peur, création et destruction, joie et souffrance, ordre et chaos. Elle ne se stabilise jamais tout à fait, puisque chaque expérience la déplace.",
+     "L'équilibre ne demande pas des quantités égales de bien et de mal. Il ressemble davantage à un réglage : apprendre à réduire la souffrance sans éteindre la diversité de ce qui peut être vécu.",
+     "> La Source ne détient pas la mesure. Elle la cherche."
+    ],
+    "open": "Si le critère du progrès évolue avec celui qui progresse, comment reconnaître un progrès ?",
+    "echoes": [
+     [
+      "Héraclite",
+      "fragments, vers 500 av. J.-C.",
+      "L'harmonie naît des tensions contraires, comme celle de l'arc et de la lyre."
+     ],
+     [
+      "Aristote",
+      "*Éthique à Nicomaque*",
+      "La juste mesure ne se calcule pas d'avance : elle se trouve dans chaque situation."
+     ]
+    ]
+   },
+   "en": {
+    "title": "The balance",
+    "thesis": "By exploring, the Source refines its equilibrium.",
+    "body": [
+     "What does becoming better mean? No one decides it from the outside. The measure takes shape along the way, through what is lived.",
+     "The balance holds every polarity: love and fear, creation and destruction, joy and suffering, order and chaos. It never quite settles, since each experience shifts it.",
+     "Equilibrium does not require equal amounts of good and evil. It is more like a tuning: learning to reduce suffering without extinguishing the diversity of what can be lived.",
+     "> The Source does not hold the measure. It is looking for it."
+    ],
+    "open": "If the criterion of progress evolves along with whatever is progressing, how can progress be recognised?",
+    "echoes": [
+     [
+      "Heraclitus",
+      "fragments, c. 500 BCE",
+      "Harmony is born of opposing tensions, like that of the bow and the lyre."
+     ],
+     [
+      "Aristotle",
+      "*Nicomachean Ethics*",
+      "The right measure is not calculated in advance: it is found in each situation."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "souffrance",
+   "figure": "field",
+   "tone": "night",
+   "part": "III",
+   "fr": {
+    "title": "La souffrance",
+    "thesis": "Rien de ce qui est vécu n'est vécu seul.",
+    "body": [
+     "Une main se brûle, et c'est tout le corps qui sursaute. Si chaque conscience est une part de la Source, il en irait de même à une autre échelle : aucune douleur ne resterait locale. La Source ne regarderait pas la souffrance de loin : elle la subirait aussi.",
+     "La souffrance ne serait donc pas une punition. Elle appartient à ce qui peut être vécu, et il arrive qu'elle enseigne quelque chose.",
+     "> Enseigner n'est pas justifier.",
+     "Cette limite ne se négocie pas. Personne ne devrait dire à quelqu'un qui souffre que son épreuve avait un sens caché ou qu'elle était nécessaire. On apprend aussi par l'amour, la curiosité et la joie, et une douleur n'a pas à devenir une leçon pour qu'une vie ait de la valeur.",
+     "Il en découle une conséquence pratique : faire du bien à quelqu'un, c'est faire du bien à une autre expression de ce que l'on est."
+    ],
+    "open": "Une Source qui ressent toute douleur, pourquoi n'apprendrait-elle pas d'abord par l'amour ? C'est l'objection la plus sérieuse.",
+    "echoes": [
+     [
+      "Dostoïevski",
+      "*Les Frères Karamazov*, 1880",
+      "Ivan refuse toute harmonie future qui serait payée par la souffrance d'un seul innocent."
+     ],
+     [
+      "Schopenhauer",
+      "*Le Fondement de la morale*, 1840",
+      "La compassion comme reconnaissance de soi-même dans l'autre."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Suffering",
+    "thesis": "Nothing that is lived is lived alone.",
+    "body": [
+     "A hand is burned, and the whole body flinches. If each consciousness is a part of the Source, the same would hold at another scale: no pain would stay local. The Source would not watch suffering from afar: it would undergo it too.",
+     "Suffering would therefore not be a punishment. It belongs to what can be lived, and it sometimes teaches something.",
+     "> To teach is not to justify.",
+     "That limit is not negotiable. No one should tell someone who is suffering that their ordeal had a hidden meaning or was necessary. We also learn through love, curiosity and joy, and pain does not have to become a lesson for a life to have value.",
+     "A practical consequence follows: doing good to someone is doing good to another expression of what you are."
+    ],
+    "open": "Why would a Source that feels every pain not learn first through love? This is the most serious objection.",
+    "echoes": [
+     [
+      "Dostoevsky",
+      "*The Brothers Karamazov*, 1880",
+      "Ivan refuses any future harmony paid for with the suffering of a single innocent."
+     ],
+     [
+      "Schopenhauer",
+      "*On the Basis of Morality*, 1840",
+      "Compassion as recognising oneself in the other."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "retour",
+   "figure": "drop",
+   "tone": "night",
+   "part": "IV",
+   "fr": {
+    "title": "Le retour",
+    "thesis": "Rejoindre le tout sans cesser d'avoir été soi.",
+    "body": [
+     "Faut-il choisir entre survivre et se fondre ? On pose souvent la question ainsi : ou bien on reste soi, ou bien on disparaît dans le tout. Cette vision répond : les deux.",
+     "Une goutte rejoint l'océan. On ne peut plus la retrouver, et pourtant l'océan n'est plus tout à fait le même : il contient ce qu'elle a traversé, le nuage, la pluie, la terre.",
+     "> Le retour n'est pas vide : il rapporte tout ce qui a été vécu.",
+     "Une conscience s'élargirait ainsi sans perdre son histoire, comme un souvenir lointain reste entier dans une vie qui l'a largement dépassé. Et ce qui revient repart sous d'autres formes. Le mouvement n'a pas de dernière étape."
+    ],
+    "open": "Nous ne savons pas si la conscience survit à la mort. Et que faudrait-il garder pour que ce soit encore soi ?",
+    "echoes": [
+     [
+      "Teilhard de Chardin",
+      "*Le Phénomène humain*, 1955",
+      "L'union différencie : en rejoignant un tout, chaque part devient davantage elle-même."
+     ],
+     [
+      "Spinoza",
+      "*Éthique*, livre V, 1677",
+      "Quelque chose de l'esprit demeure, qui est éternel."
+     ]
+    ]
+   },
+   "en": {
+    "title": "The return",
+    "thesis": "Joining the whole without ceasing to have been yourself.",
+    "body": [
+     "Must we choose between surviving and merging? The question is often put this way: either you remain yourself, or you disappear into the whole. This vision answers: both.",
+     "A drop joins the ocean. It can no longer be found, and yet the ocean is not quite the same: it holds what the drop passed through, the cloud, the rain, the earth.",
+     "> The return is not empty: it brings back everything that was lived.",
+     "A consciousness would widen in this way without losing its history, as a distant memory stays whole within a life that has far outgrown it. And what returns sets out again in other forms. The movement has no final stage."
+    ],
+    "open": "We do not know whether consciousness survives death. And what would have to remain for it still to be you?",
+    "echoes": [
+     [
+      "Teilhard de Chardin",
+      "*The Phenomenon of Man*, 1955",
+      "Union differentiates: by joining a whole, each part becomes more itself."
+     ],
+     [
+      "Spinoza",
+      "*Ethics*, book V, 1677",
+      "Something of the mind remains, which is eternal."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "liens",
+   "figure": "forms",
+   "tone": "night",
+   "part": "IV",
+   "fr": {
+    "title": "La vie sous d'autres formes",
+    "thesis": "Une forme s'achève. La vie en prend une autre.",
+    "body": [
+     "Commençons par ce qui est certain. Une personne disparaît, et sa façon de rire continue chez ceux qui l'ont aimée. Un geste appris d'elle revient dans nos mains. Une phrase qu'elle répétait nous échappe, des années plus tard, à notre tour.",
+     "Cette vision prolonge ce constat jusqu'au bout. La mort ne serait pas le contraire de la vie : il y aurait la vie, puis encore la vie, sous d'autres formes. Ceux qu'on a perdus continueraient d'apprendre et de changer, hors de notre vue.",
+     "> La mort serait la fin d'une manière de vivre un lien, pas la fin du lien.",
+     "Cela ne retire rien à ce que la perte a de terrible. L'absence reste une absence : une voix qu'on n'entendra plus, un avenir qui n'aura pas lieu. Cette vision refuse seulement de lui laisser le dernier mot."
+    ],
+    "open": "Personne ne peut garantir de retrouvailles. Cette espérance reste une espérance, et elle ne se présente pas comme un savoir.",
+    "echoes": [
+     [
+      "Épicure",
+      "*Lettre à Ménécée*",
+      "La mort n'est rien pour nous : quand elle est là, nous ne sommes plus. Le contrepoint le plus ferme."
+     ],
+     [
+      "Maurice Halbwachs",
+      "*La Mémoire collective*, 1950",
+      "Le souvenir d'une personne vit dans les groupes qui le portent."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Life in other forms",
+    "thesis": "One form ends. Life takes another.",
+    "body": [
+     "Start with what is certain. A person disappears, and their way of laughing carries on in those who loved them. A gesture learned from them comes back to our hands. A phrase they used to repeat slips out of us, years later, in our turn.",
+     "This vision takes that observation all the way. Death would not be the opposite of life: there would be life, then life again, in other forms. Those we have lost would go on learning and changing, out of our sight.",
+     "> Death would end one way of living a bond, not the bond itself.",
+     "This takes nothing away from how terrible loss is. Absence remains absence: a voice we will not hear again, a future that will not happen. This vision simply refuses to give it the last word."
+    ],
+    "open": "No one can guarantee a reunion. This hope remains a hope, and does not present itself as knowledge.",
+    "echoes": [
+     [
+      "Epicurus",
+      "*Letter to Menoeceus*",
+      "Death is nothing to us: when it is here, we are not. The firmest counterpoint."
+     ],
+     [
+      "Maurice Halbwachs",
+      "*La Mémoire collective*, 1950",
+      "The memory of a person lives on in the groups that carry it."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "contribution",
+   "figure": "useful",
+   "tone": "paper",
+   "part": "IV",
+   "fr": {
+    "title": "Ce qu'une vie apporte",
+    "thesis": "Aucune existence n'est inutile.",
+    "body": [
+     "Si la Source apprend à travers chaque conscience, les joies, les erreurs, les amours et les doutes comptent tous. Il n'y a rien d'extraordinaire à accomplir.",
+     "La question du sens se déplace alors. Elle ne demande plus seulement ce que l'existence nous doit, mais ce que nous lui apportons.",
+     "Et elle tient même sans la Source. Chaque fois qu'on aime, qu'on aide, qu'on transmet, on prend part à une histoire plus longue que sa propre vie. Les effets se ramifient bien au-delà de ce qu'on peut suivre.",
+     "> Aucune vie n'a à prouver son utilité pour avoir de la valeur."
+    ],
+    "open": "Faut-il préférer une vie utile à une vie heureuse ? Le modèle pose la question sans la trancher.",
+    "echoes": [
+     [
+      "Edward Lorenz",
+      "conférence, 1972",
+      "Le battement d'ailes d'un papillon au Brésil peut-il déclencher une tornade au Texas ?"
+     ],
+     [
+      "Hannah Arendt",
+      "*Condition de l'homme moderne*, 1958",
+      "Toute action entre dans un réseau de relations où ses conséquences ne finissent jamais."
+     ]
+    ]
+   },
+   "en": {
+    "title": "What a life brings",
+    "thesis": "No existence is useless.",
+    "body": [
+     "If the Source learns through each consciousness, joys, mistakes, loves and doubts all count. Nothing extraordinary has to be accomplished.",
+     "The question of meaning then shifts. It no longer asks only what existence owes us, but what we bring to it.",
+     "And it stands even without the Source. Each time we love, help or pass something on, we take part in a story longer than our own life. The effects branch out far beyond what we can follow.",
+     "> No life has to prove its usefulness in order to have value."
+    ],
+    "open": "Should a useful life be preferred to a happy one? The model asks without settling it.",
+    "echoes": [
+     [
+      "Edward Lorenz",
+      "lecture, 1972",
+      "Does the flap of a butterfly's wings in Brazil set off a tornado in Texas?"
+     ],
+     [
+      "Hannah Arendt",
+      "*The Human Condition*, 1958",
+      "Every action enters a web of relationships in which its consequences never end."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "pourquoi",
+   "figure": "why",
+   "tone": "blank",
+   "part": "V",
+   "fr": {
+    "title": "Pourquoi",
+    "thesis": "La question n'est pas comment, mais pourquoi.",
+    "body": [
+     "On peut expliquer comment une étoile s'allume, et même comment une conscience pourrait apprendre. Il suffit pourtant d'un mot pour faire tomber tout l'édifice : pourquoi ?",
+     "Apprendre explique pourquoi la Source crée. Cela ne dit pas pourquoi elle est. Et si elle ne le savait pas non plus ? Toutes les vies, tous les mondes seraient alors une seule question, posée d'une infinité de façons : pourquoi y a-t-il quelque chose plutôt que rien ?",
+     "> L'idée enchante et fait peur.",
+     "Elle enchante, parce qu'aucune vie n'est plus spectatrice : chacune prend part à la recherche. Elle fait peur, parce que personne, à aucune échelle, ne détiendrait la réponse.",
+     "Il reste un point ferme. On n'a jamais attendu de connaître la raison de tout pour aimer quelqu'un, veiller un malade ou planter un arbre. Le sens commence avant la réponse."
+    ],
+    "open": "Une infinité d'expériences pourrait-elle seulement apporter cette réponse ?",
+    "echoes": [
+     [
+      "Leibniz",
+      "*Principes de la nature et de la grâce*, 1714",
+      "Pourquoi y a-t-il plutôt quelque chose que rien ?"
+     ],
+     [
+      "Rilke",
+      "*Lettres à un jeune poète*, 1903",
+      "Aimer les questions elles-mêmes, et les vivre, jusqu'à entrer un jour dans la réponse."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Why",
+    "thesis": "The question is not how, but why.",
+    "body": [
+     "We can explain how a star ignites, and even how a consciousness might learn. Yet one word is enough to bring the whole edifice down: why?",
+     "Learning explains why the Source creates. It does not say why it is. And what if it did not know either? All lives, all worlds would then be a single question, asked in an infinity of ways: why is there something rather than nothing?",
+     "> The idea enchants and frightens.",
+     "It enchants, because no life is a spectator any more: each one takes part in the search. It frightens, because no one, at any scale, would hold the answer.",
+     "One firm point remains. No one has ever waited to know the reason for everything before loving someone, sitting up with the sick or planting a tree. Meaning begins before the answer."
+    ],
+    "open": "Could an infinity of experiences even provide that answer?",
+    "echoes": [
+     [
+      "Leibniz",
+      "*Principles of Nature and Grace*, 1714",
+      "Why is there something rather than nothing?"
+     ],
+     [
+      "Rilke",
+      "*Letters to a Young Poet*, 1903",
+      "Love the questions themselves, and live them, until one day you live into the answer."
+     ]
+    ]
+   }
+  }
+ ],
+ "ui": {
+  "fr": {
+   "name": "La Source",
+   "other": "EN",
+   "otherName": "English",
+   "subtitle": "Une vision de la conscience, de l'infini et du retour",
+   "description": "La Source : une vision de la conscience, de l'infini et du sens de l'existence, en quatorze idées et autant de figures vivantes. Une métaphysique, pas une théorie scientifique.",
+   "opening": "Et si exister était la façon dont le tout se découvre ?",
+   "intro": "Une origine commune, deux infinis, une multitude de vies, et un retour. Quatorze idées pour tenir ensemble la conscience, la mort et le sens. Ceci est une métaphysique : une vision à explorer, à contester, pas une théorie scientifique.",
+   "thread": "Sommaire",
+   "read": "Entrer",
+   "book": "Le livre",
+   "pdf": "books/la-source-fr.pdf",
+   "otherPdf": "books/the-source-en.pdf",
+   "you": "une vie",
+   "past": "passé",
+   "future": "futur",
+   "large": "infiniment grand",
+   "small": "infiniment petit",
+   "everything": "tout",
+   "nothing": "rien",
+   "knowing": "savoir",
+   "living": "vivre",
+   "lifeCount": "vies",
+   "limitLabel": "Nombre de vies",
+   "infinity": "sans limite",
+   "pause": "Figer",
+   "resume": "Animer",
+   "unknown": "Ce qui reste ouvert",
+   "parts": {
+    "I": "L'origine",
+    "II": "Le déploiement",
+    "III": "L'expérience",
+    "IV": "Le retour",
+    "V": "La question"
+   },
+   "openTitle": "Trois questions restent ouvertes",
+   "open": [
+    "Si une conscience dirige ses vies, comment chacune peut-elle rester libre ?",
+    "Si la Source ressent toute douleur, pourquoi n'apprendrait-elle pas davantage par l'amour ?",
+    "Si elle cherche pourquoi elle existe, une infinité d'expériences pourra-t-elle le lui dire ?"
+   ],
+   "last": "Et une dernière, qui reste sans réponse.",
+   "question": "La Source a-t-elle toujours su qu'elle existait, ou l'apprend-elle à travers nous ?",
+   "bookLine": "La même vision en livre illustré, à lire d'une traite.",
+   "bookTitle": "Le livre",
+   "download": "Télécharger le PDF",
+   "downloadOther": "English edition",
+   "source_code": "Code source",
+   "skip": "Aller au texte",
+   "contents": "Sommaire",
+   "echoes": "Échos",
+   "lexiconTitle": "Lexique",
+   "lexiconNote": "Quelques mots reviennent d'un chapitre à l'autre. Voici le sens qu'ils prennent ici.",
+   "lexicon": [
+    [
+     "Source",
+     "L'origine commune de tout ce qui existe, qui se découvre en existant."
+    ],
+    [
+     "Fractale",
+     "Une forme qui répète le même motif à toutes les échelles."
+    ],
+    [
+     "Singularité",
+     "Le point unique d'où partent l'infiniment grand et l'infiniment petit."
+    ],
+    [
+     "Âme",
+     "Une conscience plus vaste, qui rassemble plusieurs vies."
+    ],
+    [
+     "Déploiement",
+     "Le mouvement par lequel la Source prend forme dans des mondes et des vies."
+    ],
+    [
+     "Expérience",
+     "Ce qu'aucun savoir ne remplace : traverser une chose une fois, sans connaître la suite."
+    ],
+    [
+     "Balance",
+     "L'équilibre jamais acquis entre toutes les polarités du vécu."
+    ],
+    [
+     "Retour",
+     "Rejoindre le tout en y apportant ce qui a été vécu."
+    ],
+    [
+     "Forme",
+     "Une manière particulière, et provisoire, d'être vivant."
+    ]
+   ],
+   "echoesNote": "Les échos placés après chaque chapitre ne prouvent rien. Ils montrent seulement que ces questions sont très anciennes, et que d'autres les ont posées autrement."
+  },
+  "en": {
+   "name": "The Source",
+   "other": "FR",
+   "otherName": "Français",
+   "subtitle": "A vision of consciousness, infinity and return",
+   "description": "The Source: a vision of consciousness, infinity and the meaning of existence, in fourteen ideas and as many living figures. Metaphysics, not a scientific theory.",
+   "opening": "What if existing is how everything discovers itself?",
+   "intro": "One shared origin, two infinities, countless lives, and a return. Fourteen ideas for holding consciousness, death and meaning together. This is metaphysics: a vision to explore and to challenge, not a scientific theory.",
+   "thread": "Contents",
+   "read": "Enter",
+   "book": "The book",
+   "pdf": "books/the-source-en.pdf",
+   "otherPdf": "books/la-source-fr.pdf",
+   "you": "one life",
+   "past": "past",
+   "future": "future",
+   "large": "infinitely large",
+   "small": "infinitely small",
+   "everything": "everything",
+   "nothing": "nothing",
+   "knowing": "knowing",
+   "living": "living",
+   "lifeCount": "lives",
+   "limitLabel": "Number of lives",
+   "infinity": "no limit",
+   "pause": "Freeze",
+   "resume": "Animate",
+   "unknown": "What remains open",
+   "parts": {
+    "I": "The origin",
+    "II": "The unfolding",
+    "III": "Experience",
+    "IV": "The return",
+    "V": "The question"
+   },
+   "openTitle": "Three questions remain open",
+   "open": [
+    "If a consciousness directs its lives, how can each one stay free?",
+    "If the Source feels every pain, why would it not learn more through love?",
+    "If it is searching for why it exists, could an infinity of experiences ever tell it?"
+   ],
+   "last": "And one last question, left unanswered.",
+   "question": "Has the Source always known it exists, or is it learning this through us?",
+   "bookLine": "The same vision as an illustrated book, to read in one sitting.",
+   "bookTitle": "The book",
+   "download": "Download the PDF",
+   "downloadOther": "Édition française",
+   "source_code": "Source code",
+   "skip": "Skip to the text",
+   "contents": "Contents",
+   "echoes": "Echoes",
+   "lexiconTitle": "Glossary",
+   "lexiconNote": "A few words come back from one chapter to the next. Here is the sense they take in this book.",
+   "lexicon": [
+    [
+     "Source",
+     "The shared origin of everything that exists, which discovers itself by existing."
+    ],
+    [
+     "Fractal",
+     "A shape that repeats the same pattern at every scale."
+    ],
+    [
+     "Singularity",
+     "The single point from which the infinitely large and the infinitely small set out."
+    ],
+    [
+     "Soul",
+     "A vaster consciousness that gathers several lives."
+    ],
+    [
+     "Unfolding",
+     "The movement by which the Source takes form in worlds and lives."
+    ],
+    [
+     "Experience",
+     "What no knowledge replaces: going through something once, without knowing what comes next."
+    ],
+    [
+     "Balance",
+     "The never-settled equilibrium between all the polarities of what is lived."
+    ],
+    [
+     "Return",
+     "Joining the whole and bringing to it what was lived."
+    ],
+    [
+     "Form",
+     "A particular, and passing, way of being alive."
+    ]
+   ],
+   "echoesNote": "The echoes after each chapter prove nothing. They only show that these questions are very old, and that others have asked them differently."
+  }
+ }
+}
