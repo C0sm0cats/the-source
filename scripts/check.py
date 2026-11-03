@@ -34,7 +34,7 @@ class Page(HTMLParser):
                 if value.startswith('#'):
                     self.anchors.add(value[1:])
                 elif not value.startswith(('http:', 'https:')):
-                    target = (self.folder / value).resolve()
+                    target = (self.folder / value.split('?')[0]).resolve()
                     assert target.exists(), f'Missing local link: {value}'
 
 

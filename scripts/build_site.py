@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Generate index.html (French) and en/index.html (English) from content/chapters.json."""
+import hashlib
 import json
 import re
 from html import escape
 
 from common import ROOT, load, typo
 from figures import LABELS
+
+# Bumps the asset URLs whenever the code changes, so no browser mixes new pages with old scripts.
+VERSION = hashlib.sha256(b''.join((ROOT / f'assets/{f}').read_bytes() for f in ('app.mjs', 'scenes.mjs', 'style.css'))).hexdigest()[:10]
 
 BASE_URL = 'https://c0sm0cats.github.io/the-source/'
 FONTS = ['ExtraLight', 'ExtraLightItalic', 'Light', 'LightItalic', 'Regular', 'Italic']
@@ -119,8 +123,8 @@ def page(data, lang):
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg">
 <link rel="preload" href="{prefix}assets/fonts/Spectral-Light.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{prefix}assets/style.css">
-<script type="module" src="{prefix}assets/app.mjs"></script>
+<link rel="stylesheet" href="{prefix}assets/style.css?v={VERSION}">
+<script type="module" src="{prefix}assets/app.mjs?v={VERSION}"></script>
 </head>
 <body data-tone="paper">
 <a class="skip" href="#{first}">{ui['skip']}</a>

@@ -1,5 +1,5 @@
 // Enhancements only: every word is already in the HTML, and each figure has an image for when JavaScript is off.
-import { createScene, FROZEN } from './scenes.mjs';
+const { createScene, FROZEN } = await import(`./scenes.mjs${new URL(import.meta.url).search}`);
 
 const root = document.documentElement;
 root.classList.add('js');
@@ -83,7 +83,8 @@ document.querySelectorAll('canvas[data-scene]').forEach((canvas) => {
   const state = { x: null, y: null, click: null, snap: false };
   const limit = figure.querySelector('[data-limit]');
   const range = limit?.querySelector('input');
-  const draw = createScene(name, JSON.parse(canvas.dataset.labels || '{}'), { step: () => +(range?.value ?? 0) });
+  let draw;
+  try { draw = createScene(name, JSON.parse(canvas.dataset.labels || '{}'), { step: () => +(range?.value ?? 0) }); } catch { return; }
   const item = { canvas, name, g: canvas.getContext('2d'), state, visible: false, draw };
   canvas.hidden = false;
   if (limit) {
@@ -122,7 +123,7 @@ function tick(now) {
   if (paused || !active.length) return;
   clock += Math.min(.05, (now - last) / 1000);
   last = now;
-  active.forEach(paint);
+  active.forEach((item) => { try { paint(item); } catch (error) { item.visible = false; console.error(error); } });
   frame = requestAnimationFrame(tick);
 }
 function wake() {
