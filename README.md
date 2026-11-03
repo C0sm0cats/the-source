@@ -8,7 +8,7 @@
 
 One shared origin, two infinities, countless lives, a return. **The Source** is a vision of consciousness and the meaning of existence, in fourteen ideas. Each one fits in a sentence, unfolds over a page, comes with a living figure and ends with what it leaves open. Metaphysics to explore and to challenge, not a scientific theory.
 
-## Fourteen ideas
+## From the origin to the question
 
 **I · The origin**  
 [The Source](https://c0sm0cats.github.io/the-source/en/#source) · [Two fractals](https://c0sm0cats.github.io/the-source/en/#fractales) · [Everything and nothing](https://c0sm0cats.github.io/the-source/en/#tout-et-rien)
