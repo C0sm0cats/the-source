@@ -238,6 +238,142 @@
    }
   },
   {
+   "id": "corps",
+   "figure": "body",
+   "tone": "paper",
+   "part": "II",
+   "fr": {
+    "title": "Le corps",
+    "thesis": "La conscience a besoin d'un lieu pour sentir.",
+    "body": [
+     "On parle volontiers de la conscience comme d'une lumière sans support. Pourtant aucune pensée n'a jamais eu lieu ailleurs que dans un corps : un corps qui a faim, qui a froid, qui s'endort au milieu d'une phrase. Avant d'être une idée, l'expérience est une température, un poids, une fatigue.",
+     "Si la Source se découvre en vivant, elle ne pouvait pas le faire à distance. Il lui fallait des mains pour toucher, une peau pour sentir la pluie, un dos pour connaître l'usure. Le corps ne serait pas la prison de l'âme, comme on l'a si souvent dit. Il serait l'organe par lequel l'infini apprend ce qu'est une limite.",
+     "> Sans corps, rien ne pèse. Et ce qui ne pèse rien ne s'apprend pas.",
+     "La première gorgée d'eau après une longue marche : aucune description ne la remplace. On peut tout savoir de la soif, de la chimie de l'eau, des récepteurs de la langue, et n'avoir rien appris de ce que fait cette gorgée-là. Le savoir passe par les livres. La sensation, elle, ne passe que par la chair.",
+     "Le corps enseigne aussi ce que l'esprit préférerait ignorer. La douleur, la maladie, le vieillissement, la lenteur qui vient. Il oblige à apprendre la patience et la dépendance, à accepter d'être porté quand on ne peut plus porter. Ces leçons-là, aucune conscience désincarnée ne pourrait les recevoir.",
+     "Il a sa propre intelligence. Le cœur bat sans qu'on le lui demande, la plaie se referme pendant le sommeil, la main retrouve le chemin d'une serrure que la mémoire a oublié. Une part de ce qui vit en nous n'attend pas notre avis, et c'est heureux.",
+     "Habiter son corps ne voudrait donc dire ni le dominer ni le fuir, mais le prendre pour ce qu'il est : l'endroit précis, mortel, irremplaçable, où le tout peut sentir pour l'instant. Un corps n'est pas une enveloppe que l'on porte. C'est la forme que prend une vie quand elle touche le monde."
+    ],
+    "open": "Une conscience sans corps pourrait-elle encore apprendre quelque chose ? Ou le retour serait-il la fin de toute sensation ?",
+    "echoes": [
+     [
+      "Maurice Merleau-Ponty",
+      "*Phénoménologie de la perception*, 1945",
+      "Le corps n'est pas un objet parmi d'autres : il est notre manière d'être au monde."
+     ],
+     [
+      "Spinoza",
+      "*Éthique*, livre III, 1677",
+      "« Personne n'a encore déterminé ce que peut le corps. »"
+     ],
+     [
+      "Platon",
+      "*Phédon*",
+      "L'âme enchaînée au corps, qui aspire à s'en délivrer. La position inverse, en contrepoint."
+     ]
+    ]
+   },
+   "en": {
+    "title": "The body",
+    "thesis": "Consciousness needs a place to feel.",
+    "body": [
+     "We readily speak of consciousness as a light with nothing beneath it. Yet no thought has ever taken place anywhere but in a body: a body that is hungry, that is cold, that falls asleep in the middle of a sentence. Before it is an idea, experience is a temperature, a weight, a tiredness.",
+     "If the Source discovers itself by living, it could not have done so from a distance. It needed hands to touch, skin to feel the rain, a back to know wear. The body would not be the prison of the soul, as has so often been said. It would be the organ through which the infinite learns what a limit is.",
+     "> Without a body, nothing weighs. And what weighs nothing cannot be learned.",
+     "The first mouthful of water after a long walk: no description replaces it. One can know everything about thirst, the chemistry of water, the receptors of the tongue, and have learned nothing of what that mouthful does. Knowledge comes through books. Sensation comes only through flesh.",
+     "The body also teaches what the mind would rather ignore. Pain, illness, ageing, the slowness that comes. It forces us to learn patience and dependence, to accept being carried when we can no longer carry. No disembodied consciousness could receive these lessons.",
+     "It has its own intelligence. The heart beats without being asked, the wound closes during sleep, the hand finds its way to a lock that memory has forgotten. Part of what lives in us does not wait for our opinion, and that is just as well.",
+     "To inhabit one’s body would then mean neither dominating it nor fleeing it, but taking it for what it is: the precise, mortal, irreplaceable place where the whole can feel, for now. A body is not an envelope one carries. It is the form a life takes when it touches the world."
+    ],
+    "open": "Could a consciousness without a body still learn anything? Or would the return be the end of all sensation?",
+    "echoes": [
+     [
+      "Maurice Merleau-Ponty",
+      "*Phenomenology of Perception*, 1945",
+      "The body is not one object among others: it is our way of being in the world."
+     ],
+     [
+      "Spinoza",
+      "*Ethics*, book III, 1677",
+      "“No one has yet determined what the body can do.”"
+     ],
+     [
+      "Plato",
+      "*Phaedo*",
+      "The soul chained to the body, longing to be freed from it. The opposite position, as a counterpoint."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "enfance",
+   "figure": "play",
+   "tone": "blank",
+   "part": "II",
+   "fr": {
+    "title": "L'enfance",
+    "thesis": "Tout regarder pour la première fois.",
+    "body": [
+     "Un enfant de deux ans peut passer un quart d'heure devant une flaque. Il y jette un caillou, regarde les cercles, recommence. Personne ne lui a dit que c'était intéressant. Il le découvre, et la découverte lui suffit.",
+     "C'est l'image la plus fidèle de ce que ce livre appelle la Source : quelque chose qui ne sait pas encore, et qui apprend en touchant. L'enfant ne cherche pas à savoir pourquoi il joue. Il joue, et le monde s'ouvre sous ses mains.",
+     "Le jeu est une activité étrange. Il ne produit rien, ne sert à rien, et pourtant on s'y engage avec un sérieux total. Une partie de cache-cache n'a pas d'autre but qu'elle-même. C'est ce qui la rapproche de l'existence telle que cette vision la décrit : une expérience qui vaut d'être faite pour elle-même.",
+     "> Jouer, c'est faire quelque chose pour rien, et le faire entièrement.",
+     "En grandissant, on perd ce regard. On apprend les noms, puis on ne voit plus que les noms. Un arbre devient « un arbre », une rue devient le chemin du travail, un visage devient une fonction. Ce n'est pas une faute : il faut bien s'orienter. Mais quelque chose se referme.",
+     "On ne retrouve pas l'enfance en jouant à l'enfant. On la retrouve parfois par accident : en voyage, au sortir d'une maladie, devant un nouveau-né, quand l'habitude cède et qu'une chose banale redevient étrange. Pour un instant, on regarde comme si c'était la première fois. Et d'une certaine façon, ça l'est.",
+     "L'enfance n'est pas toujours un paradis. Beaucoup d'enfants ont peur, ont faim, ne sont pas protégés, et le regard neuf est aussi un regard sans défense. Dire qu'il a de la valeur ne revient pas à idéaliser cet âge. Cela revient à reconnaître qu'il voit ce que nous avons cessé de voir, et qu'il mérite d'être gardé."
+    ],
+    "open": "Peut-on garder un regard neuf en sachant beaucoup ? Ou faut-il oublier pour redécouvrir ?",
+    "echoes": [
+     [
+      "Héraclite",
+      "Fragment 52",
+      "« Le temps est un enfant qui joue : royauté d'un enfant. »"
+     ],
+     [
+      "Nietzsche",
+      "*Ainsi parlait Zarathoustra*, 1883",
+      "Les trois métamorphoses : l'esprit devient chameau, puis lion, puis enfant, « un jeu, une roue qui roule d'elle-même »."
+     ],
+     [
+      "Jésus",
+      "*Évangile selon Matthieu*, 18, 3",
+      "« Si vous ne devenez comme les petits enfants, vous n'entrerez pas dans le royaume des cieux. »"
+     ]
+    ]
+   },
+   "en": {
+    "title": "Childhood",
+    "thesis": "Looking at everything for the first time.",
+    "body": [
+     "A two-year-old can spend a quarter of an hour in front of a puddle. They throw in a pebble, watch the circles, do it again. No one has told them it was interesting. They discover it, and the discovery is enough.",
+     "It is the most faithful image of what this book calls the Source: something that does not yet know, and learns by touching. The child does not ask why they play. They play, and the world opens under their hands.",
+     "Play is a strange activity. It produces nothing, serves no purpose, and yet we throw ourselves into it with complete seriousness. A game of hide-and-seek has no aim beyond itself. That is what brings it close to existence as this vision describes it: an experience worth having for its own sake.",
+     "> To play is to do something for nothing, and to do it wholeheartedly.",
+     "As we grow up, we lose this way of looking. We learn names, then see nothing but names. A tree becomes “a tree”, a street becomes the way to work, a face becomes a function. This is no fault: we have to find our bearings. But something closes.",
+     "We do not find childhood again by playing at being a child. We find it sometimes by accident: while travelling, after an illness, before a newborn, when habit gives way and some ordinary thing becomes strange again. For an instant, we look as if it were the first time. And in a way, it is.",
+     "Childhood is not always a paradise. Many children are afraid, hungry, unprotected, and a fresh gaze is also a defenceless one. To say that it has value is not to idealise that age. It is to recognise that it sees what we have stopped seeing, and that it deserves to be kept."
+    ],
+    "open": "Can one keep a fresh gaze while knowing a great deal? Or must one forget in order to rediscover?",
+    "echoes": [
+     [
+      "Heraclitus",
+      "Fragment 52",
+      "“Time is a child at play: the kingdom belongs to a child.”"
+     ],
+     [
+      "Nietzsche",
+      "*Thus Spoke Zarathustra*, 1883",
+      "The three metamorphoses: the spirit becomes a camel, then a lion, then a child, “a game, a wheel rolling out of itself”."
+     ],
+     [
+      "Jesus",
+      "*Gospel of Matthew*, 18, 3",
+      "“Unless you become like little children, you will never enter the kingdom of heaven.”"
+     ]
+    ]
+   }
+  },
+  {
    "id": "echelles",
    "figure": "nested",
    "tone": "paper",
@@ -610,6 +746,74 @@
    }
   },
   {
+   "id": "reve",
+   "figure": "dream",
+   "tone": "night",
+   "part": "II",
+   "fr": {
+    "title": "Le rêve",
+    "thesis": "Chaque nuit, une conscience invente un monde et l'oublie.",
+    "body": [
+     "Chaque nuit, sans effort, on fabrique des villes, des visages, des conversations entières. On parle avec des morts, on vole, on reconnaît une maison où l'on n'est jamais entré. Et au matin, presque tout s'efface en quelques minutes.",
+     "Le rêve montre une chose que la veille cache : une seule conscience peut produire tout un monde, avec ses personnages, ses obstacles, ses surprises. Chaque figure du rêve semble indépendante, a sa voix, ses intentions, parfois sa malveillance. Pourtant toutes viennent du même dormeur.",
+     "C'est l'image la plus proche que nous ayons de ce que cette vision imagine à grande échelle. La Source ressemblerait à un rêveur qui ne se sait pas rêver : elle se donne des mondes, s'y perd, s'y rencontre sous mille visages, sans savoir à l'avance ce qui arrivera.",
+     "> Dans un rêve, tous les personnages sont le rêveur. Aucun ne le sait.",
+     "Il y a pourtant deux différences capitales. Le rêve se dissipe, alors que ce qui est vécu, dans cette vision, demeure. Et les personnages du rêve n'ont pas de vie propre, alors qu'ici chaque vie a la sienne, que personne ne dicte. L'image éclaire ; elle ne prouve rien.",
+     "Le rêve apprend aussi l'humilité. Pendant qu'on rêve, tout semble évident, même l'absurde. Ce n'est qu'au réveil qu'on voit l'incohérence. Rien ne garantit que nos certitudes de veille soient d'une autre nature, et qu'aucun réveil ne nous attende.",
+     "Mourir ressemble peut-être moins à s'endormir qu'à se réveiller. Ce livre ne le sait pas. Mais il arrive, au réveil, de garder d'un rêve non pas l'histoire, seulement le goût : une tendresse, une inquiétude, une couleur qui dure toute la matinée. Une vie qui rejoint le tout garderait quelque chose de semblable."
+    ],
+    "open": "Si une conscience peut rêver tout un monde, qu'est-ce qui distingue un monde rêvé d'un monde vécu ?",
+    "echoes": [
+     [
+      "Tchouang-tseu",
+      "*Zhuangzi*, chapitre II, IVe siècle av. J.-C.",
+      "Le rêve du papillon : est-ce Zhou qui rêvait d'être un papillon, ou un papillon qui rêve d'être Zhou ?"
+     ],
+     [
+      "Descartes",
+      "*Méditations métaphysiques*, I, 1641",
+      "« Il n'y a point d'indices certains par où l'on puisse distinguer nettement la veille d'avec le sommeil. »"
+     ],
+     [
+      "Sigmund Freud",
+      "*L'Interprétation du rêve*, 1900",
+      "Le rêve vient du désir et du refoulé, non d'une conscience plus vaste. La lecture inverse, en contrepoint."
+     ]
+    ]
+   },
+   "en": {
+    "title": "The dream",
+    "thesis": "Every night, a consciousness invents a world and forgets it.",
+    "body": [
+     "Every night, without effort, we fabricate cities, faces, whole conversations. We talk with the dead, we fly, we recognise a house we have never entered. And by morning, almost everything fades within minutes.",
+     "The dream shows what waking hides: a single consciousness can produce an entire world, with its characters, its obstacles, its surprises. Each figure in the dream seems independent, with a voice, intentions, sometimes malice. Yet all of them come from the same sleeper.",
+     "It is the closest image we have of what this vision imagines on a vast scale. The Source would be like a dreamer who does not know they are dreaming: it gives itself worlds, loses itself in them, meets itself under a thousand faces, without knowing in advance what will happen.",
+     "> In a dream, every character is the dreamer. None of them knows it.",
+     "There are, however, two crucial differences. The dream dissolves, whereas what is lived, in this vision, remains. And the characters of a dream have no life of their own, whereas here each life has its own, which no one dictates. The image illuminates; it proves nothing.",
+     "The dream also teaches humility. While we dream, everything seems obvious, even the absurd. Only on waking do we see the incoherence. Nothing guarantees that our waking certainties are of a different nature, or that no awakening awaits us.",
+     "Dying may be less like falling asleep than like waking up. This book does not know. But it happens, on waking, that we keep from a dream not the story, only the taste: a tenderness, an unease, a colour that lasts all morning. A life that rejoins the whole would keep something similar."
+    ],
+    "open": "If a consciousness can dream an entire world, what distinguishes a dreamed world from a lived one?",
+    "echoes": [
+     [
+      "Zhuangzi",
+      "*Zhuangzi*, chapter II, 4th century BCE",
+      "The butterfly dream: was it Zhou dreaming he was a butterfly, or a butterfly dreaming it is Zhou?"
+     ],
+     [
+      "Descartes",
+      "*Meditations on First Philosophy*, I, 1641",
+      "“There are never any sure signs by means of which being awake can be distinguished from being asleep.”"
+     ],
+     [
+      "Sigmund Freud",
+      "*The Interpretation of Dreams*, 1900",
+      "The dream comes from desire and the repressed, not from a vaster consciousness. The opposite reading, as a counterpoint."
+     ]
+    ]
+   }
+  },
+  {
    "id": "savoir-vivre",
    "figure": "knowing",
    "tone": "dusk",
@@ -726,6 +930,64 @@
    }
   },
   {
+   "id": "peur",
+   "figure": "fear",
+   "tone": "dusk",
+   "part": "III",
+   "fr": {
+    "title": "La peur",
+    "thesis": "Elle protège une vie, et parfois l'empêche.",
+    "body": [
+     "La peur est plus ancienne que nous. Elle habitait les premiers animaux, bien avant les mots : un bruit dans les herbes, et le corps se tend avant que l'esprit comprenne. Sans elle, aucune vie n'aurait duré assez longtemps pour se poser des questions.",
+     "Il faut donc commencer par la remercier. Elle retient la main au bord du feu, ralentit le pas au bord du vide. Elle est la forme la plus simple de l'attachement à la vie : avoir peur, c'est tenir à quelque chose.",
+     "Mais elle grandit souvent au-delà de sa tâche. On a peur de parler, d'aimer, de changer, d'être vu. On renonce à des choses qui ne menaçaient rien, sinon une image de soi. La peur qui protégeait le corps se met à protéger les habitudes.",
+     "> La peur garde la porte. Elle ne sait pas toujours que le loup est parti.",
+     "Au fond de beaucoup de peurs, il y a celle de disparaître. Cette vision n'efface pas cette peur-là, et il serait malhonnête de le promettre. Elle propose seulement une autre façon de la regarder : si rien de ce qui est vécu ne se perd, alors ce qu'on risque en vivant pleinement est moins grand qu'on ne le croit.",
+     "Le courage n'est pas l'absence de peur. C'est la peur qui a dit ce qu'elle avait à dire, et qu'on remercie avant d'avancer quand même. Il se mesure rarement à des exploits ; bien plus souvent à une phrase enfin prononcée, à un appel passé, à une porte poussée.",
+     "Certaines peurs sont justes et doivent être écoutées : la violence, l'injustice, le danger réel. Aucune vision du monde ne devrait servir à les faire taire. Le travail consiste seulement à distinguer la peur qui garde la vie de celle qui la rétrécit, et cela, personne ne peut le faire à la place de chacun."
+    ],
+    "open": "Si rien ne se perd, faudrait-il cesser d'avoir peur de mourir ? Ou cette peur fait-elle partie de ce qu'il faut vivre ?",
+    "echoes": [
+     [
+      "Montaigne",
+      "*Essais*, I, 18",
+      "« La chose de quoi j'ai le plus de peur, c'est la peur. »"
+     ],
+     [
+      "Søren Kierkegaard",
+      "*Le Concept d'angoisse*, 1844",
+      "L'angoisse est le vertige de la liberté : la peur de ce qui est possible."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Fear",
+    "thesis": "It protects a life, and sometimes stands in its way.",
+    "body": [
+     "Fear is older than we are. It lived in the first animals, long before words: a sound in the grass, and the body tenses before the mind understands. Without it, no life would have lasted long enough to ask itself questions.",
+     "We should begin, then, by thanking it. It holds back the hand at the edge of the fire, slows the step at the edge of the drop. It is the simplest form of attachment to life: to be afraid is to hold on to something.",
+     "But it often grows beyond its task. We are afraid to speak, to love, to change, to be seen. We give up things that threatened nothing but an image of ourselves. The fear that protected the body begins to protect habits.",
+     "> Fear guards the door. It does not always know the wolf has gone.",
+     "Beneath many fears lies the fear of disappearing. This vision does not erase that fear, and it would be dishonest to promise it. It offers only another way of looking at it: if nothing that is lived is lost, then what we risk by living fully is smaller than we think.",
+     "Courage is not the absence of fear. It is fear having said what it had to say, thanked, and then going on anyway. It is rarely measured in feats; far more often in a sentence at last spoken, a call made, a door pushed open.",
+     "Some fears are right and must be heeded: violence, injustice, real danger. No view of the world should ever be used to silence them. The work lies only in telling the fear that guards life from the one that shrinks it, and no one can do that for anyone else."
+    ],
+    "open": "If nothing is lost, should we stop fearing death? Or is that fear part of what must be lived?",
+    "echoes": [
+     [
+      "Montaigne",
+      "*Essays*, I, 18",
+      "“The thing I fear most is fear.”"
+     ],
+     [
+      "Søren Kierkegaard",
+      "*The Concept of Anxiety*, 1844",
+      "Anxiety is the dizziness of freedom: the fear of what is possible."
+     ]
+    ]
+   }
+  },
+  {
    "id": "amour",
    "figure": "love",
    "tone": "paper",
@@ -752,6 +1014,11 @@
       "Martin Buber",
       "*Je et Tu*, 1923",
       "On ne rencontre vraiment l'autre qu'en lui disant tu, jamais en le traitant comme une chose."
+     ],
+     [
+      "Jésus",
+      "*Évangile selon Matthieu*, 5, 44",
+      "« Aimez vos ennemis. » L'amour étendu à celui qu'on n'a pas choisi."
      ]
     ]
    },
@@ -777,6 +1044,137 @@
       "Martin Buber",
       "*I and Thou*, 1923",
       "We truly meet the other only by saying thou to them, never by treating them as a thing."
+     ],
+     [
+      "Jesus",
+      "*Gospel of Matthew*, 5, 44",
+      "“Love your enemies.” Love extended to the one we did not choose."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "solitude",
+   "figure": "alone",
+   "tone": "blank",
+   "part": "III",
+   "fr": {
+    "title": "La solitude",
+    "thesis": "Être seul n'est pas être séparé.",
+    "body": [
+     "Deux solitudes portent le même nom. L'une pèse : un appartement silencieux, un téléphone qui ne sonne pas, le sentiment que personne ne sait vraiment qui l'on est. L'autre repose : une marche sans compagnie, une soirée à soi, un temps où l'on n'a rien à montrer.",
+     "La première est une blessure, et il faut la nommer ainsi. Elle compte parmi les souffrances les plus répandues et les moins dites. Aucune métaphysique ne remplace une visite, une voix, une main posée sur l'épaule.",
+     "Pourtant, si cette vision est juste, personne n'est jamais tout à fait séparé. Chaque vie serait une part de la même conscience, reliée aux autres par en dessous, comme les îles le sont par le fond de la mer. On peut se sentir seul ; on ne le serait jamais au sens strict.",
+     "> Les îles semblent séparées. Sous l'eau, c'est la même terre.",
+     "La seconde solitude laisse parfois entrevoir ce lien. Quand on cesse de se comparer, de répondre, de se défendre, il arrive que la frontière entre soi et le reste devienne moins nette. On est seul, et l'on ne s'est jamais senti aussi peu à part.",
+     "Il faut aussi, pour vivre, une part d'isolement. Une vie sans cesse traversée par les autres ne saurait plus ce qu'elle pense. Si la Source se découvre à travers des vies distinctes, elle a besoin que chacune garde un dedans que personne d'autre n'habite.",
+     "La solitude aurait ainsi deux faces : la douleur d'être coupé, et la chance d'être un. Une part du travail d'une vie consisterait à passer de l'une à l'autre, sans jamais oublier ceux qui sont restés du côté de la douleur. Pour eux, le lien invisible ne suffit pas. Il faut le lien visible, celui qu'on tend."
+    ],
+    "open": "Si personne n'est jamais vraiment séparé, pourquoi la solitude fait-elle si mal ?",
+    "echoes": [
+     [
+      "Rainer Maria Rilke",
+      "*Lettres à un jeune poète*, 1929",
+      "Aimer sa solitude, et porter la souffrance qu'elle cause."
+     ],
+     [
+      "Blaise Pascal",
+      "*Pensées*, 139",
+      "« Tout le malheur des hommes vient d'une seule chose, qui est de ne savoir pas demeurer en repos dans une chambre. »"
+     ]
+    ]
+   },
+   "en": {
+    "title": "Solitude",
+    "thesis": "Being alone is not being separated.",
+    "body": [
+     "Two solitudes share one name. One weighs: a silent flat, a phone that does not ring, the feeling that no one really knows who we are. The other rests: a walk without company, an evening to oneself, a time when there is nothing to show.",
+     "The first is a wound, and it should be called one. It is among the most widespread and least spoken of sufferings. No metaphysics replaces a visit, a voice, a hand laid on a shoulder.",
+     "Yet if this vision is right, no one is ever entirely separated. Each life would be a part of the same consciousness, linked to the others from below, as islands are by the sea floor. We can feel alone; in the strict sense, we never would be.",
+     "> The islands seem separate. Under the water, it is the same land.",
+     "The second solitude sometimes lets us glimpse this link. When we stop comparing, answering, defending ourselves, the boundary between ourselves and the rest can grow less distinct. We are alone, and have never felt so little apart.",
+     "To live, we also need a measure of isolation. A life constantly crossed by others would no longer know what it thinks. If the Source discovers itself through distinct lives, it needs each of them to keep an inside that no one else inhabits.",
+     "Solitude would thus have two faces: the pain of being cut off, and the chance of being one. Part of the work of a life would be to pass from the one to the other, never forgetting those who remained on the side of pain. For them, the invisible link is not enough. They need the visible one, the one we hold out."
+    ],
+    "open": "If no one is ever truly separated, why does solitude hurt so much?",
+    "echoes": [
+     [
+      "Rainer Maria Rilke",
+      "*Letters to a Young Poet*, 1929",
+      "To love one’s solitude, and to bear the suffering it causes."
+     ],
+     [
+      "Blaise Pascal",
+      "*Pensées*, 139",
+      "“All the unhappiness of men arises from one single fact, that they cannot stay quietly in their own chamber.”"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "beaute",
+   "figure": "beauty",
+   "tone": "paper",
+   "part": "III",
+   "fr": {
+    "title": "La beauté",
+    "thesis": "Ce qui nous arrête sans rien demander.",
+    "body": [
+     "On marche, on pense à autre chose, et soudain on s'arrête. Une lumière sur un mur, un visage, trois notes, la courbe d'une colline. Rien n'a changé dans le monde, et pourtant quelque chose s'est ouvert. On ne sait pas pourquoi. On sait seulement qu'on ne peut pas repartir tout de suite.",
+     "La beauté a ceci d'étrange qu'elle ne sert à rien de précis. Elle ne nourrit pas, ne protège pas. L'évolution explique une part de nos goûts : la symétrie d'un visage, l'éclat d'un fruit mûr. Elle explique moins bien pourquoi un ciel d'après l'orage peut faire monter les larmes.",
+     "Cette vision en propose une lecture : la beauté serait un moment de reconnaissance. Une part du tout en rencontre une autre et sent, sans pouvoir le dire, qu'elles viennent du même endroit. D'où ce sentiment curieux, devant ce qui est beau, d'avoir retrouvé quelque chose plutôt que de l'avoir découvert.",
+     "> Devant le beau, on a l'impression de se souvenir.",
+     "C'est aussi pour cela qu'elle ne se possède pas. On peut acheter le tableau, photographier le coucher de soleil, revenir au même endroit : l'instant ne se reproduit pas sur commande. La beauté n'appartient ni à la chose ni à celui qui regarde. Elle appartient à leur rencontre.",
+     "Elle n'est pas toujours douce. Il y a une beauté de la tempête, du désert, du visage très vieux, et même, parfois, de ce qui effraie. Ce n'est pas le joli. C'est ce qui dépasse un peu ce qu'on peut contenir.",
+     "Si la Source se découvre à travers ce qui est vécu, la beauté serait l'un de ses moments les plus rares : celui où elle s'aperçoit elle-même, un instant, dans ce qu'elle est devenue. On n'en fait rien. On la laisse passer, et l'on reste un peu changé."
+    ],
+    "open": "La beauté est-elle dans les choses, dans le regard, ou seulement entre les deux ?",
+    "echoes": [
+     [
+      "Platon",
+      "*Phèdre*",
+      "La beauté réveille dans l'âme le souvenir de ce qu'elle a contemplé autrefois."
+     ],
+     [
+      "Emmanuel Kant",
+      "*Critique de la faculté de juger*, 1790",
+      "Le beau plaît universellement, sans concept et sans intérêt."
+     ],
+     [
+      "Fiodor Dostoïevski",
+      "*L'Idiot*, 1869",
+      "« La beauté sauvera le monde. »"
+     ]
+    ]
+   },
+   "en": {
+    "title": "Beauty",
+    "thesis": "What stops us without asking anything.",
+    "body": [
+     "We walk, thinking of something else, and suddenly we stop. Light on a wall, a face, three notes, the curve of a hill. Nothing in the world has changed, and yet something has opened. We do not know why. We know only that we cannot walk on just yet.",
+     "Beauty is strange in that it serves no particular purpose. It does not feed, it does not protect. Evolution explains some of our tastes: the symmetry of a face, the gleam of ripe fruit. It explains less well why a sky after a storm can bring tears.",
+     "This vision offers a reading: beauty would be a moment of recognition. One part of the whole meets another and feels, without being able to say so, that they come from the same place. Hence the curious feeling, before what is beautiful, of having found something again rather than discovered it.",
+     "> Before the beautiful, we seem to be remembering.",
+     "This is also why it cannot be possessed. We can buy the painting, photograph the sunset, return to the same spot: the instant does not repeat on demand. Beauty belongs neither to the thing nor to the one who looks. It belongs to their meeting.",
+     "It is not always gentle. There is a beauty of storms, of deserts, of very old faces, and even, at times, of what frightens. This is not prettiness. It is what exceeds, a little, what we can contain.",
+     "If the Source discovers itself through what is lived, beauty would be one of its rarest moments: the one in which it glimpses itself, for an instant, in what it has become. We can do nothing with it. We let it pass, and remain a little changed."
+    ],
+    "open": "Is beauty in things, in the gaze, or only between the two?",
+    "echoes": [
+     [
+      "Plato",
+      "*Phaedrus*",
+      "Beauty awakens in the soul the memory of what it once contemplated."
+     ],
+     [
+      "Immanuel Kant",
+      "*Critique of Judgment*, 1790",
+      "The beautiful pleases universally, without concept and without interest."
+     ],
+     [
+      "Fyodor Dostoevsky",
+      "*The Idiot*, 1869",
+      "“Beauty will save the world.”"
      ]
     ]
    }
@@ -903,6 +1301,146 @@
       "Alfred North Whitehead",
       "*Process and Reality*, 1929",
       "God, “the great companion — the fellow-sufferer who understands.”"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "pardon",
+   "figure": "mend",
+   "tone": "dusk",
+   "part": "III",
+   "fr": {
+    "title": "Le pardon",
+    "thesis": "Défaire le nœud sans effacer ce qui a eu lieu.",
+    "body": [
+     "Une blessure infligée par quelqu'un ne reste pas au passé. Elle revient : dans une pensée la nuit, une conversation qu'on se rejoue, une tension dans les épaules quand un nom est prononcé. Ce qui a duré une minute peut occuper des années.",
+     "Le pardon n'est pas l'oubli. Ce qui a été fait a été fait, et ce livre dit justement que rien de ce qui est vécu ne s'efface. Pardonner ne consiste pas à prétendre que ce n'était rien. C'est cesser de rejouer la scène, cesser de laisser l'autre tenir la corde.",
+     "@knot",
+     "Il n'est pas non plus une obligation. On ne doit le pardon à personne, et l'exiger d'une victime est une seconde violence. Il vient quand il vient, parfois jamais, et ne pas y parvenir n'est pas une faute.",
+     "> Pardonner, c'est rendre au passé sa place : derrière.",
+     "Si chaque vie est une part de la même conscience, alors celui qui a blessé et celui qui a été blessé viennent, au fond, du même endroit. Cela n'excuse rien. Mais cela change la nature du nœud : on ne serait pas lié à un étranger, on serait lié à une autre part de soi qui s'est égarée, ou qui a fait le mal.",
+     "Reste le pardon à soi-même, souvent le plus difficile. On se reproche une parole, un abandon, une erreur qu'on ne peut plus réparer. Là encore, il ne s'agit pas d'effacer, mais d'admettre que celui qu'on était ne savait pas ce qu'on sait maintenant. Une vie apprend en se trompant ; c'est l'une des raisons d'en vivre une.",
+     "Le nœud ne disparaît pas d'un coup. Il se desserre fil après fil, et un jour on s'aperçoit qu'on y pense sans que la gorge se serre. Ce jour-là, quelque chose a été rendu, non à l'autre, mais à soi."
+    ],
+    "open": "Peut-on pardonner l'impardonnable ? Et faut-il, pour pardonner, que l'autre le demande ?",
+    "echoes": [
+     [
+      "Jésus",
+      "*Évangile selon Luc*, 23, 34",
+      "« Père, pardonne-leur, car ils ne savent pas ce qu'ils font. »"
+     ],
+     [
+      "Hannah Arendt",
+      "*Condition de l'homme moderne*, 1958",
+      "Le pardon délivre de l'irréversible : sans lui, nous resterions prisonniers d'un seul acte."
+     ],
+     [
+      "Vladimir Jankélévitch",
+      "*L'Imprescriptible*, 1971",
+      "« Le pardon est mort dans les camps de la mort. » Ce qui ne peut se pardonner, en contrepoint."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Forgiveness",
+    "thesis": "Undoing the knot without erasing what happened.",
+    "body": [
+     "A wound inflicted by someone does not stay in the past. It returns: in a thought at night, in a conversation replayed, in a tension in the shoulders when a name is spoken. What lasted a minute can occupy years.",
+     "Forgiveness is not forgetting. What was done was done, and this book says precisely that nothing lived is erased. To forgive is not to pretend it was nothing. It is to stop replaying the scene, to stop letting the other hold the rope.",
+     "@knot",
+     "Nor is it an obligation. No one owes forgiveness to anyone, and to demand it of a victim is a second violence. It comes when it comes, sometimes never, and failing to reach it is no fault.",
+     "> To forgive is to give the past its place: behind.",
+     "If each life is a part of the same consciousness, then the one who wounded and the one who was wounded come, at bottom, from the same place. This excuses nothing. But it changes the nature of the knot: we would not be bound to a stranger, but to another part of ourselves that went astray, or that did harm.",
+     "There remains forgiving oneself, often the hardest. We reproach ourselves for a word, an abandonment, a mistake we can no longer repair. Here again, the point is not to erase, but to admit that the person we were did not know what we know now. A life learns by getting things wrong; that is one of the reasons to live one.",
+     "The knot does not vanish all at once. It loosens thread by thread, and one day we notice that we think of it without our throat tightening. That day, something has been given back, not to the other, but to ourselves."
+    ],
+    "open": "Can the unforgivable be forgiven? And must the other ask, for there to be forgiveness?",
+    "echoes": [
+     [
+      "Jesus",
+      "*Gospel of Luke*, 23, 34",
+      "“Father, forgive them, for they know not what they do.”"
+     ],
+     [
+      "Hannah Arendt",
+      "*The Human Condition*, 1958",
+      "Forgiveness frees us from the irreversible: without it, we would remain prisoners of a single act."
+     ],
+     [
+      "Vladimir Jankélévitch",
+      "*L'Imprescriptible*, 1971",
+      "“Forgiveness died in the death camps.” What cannot be forgiven, as a counterpoint."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "mort",
+   "figure": "death",
+   "tone": "night",
+   "part": "IV",
+   "fr": {
+    "title": "La mort",
+    "thesis": "Regarder la fin en face, sans la maquiller.",
+    "body": [
+     "Tout ce qui vit meurt. On le sait depuis l'enfance, et l'on passe pourtant la plus grande partie de sa vie à ne pas y penser. Ce n'est pas de la lâcheté. « Le soleil ni la mort ne se peuvent regarder fixement », écrivait La Rochefoucauld.",
+     "Ce livre parle de retour, d'une conscience plus vaste, de rien qui ne se perd. Il serait facile d'en faire une consolation commode, un moyen de ne pas regarder. Ce serait trahir ce qu'il dit. Car même si tout revient, quelque chose s'arrête vraiment : une voix, une façon de rire, des projets à moitié faits. Cela, personne ne le retrouvera sous cette forme.",
+     "> Même si rien ne se perd, quelque chose finit.",
+     "Le deuil est la part de la mort qui revient aux vivants. Il ne se raisonne pas. Ceux qui ont perdu quelqu'un savent qu'aucune idée, si belle soit-elle, ne comble une chaise vide à table. Une vision du monde peut accompagner le chagrin. Elle ne doit jamais lui demander de se taire.",
+     "@leaves",
+     "La mort donne pourtant sa forme à la vie. Une existence sans fin n'aurait ni urgence ni prix ; chaque jour serait remplaçable. C'est parce qu'une vie s'achève qu'elle a un contour, comme un dessin n'existe que par sa limite. La finitude ne serait pas un défaut du projet. Elle en ferait partie.",
+     "Dans la nature, rien ne meurt pour rien. La feuille qui tombe nourrit le sol, l'arbre abattu abrite d'autres vies pendant des décennies. Ce n'est pas une preuve de ce que devient la conscience. C'est l'image d'un monde où la fin d'une forme est le début d'une autre.",
+     "Regarder la mort en face ne voudrait donc dire ni la désirer ni la nier. Ce serait vivre en sachant qu'elle viendra, et laisser ce savoir rendre le présent un peu plus net. Ce qu'on dirait demain, on peut aussi le dire aujourd'hui."
+    ],
+    "open": "Faut-il que quelque chose survive pour qu'une vie ait un sens ? Ou le sens tient-il justement à ce qu'elle s'arrête ?",
+    "echoes": [
+     [
+      "Épicure",
+      "*Lettre à Ménécée*",
+      "La mort n'est rien pour nous : quand nous sommes, elle n'est pas là, et quand elle est là, nous ne sommes plus."
+     ],
+     [
+      "Jésus",
+      "*Évangile selon Jean*, 12, 24",
+      "« Si le grain de blé tombé en terre ne meurt, il reste seul ; mais s'il meurt, il porte beaucoup de fruit. »"
+     ],
+     [
+      "Martin Heidegger",
+      "*Être et Temps*, 1927",
+      "L'être-pour-la-mort : c'est en assumant sa fin qu'une existence devient la sienne."
+     ]
+    ]
+   },
+   "en": {
+    "title": "Death",
+    "thesis": "Facing the end, without making it up.",
+    "body": [
+     "All that lives dies. We have known it since childhood, and yet we spend most of our lives not thinking about it. This is not cowardice. “Neither the sun nor death can be looked at steadily,” wrote La Rochefoucauld.",
+     "This book speaks of return, of a vaster consciousness, of nothing being lost. It would be easy to make of this a convenient consolation, a way of not looking. That would betray what it says. For even if everything returns, something truly stops: a voice, a way of laughing, plans half made. No one will find that again in that form.",
+     "> Even if nothing is lost, something ends.",
+     "Mourning is the share of death that falls to the living. It cannot be reasoned with. Those who have lost someone know that no idea, however beautiful, fills an empty chair at the table. A view of the world can accompany grief. It must never ask it to be silent.",
+     "@leaves",
+     "Death nonetheless gives life its form. An existence without end would have neither urgency nor price; every day would be replaceable. It is because a life ends that it has an outline, as a drawing exists only by its edge. Finitude would not be a flaw in the project. It would be part of it.",
+     "In nature, nothing dies for nothing. The fallen leaf feeds the soil, the felled tree shelters other lives for decades. This is not proof of what becomes of consciousness. It is the image of a world in which the end of one form is the beginning of another.",
+     "To face death, then, would mean neither desiring it nor denying it. It would mean living knowing that it will come, and letting that knowledge make the present a little sharper. What we would say tomorrow, we can say today."
+    ],
+    "open": "Must something survive for a life to have meaning? Or does the meaning lie precisely in its ending?",
+    "echoes": [
+     [
+      "Epicurus",
+      "*Letter to Menoeceus*",
+      "Death is nothing to us: when we are, it is not there, and when it is there, we are no more."
+     ],
+     [
+      "Jesus",
+      "*Gospel of John*, 12, 24",
+      "“Unless a grain of wheat falls into the earth and dies, it remains alone; but if it dies, it bears much fruit.”"
+     ],
+     [
+      "Martin Heidegger",
+      "*Being and Time*, 1927",
+      "Being-toward-death: it is by taking on its end that an existence becomes its own."
      ]
     ]
    }
@@ -1127,6 +1665,11 @@
       "L'Ecclésiaste",
       "Bible hébraïque",
       "Rien de nouveau sous le soleil. La lassitude de la répétition, en contrepoint."
+     ],
+     [
+      "Jésus",
+      "*Évangile selon Matthieu*, 6, 28",
+      "« Observez les lys des champs : ils ne travaillent ni ne filent. » L'attention à ce qui est là, sans souci du lendemain."
      ]
     ]
    },
@@ -1153,6 +1696,11 @@
       "Ecclesiastes",
       "Hebrew Bible",
       "Nothing new under the sun. The weariness of repetition, as a counterpoint."
+     ],
+     [
+      "Jesus",
+      "*Gospel of Matthew*, 6, 28",
+      "“Consider the lilies of the field: they neither toil nor spin.” Attention to what is there, without care for tomorrow."
      ]
     ]
    }
@@ -1209,6 +1757,88 @@
       "William James",
       "*The Varieties of Religious Experience*, 1902",
       "Mystical states are ineffable, and have for those who live them the authority of knowledge."
+     ]
+    ]
+   }
+  },
+  {
+   "id": "passeurs",
+   "figure": "passers",
+   "tone": "paper",
+   "part": "V",
+   "fr": {
+    "title": "Les passeurs",
+    "thesis": "D'autres l'ont dit avant, avec d'autres mots.",
+    "body": [
+     "Cette vision n'est pas neuve. Ce qu'elle dit de l'unité, de l'amour et du retour, d'autres l'ont dit avant elle, dans des langues, des siècles et des pays qui ne se connaissaient pas. On ne s'en étonne pas assez : des intuitions si proches, nées si loin les unes des autres.",
+     "En Inde, il y a vingt-cinq siècles, un homme assis sous un arbre comprend que le moi qu'on croit solide n'est qu'un courant, et que la souffrance naît de vouloir s'y agripper. Le Bouddha ne parle pas de Source ; il parle d'éveil. Mais il dit déjà que la séparation est une illusion qui fait souffrir.",
+     "En Chine, vers la même époque, on attribue à Lao-tseu un petit livre qui commence par avouer son impuissance : le Tao qu'on peut nommer n'est pas le vrai Tao. Une origine sans nom, d'où tout sort et où tout retourne, comme l'eau qui ne lutte contre rien et finit par tout user.",
+     "À Athènes, Socrate affirme ne rien savoir. Il pose des questions jusqu'à ce que les certitudes tombent, et il meurt sans renier cette ignorance qui cherche. Il ne laisse pas une doctrine, mais une attitude : préférer la question vraie à la réponse confortable.",
+     "En Galilée, Jésus parle peu de métaphysique et beaucoup des autres. Il dit d'aimer ses ennemis, de regarder les lys des champs, de redevenir comme un enfant. Il dit que ce qu'on fait au plus petit, c'est à lui qu'on le fait. Que l'on croie ou non à ce qui a été bâti ensuite en son nom, cette phrase rejoint l'intuition de ce livre : l'autre n'est pas un étranger.",
+     "> Ils n'ont pas dit la même chose. Ils ont regardé dans la même direction.",
+     "@relay",
+     "Il ne faudrait pas les fondre en une sagesse unique : ce serait les trahir. Le Bouddha ne croit pas en une âme qui dure, Jésus prie un Père, Lao-tseu se méfie des préceptes, Socrate des dieux de la cité. Leurs différences comptent autant que leurs échos. Et bien d'autres, femmes et hommes sans livre ni disciples, ont transmis la même chose à leur façon : dans une manière de soigner, d'écouter, de pardonner.",
+     "Ce livre ne se place pas à leur hauteur. Il reconnaît la direction qu'ils ont indiquée et la reprend avec ses propres mots, sans autre autorité que celle d'une question honnête. Un passeur ne garde pas la lumière. Il la tend, et quelqu'un d'autre continue."
+    ],
+    "open": "Si des traditions si éloignées se rejoignent, est-ce le signe d'une vérité commune, ou d'un même besoin humain de consolation ?",
+    "echoes": [
+     [
+      "Jésus",
+      "*Évangile selon Matthieu*, 25, 40",
+      "« Ce que vous avez fait au plus petit de mes frères, c'est à moi que vous l'avez fait. »"
+     ],
+     [
+      "Lao-tseu",
+      "*Tao-tö-king*, I",
+      "« Le Tao qu'on peut nommer n'est pas le Tao éternel. »"
+     ],
+     [
+      "Le Bouddha",
+      "*Dhammapada*, I, 5",
+      "« La haine ne s'apaise jamais par la haine ; seule l'absence de haine l'apaise. »"
+     ],
+     [
+      "Aldous Huxley",
+      "*La Philosophie éternelle*, 1945",
+      "Une même sagesse au cœur de toutes les traditions. Une thèse contestée, à qui l'on reproche d'effacer les différences."
+     ]
+    ]
+   },
+   "en": {
+    "title": "The bearers",
+    "thesis": "Others said it before, in other words.",
+    "body": [
+     "This vision is not new. What it says of unity, of love and of return, others said before it, in languages, centuries and countries that did not know one another. We are not astonished enough: intuitions so close, born so far from one another.",
+     "In India, twenty-five centuries ago, a man sitting under a tree understands that the self we take to be solid is only a current, and that suffering is born of wanting to cling to it. The Buddha does not speak of a Source; he speaks of awakening. But he already says that separation is an illusion that makes us suffer.",
+     "In China, around the same time, a small book is attributed to Lao Tzu, which begins by confessing its own powerlessness: the Tao that can be named is not the true Tao. An origin without a name, from which everything comes and to which everything returns, like water that struggles against nothing and ends by wearing down everything.",
+     "In Athens, Socrates claims to know nothing. He asks questions until certainties fall, and dies without disowning this searching ignorance. He leaves no doctrine, but an attitude: to prefer the true question to the comfortable answer.",
+     "In Galilee, Jesus speaks little of metaphysics and much of other people. He says to love our enemies, to look at the lilies of the field, to become like a child again. He says that what we do to the least of them, we do to him. Whether or not one believes in what was built afterwards in his name, this sentence meets the intuition of this book: the other is not a stranger.",
+     "> They did not say the same thing. They looked in the same direction.",
+     "@relay",
+     "They should not be melted into a single wisdom: that would be to betray them. The Buddha does not believe in a soul that endures, Jesus prays to a Father, Lao Tzu distrusts precepts, Socrates the gods of the city. Their differences matter as much as their echoes. And many others, women and men with no book and no disciples, have passed on the same thing in their own way: in a manner of caring, of listening, of forgiving.",
+     "This book does not set itself at their height. It recognises the direction they pointed and takes it up in its own words, with no authority but that of an honest question. A bearer does not keep the light. They hand it on, and someone else goes on."
+    ],
+    "open": "If traditions so far apart converge, is it the sign of a common truth, or of the same human need for consolation?",
+    "echoes": [
+     [
+      "Jesus",
+      "*Gospel of Matthew*, 25, 40",
+      "“Whatever you did for one of the least of these my brothers, you did for me.”"
+     ],
+     [
+      "Lao Tzu",
+      "*Tao Te Ching*, I",
+      "“The Tao that can be told is not the eternal Tao.”"
+     ],
+     [
+      "The Buddha",
+      "*Dhammapada*, I, 5",
+      "“Hatred is never appeased by hatred; only by the absence of hatred is it appeased.”"
+     ],
+     [
+      "Aldous Huxley",
+      "*The Perennial Philosophy*, 1945",
+      "One wisdom at the heart of all traditions. A contested thesis, accused of erasing differences."
      ]
     ]
    }
@@ -1300,9 +1930,9 @@
    "other": "EN",
    "otherName": "English",
    "subtitle": "Une vision de la conscience, de l'infini et du retour",
-   "description": "La Source : une vision de la conscience, de l'infini et du sens de l'existence, en vingt et une idées et autant de figures vivantes. Une métaphysique, pas une théorie scientifique.",
+   "description": "La Source : une vision de la conscience, de l'infini et du sens de l'existence, en trente idées et autant de figures vivantes. Une métaphysique, pas une théorie scientifique.",
    "opening": "Et si exister était la façon dont le tout se découvre ?",
-   "intro": "Une origine commune, deux infinis, une multitude de vies, et un retour. Vingt et une idées pour tenir ensemble la conscience, la mort et le sens. Tout repose sur un postulat : chaque conscience serait une part d'une même conscience, et le reste en découle. Une différence avec les grandes traditions qui l'ont précédée : cette origine ne saurait pas elle-même pourquoi elle existe. Ceci est une métaphysique : une vision à explorer, à contester, pas une théorie scientifique.",
+   "intro": "Une origine commune, deux infinis, une multitude de vies, et un retour. Trente idées pour tenir ensemble la conscience, la mort et le sens. Tout repose sur un postulat : chaque conscience serait une part d'une même conscience, et le reste en découle. Une différence avec les grandes traditions qui l'ont précédée : cette origine ne saurait pas elle-même pourquoi elle existe. Ceci est une métaphysique : une vision à explorer, à contester, pas une théorie scientifique.",
    "thread": "Sommaire",
    "read": "Entrer",
    "book": "Le livre",
@@ -1394,9 +2024,9 @@
    "other": "FR",
    "otherName": "Français",
    "subtitle": "A vision of consciousness, infinity and return",
-   "description": "The Source: a vision of consciousness, infinity and the meaning of existence, in twenty-one ideas and as many living figures. Metaphysics, not a scientific theory.",
+   "description": "The Source: a vision of consciousness, infinity and the meaning of existence, in thirty ideas and as many living figures. Metaphysics, not a scientific theory.",
    "opening": "What if existing is how everything discovers itself?",
-   "intro": "One shared origin, two infinities, countless lives, and a return. Twenty-one ideas for holding consciousness, death and meaning together. Everything rests on one postulate: each consciousness would be part of a single consciousness, and the rest follows. One difference from the great traditions before it: this origin would not itself know why it exists. This is metaphysics: a vision to explore and to challenge, not a scientific theory.",
+   "intro": "One shared origin, two infinities, countless lives, and a return. Thirty ideas for holding consciousness, death and meaning together. Everything rests on one postulate: each consciousness would be part of a single consciousness, and the rest follows. One difference from the great traditions before it: this origin would not itself know why it exists. This is metaphysics: a vision to explore and to challenge, not a scientific theory.",
    "thread": "Contents",
    "read": "Enter",
    "book": "The book",

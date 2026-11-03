@@ -1495,10 +1495,628 @@ const factories = {
       point(g, c, px, py, 5, 26);
     };
   },
+
+  // A body breathing: lines spread from the heart to the skin, swell with each breath and carry every beat outward.
+  body() {
+    const N = 24, PTS = 180, HX = 304, HY = 292, BREATH = 7.5, BEAT = 1.1;
+    // the outline of a bust: a head joined softly to the shoulders
+    const smin = (a, b, k) => { const h = clamp(.5 + (.5 * (b - a)) / k); return b + (a - b) * h - k * h * (1 - h); };
+    const field = (x, y) => {
+      const head = Math.hypot(x - 300, (y - 172) * .92) - 54;
+      const w = 140 - .12 * (y - 250), qx = Math.abs(x - 300) - (w - 80), qy = Math.abs(y - 408) - 92;
+      return smin(head, Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - 80, 70);
+    };
+    // each direction from the heart reaches the skin at its last crossing
+    const skin = Array.from({ length: PTS + 1 }, (_, i) => {
+      const a = (i / PTS) * TAU, dx = Math.cos(a), dy = Math.sin(a);
+      let reach = 0, before = field(HX, HY);
+      for (let d = 2; d < 420; d += 2) {
+        const now = field(HX + dx * d, HY + dy * d);
+        if (before <= 0 && now > 0) reach = d - 2 + (2 * -before) / (now - before);
+        before = now;
+      }
+      return [dx * reach, dy * reach];
+    });
+    const beat = (x) => Math.exp(-((x / .07) ** 2)) + .55 * Math.exp(-(((x - .27) / .07) ** 2));
+    return (g, c, t) => {
+      const age = t % BEAT;
+      g.lineCap = g.lineJoin = 'round';
+      for (let i = 0; i < N; i++) {
+        const k = (i + 1) / N, lag = k * .55;
+        const d = beat(age - lag) + beat(age + BEAT - lag);
+        const q = k * (1 + .05 * Math.sin((t / BREATH - k * .2) * TAU)) + .028 * d * (1 - .75 * k);
+        g.strokeStyle = c.mix(clamp(k * 3 - .2));
+        g.globalAlpha = .3 + .55 * k ** 1.5;
+        g.lineWidth = i === N - 1 ? 1.3 : .42 + .3 * k;
+        g.beginPath();
+        skin.forEach(([x, y], j) => { const X = HX + x * q, Y = HY + y * q; if (j) g.lineTo(X, Y); else g.moveTo(X, Y); });
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      point(g, c, HX, HY, 4.2 + 2.6 * beat(age), 30);
+    };
+  },
+
+  // Shapes that bounce for nothing, each at its own rhythm. A click throws one more.
+  play() {
+    const FLOOR = 488, LEFT = 40, RIGHT = 560, G = 300;
+    const ring = (n, f) => Array.from({ length: n + 1 }, (_, i) => { const a = -Math.PI / 2 + (i / n) * TAU, q = f(i); return [q * Math.cos(a), q * Math.sin(a)]; });
+    const shapes = [
+      (s) => [ring(28, () => s), [[-s, 0], [s, 0]]],
+      (s) => [ring(3, () => s * 1.15)],
+      (s) => [ring(4, () => s * 1.1).map(([x, y]) => [x * Math.SQRT1_2 - y * Math.SQRT1_2, x * Math.SQRT1_2 + y * Math.SQRT1_2])],
+      (s) => [ring(10, (i) => (i % 2 ? s * .48 : s * 1.1))],
+    ];
+    const toys = [
+      { kind: 0, size: 30, x0: 90, vx: 34, T: 2.6, p: 0, spin: .5 },
+      { kind: 1, size: 25, x0: 260, vx: -27, T: 2.1, p: .37, spin: -.8 },
+      { kind: 2, size: 22, x0: 430, vx: 22, T: 2.9, p: .66, spin: .6 },
+      { kind: 3, size: 20, x0: 520, vx: -40, T: 1.7, p: .2, spin: 1.3 },
+    ];
+    const bounce = (v, lo, hi) => { const w = hi - lo, m = (((v - lo) % (2 * w)) + 2 * w) % (2 * w); return lo + (m < w ? m : 2 * w - m); };
+    const hop = (o, t) => {
+      const f = (((t / o.T + o.p) % 1) + 1) % 1, H = (G * o.T * o.T) / 8;
+      return [bounce(o.x0 + o.vx * t, LEFT + o.size, RIGHT - o.size), FLOOR - o.size - H * 4 * f * (1 - f), Math.exp(-((Math.min(f, 1 - f) / .035) ** 2)), H];
+    };
+    const draw = (g, kind, size, x, y, rot, squash) => {
+      const ca = Math.cos(rot), sa = Math.sin(rot), sx = 1 + .15 * squash, sy = 1 - .22 * squash;
+      g.beginPath();
+      for (const line of shapes[kind](size)) line.forEach(([lx, ly], i) => {
+        const X = x + (lx * ca - ly * sa) * sx, Y = y + size + ((lx * sa + ly * ca) - size) * sy;
+        if (i) g.lineTo(X, Y); else g.moveTo(X, Y);
+      });
+      g.stroke();
+    };
+    // what a click throws, simulated from the moment it left the hand
+    const thrown = [];
+    let lastClick = null, count = 0;
+    const flight = (o, t) => {
+      let x = o.x, y = o.y, vx = o.vx, vy = o.vy, rot = 0;
+      const steps = Math.min(960, Math.floor((t - o.t0) * 60));
+      for (let i = 0; i < steps; i++) {
+        vy += G / 60; x += vx / 60; y += vy / 60; rot += (o.spin + vx / o.size * .5) / 60;
+        if (x < LEFT + o.size) { x = LEFT + o.size; vx = -vx; }
+        if (x > RIGHT - o.size) { x = RIGHT - o.size; vx = -vx; }
+        if (y > FLOOR - o.size) { y = FLOOR - o.size; vy = Math.abs(vy) < 30 ? 0 : -vy * .7; vx *= .94; o.spin *= .9; }
+      }
+      return [x, y, rot];
+    };
+    return (g, c, t, s) => {
+      if (s.click && s.click !== lastClick) {
+        lastClick = s.click;
+        if (!s.snap) {
+          const m = rng(++count * 41 + 3); m();
+          const [cx, cy] = s.click;
+          thrown.push({ x: clamp(cx, 70, 530), y: Math.min(cy, FLOOR - 60), vx: (300 - cx) * .45 + (m() - .5) * 160, vy: -200 - m() * 140, t0: t, kind: Math.floor(m() * 4), size: 12 + m() * 13, spin: (m() - .5) * 4 });
+          if (thrown.length > 6) thrown.shift();
+        }
+      }
+      for (let i = thrown.length - 1; i >= 0; i--) if (t < thrown[i].t0 || t - thrown[i].t0 > 16) thrown.splice(i, 1);
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      g.globalAlpha = .7;
+      g.lineWidth = .8;
+      g.beginPath(); g.moveTo(24, FLOOR); g.lineTo(576, FLOOR); g.stroke();
+      // their shadows on the ground, shorter as they fly
+      g.globalAlpha = .3;
+      g.lineWidth = 1.6;
+      g.beginPath();
+      for (const o of toys) { const [x, y, , H] = hop(o, t), near = 1 - (FLOOR - o.size - y) / H; g.moveTo(x - o.size * (.3 + .6 * near), FLOOR + 5); g.lineTo(x + o.size * (.3 + .6 * near), FLOOR + 5); }
+      g.stroke();
+      g.globalAlpha = .9;
+      g.lineWidth = 1.1;
+      for (const o of toys) { const [x, y, squash] = hop(o, t); draw(g, o.kind, o.size, x, y, o.spin * t, squash); }
+      for (const o of thrown) {
+        const [x, y, rot] = flight({ ...o }, t);
+        g.globalAlpha = .9 * (1 - smooth(11, 16, t - o.t0));
+        draw(g, o.kind, o.size, x, y, rot, 0);
+      }
+      // the red ball hops lightly, and leaves a trail of where it played
+      const ball = { size: 7, x0: 200, vx: 51, T: 1.35, p: .5 };
+      g.fillStyle = c.mark;
+      for (let i = 14; i > 0; i--) {
+        const [x, y] = hop(ball, t - i * .07);
+        g.globalAlpha = .45 * (1 - i / 15);
+        g.beginPath(); dot(g, x, y, 1.6); g.fill();
+      }
+      g.globalAlpha = 1;
+      const [bx, by, squash] = hop(ball, t);
+      point(g, c, bx, by + 7 * .2 * squash, 6, 26);
+    };
+  },
+
+  // A line that dreams: it becomes a fish, a house, an eye, and nothing about it surprises.
+  dream() {
+    const PTS = 220, STAGE = 7;
+    const curve = (f) => Array.from({ length: PTS + 1 }, (_, i) => f((i / PTS) * TAU));
+    const polygon = (corners) => {
+      const len = corners.map((p, i) => Math.hypot(corners[(i + 1) % corners.length][0] - p[0], corners[(i + 1) % corners.length][1] - p[1]));
+      const total = len.reduce((a, b) => a + b, 0);
+      return Array.from({ length: PTS + 1 }, (_, i) => {
+        let d = ((i / PTS) * total) % total, e = 0;
+        while (d > len[e]) d -= len[e++];
+        const a = corners[e], b = corners[(e + 1) % corners.length], f = d / len[e];
+        return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+      });
+    };
+    const forms = [
+      curve((a) => [Math.cos(a), Math.sin(a)]),
+      curve((a) => [1.05 * (Math.cos(a) - Math.sin(a) ** 2 / Math.SQRT2) + .12, 1.05 * Math.cos(a) * Math.sin(a)]),
+      polygon([[.7, .3], [.7, .72], [-.7, .72], [-.7, -.1], [0, -.8], [.7, -.1]]),
+      curve((a) => [Math.cos(a), .55 * Math.sin(2 * a)]),
+      curve((a) => { const q = .5 + .5 * Math.cos(3 * a); return [q * Math.cos(a), q * Math.sin(a)]; }),
+      curve((a) => [Math.cos(a), .5 * Math.sin(a) * Math.abs(Math.sin(a)) ** .35]),
+      curve((a) => { const q = .62 * (.45 + .75 * Math.cos(a)); return [q * Math.cos(a) - .2, q * Math.sin(a)]; }),
+    ];
+    const shape = (time) => {
+      const j = Math.floor(time / STAGE), f = smooth(.45, 1, (time % STAGE) / STAGE);
+      const A = forms[((j % forms.length) + forms.length) % forms.length], B = forms[(((j + 1) % forms.length) + forms.length) % forms.length];
+      const cx = 300 + 26 * Math.sin(time * .11), cy = 296 + 18 * Math.sin(time * .15), rot = .22 * Math.sin(time * .05), ca = Math.cos(rot), sa = Math.sin(rot);
+      return A.map(([ax, ay], i) => {
+        const v = (i / PTS) * TAU, x = ax + (B[i][0] - ax) * f + .035 * Math.sin(3 * v + time * .8), y = ay + (B[i][1] - ay) * f + .035 * Math.cos(2 * v - time * .6);
+        return [cx + 178 * (x * ca - y * sa), cy + 178 * (x * sa + y * ca)];
+      });
+    };
+    const line = (g, pts, dx, dy) => { pts.forEach(([x, y], i) => { if (i) g.lineTo(x + dx, y + dy); else g.moveTo(x + dx, y + dy); }); };
+    return (g, c, t) => {
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      // what it was a moment ago drifts up and fades
+      for (let d = 7; d >= 1; d--) {
+        g.globalAlpha = .3 * (1 - d / 8);
+        g.lineWidth = .45;
+        g.beginPath(); line(g, shape(t - d * 1.3), d * 4, -d * 8); g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.lineWidth = 1.3;
+      g.beginPath(); line(g, shape(t), 0, 0); g.stroke();
+      // no one is dreaming it: the point floats, held by nothing
+      point(g, c, 300 + 70 * Math.sin(t * .21), 300 + 52 * Math.sin(t * .29 + 1), 5, 28);
+    };
+  },
+
+  // A small point and the immense shadow it casts. Bring the pointer closer: the shadow returns to its true size.
+  fear() {
+    const PX = 300, PY = 446, FLOOR = 462, STEP = 3.6;
+    let calm = 0;
+    return (g, c, t, s) => {
+      const near = s.x == null ? 0 : 1 - smooth(70, 320, Math.hypot(s.x - PX, s.y - PY));
+      calm = ease(s, calm, near, .035);
+      const size = (1 - .9 * calm) * (1 + .025 * Math.sin(t * 1.3) + .015 * Math.sin(t * 2.9 + 1));
+      const H = 410 * size, W = 236 * size, lean = 18 * Math.sin(t * .21) * size;
+      const by = FLOOR - H * .4, bb = H * .32, hy = FLOOR - H * .83, hb = H * .15, hr = W * .24;
+      const half = (y) => {
+        let w = 0;
+        const v = (y - by) / bb;
+        if (v >= 0) w = (W / 2) * (1 + .1 * v); else if (v > -1) w = (W / 2) * Math.sqrt(1 - v * v);
+        const h = (y - hy) / hb;
+        if (Math.abs(h) < 1) w = Math.max(w, hr * Math.sqrt(1 - h * h));
+        return w * (1 + .035 * Math.sin(y * .045 + t * 1.3) + .012 * Math.sin(y * .11 - t * 2.3));
+      };
+      const mid = (y) => PX + (lean * (FLOOR - y)) / Math.max(1, H);
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      // the shadow, drawn line by line
+      g.globalAlpha = .4;
+      g.lineWidth = .55;
+      g.beginPath();
+      const left = [], right = [];
+      for (let y = FLOOR - H * .985; y <= FLOOR; y += STEP) {
+        const w = half(y), x = mid(y);
+        if (w < .5) continue;
+        g.moveTo(x - w, y); g.lineTo(x + w, y);
+        left.push([x - w, y]); right.push([x + w, y]);
+      }
+      g.stroke();
+      g.globalAlpha = .75;
+      g.lineWidth = .8;
+      for (const edge of [left, right]) { g.beginPath(); edge.forEach(([x, y], i) => { if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.stroke(); }
+      g.globalAlpha = .7;
+      g.lineWidth = .8;
+      g.beginPath(); g.moveTo(30, FLOOR); g.lineTo(570, FLOOR); g.stroke();
+      // the rings it keeps around itself: tight and trembling, they loosen when someone comes near
+      g.lineWidth = .7;
+      for (let i = 0; i < 3; i++) {
+        const rad = (10 + 3.4 * i) * (1 - calm) + (18 + 17 * i) * calm + .6 * Math.sin(t * 8 + i * 2.1) * (1 - calm);
+        g.globalAlpha = .8 * (1 - .65 * calm);
+        g.beginPath(); g.arc(PX, PY, rad, 0, TAU); g.stroke();
+      }
+      g.globalAlpha = 1;
+      point(g, c, PX, PY, 5.5, 22);
+    };
+  },
+
+  // One point in a vast space, linked by faint threads to others that come and go. Sometimes all are there at once.
+  alone() {
+    const r = rng(37), N = 16, ONE = 36;
+    const others = Array.from({ length: N }, (_, i) => ({ a: (i / N) * TAU + r() * .3, q: 175 + r() * 105, P: 15 + r() * 14, p: r(), v: (r() - .5) * .02 }));
+    const specks = Array.from({ length: 140 }, () => { const q = 292 * Math.sqrt(r()), a = r() * TAU; return [300 + q * Math.cos(a), 300 + q * Math.sin(a), .35 + r() * .4]; });
+    // the pointer is a presence too: a thread reaches toward it
+    let presence = 0, hx = 300, hy = 300;
+    return (g, c, t, s) => {
+      const near = s.x != null;
+      if (near) { hx = presence ? ease(s, hx, s.x, .08) : s.x; hy = presence ? ease(s, hy, s.y, .08) : s.y; }
+      presence = ease(s, presence, near ? 1 : 0, .04);
+      if (presence < .002 && !near) presence = 0;
+      const u = (t % ONE) / ONE, together = smooth(.74, .84, u) * (1 - smooth(.92, 1, u));
+      const pos = others.map((o) => {
+        const a = o.a + o.v * t, on = Math.sin(Math.PI * ((t / o.P + o.p) % 1)) ** 6;
+        return [300 + o.q * Math.cos(a), 300 + o.q * Math.sin(a), Math.max(on, together)];
+      });
+      g.lineCap = 'round';
+      g.fillStyle = c.ink;
+      g.globalAlpha = .3;
+      g.beginPath();
+      for (const [x, y, size] of specks) dot(g, x, y, size);
+      g.fill();
+      g.strokeStyle = c.ink;
+      g.lineWidth = .45;
+      if (together > .01) {
+        g.globalAlpha = .25 * together;
+        g.beginPath();
+        pos.forEach(([x, y], i) => { const [nx, ny] = pos[(i + 1) % N]; g.moveTo(x, y); g.lineTo(nx, ny); });
+        g.stroke();
+      }
+      for (const [x, y, v] of pos) {
+        if (v < .01) continue;
+        g.globalAlpha = .45 * v;
+        g.beginPath(); g.moveTo(300, 300); g.lineTo(x, y); g.stroke();
+      }
+      for (const [x, y, v] of pos) {
+        g.globalAlpha = .16 + .8 * v;
+        g.beginPath(); dot(g, x, y, 1.5 + 1.3 * v); g.fill();
+      }
+      if (presence > .01) {
+        g.globalAlpha = .5 * presence;
+        g.lineWidth = .6;
+        g.beginPath(); g.moveTo(300, 300); g.lineTo(hx, hy); g.stroke();
+        g.beginPath(); dot(g, hx, hy, 4); g.stroke();
+      }
+      g.globalAlpha = 1;
+      point(g, c, 300, 300, 5.5, 34);
+    };
+  },
+
+  // A harmonic figure that never quite closes, until for a moment it does, perfectly.
+  beauty() {
+    const TURNS = 7, PTS = 300, PERIOD = 26, R = 232;
+    return (g, c, t) => {
+      const u = (t % PERIOD) / PERIOD;
+      const hold = smooth(.6, .66, u) * (1 - smooth(.9, .98, u));
+      const delta = (.011 + .004 * Math.sin(t * .23)) * (1 - hold), phase = .45 * Math.sin(t * .07) * (1 - hold);
+      const v0 = t * .012, a0 = v0 * TAU;
+      const at = (v) => {
+        const a = v * TAU, b = -4 * a + phase + delta * (a - a0) * 4;
+        return [300 + R * (.6 * Math.sin(a) + .4 * Math.sin(b)), 300 - R * (.6 * Math.cos(a) + .4 * Math.cos(b))];
+      };
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      g.lineWidth = .5;
+      for (let n = 0; n < TURNS; n++) {
+        g.globalAlpha = .12 + .2 * (n / (TURNS - 1));
+        g.beginPath();
+        for (let i = 0; i <= PTS; i++) { const [x, y] = at(v0 - TURNS / 2 + n + i / PTS); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+      }
+      if (hold > .01) {
+        g.globalAlpha = .85 * hold;
+        g.lineWidth = 1.1;
+        g.beginPath();
+        for (let i = 0; i <= PTS * 2; i++) { const [x, y] = at(v0 + i / (PTS * 2)); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      const [px, py] = at(v0 + TURNS / 2);
+      point(g, c, px, py, 4.5 + 1.5 * hold, 24 + 16 * hold);
+    };
+  },
+
+  // A tangled line loosens, the smallest loops first, until only a circle is left. Then another knot comes.
+  mend() {
+    const PERIOD = 44, PTS = 520, R = 128;
+    const knot = (k) => { const m = rng(k * 53 + 11); m(); return [3, 4, 5, 6, 7, 9].map((h) => [h * (m() < .5 ? -1 : 1), 17 + m() * 13, m() * TAU]); };
+    const weights = (u) => [0, 1, 2, 3, 4, 5].map((i) => 1 - smooth(.1 + .075 * (5 - i), .34 + .075 * (5 - i), u));
+    const at = (H, w, a) => {
+      let x = R * Math.cos(a), y = R * Math.sin(a);
+      H.forEach(([h, amp, p], i) => { const q = amp * w[i]; x += q * Math.cos(h * a + p); y += q * Math.sin(h * a + p); });
+      return [300 + x, 300 + y];
+    };
+    const trace = (g, H, w) => { for (let i = 0; i <= PTS; i++) { const [x, y] = at(H, w, (i / PTS) * TAU); if (i) g.lineTo(x, y); else g.moveTo(x, y); } };
+    return (g, c, t) => {
+      const k = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD, H = knot(k);
+      const fade = smooth(0, .06, u) * (1 - smooth(.9, 1, u));
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      // what the line was a little earlier, still faintly there
+      g.lineWidth = .5;
+      for (let e = 3; e >= 1; e--) {
+        g.globalAlpha = .1 * fade * (1 - e / 4);
+        g.beginPath(); trace(g, H, weights(u - e * .03)); g.stroke();
+      }
+      g.globalAlpha = .9 * fade;
+      g.lineWidth = 1.3;
+      g.beginPath(); trace(g, H, weights(u)); g.stroke();
+      g.globalAlpha = 1;
+      const [px, py] = at(H, weights(u), t * .22);
+      point(g, c, px, py, 1.5 + 3.5 * fade, 26);
+    };
+  },
+
+  // A line of life thins out and ends; what it was drifts away and becomes part of a wider field.
+  death() {
+    const r = rng(61), END = 316, Y = 300, L = 24, golden = Math.PI * (3 - Math.sqrt(5));
+    const field = Array.from({ length: 1200 }, (_, i) => { const q = 288 * Math.sqrt((i + .5) / 1200), a = i * golden; return [300 + q * Math.cos(a), 300 + q * Math.sin(a), .45 + r() * .45, r() * TAU]; });
+    const dust = Array.from({ length: 420 }, () => ({ to: field[Math.floor(r() * field.length)], off: r(), curl: r() * 2 - 1 }));
+    const life = (x, t) => Y + 16 * Math.sin(x * .021 - t * .25) * smooth(20, 140, x) + 5 * Math.sin(x * .07 + t * .4);
+    return (g, c, t) => {
+      g.lineCap = g.lineJoin = 'round';
+      g.fillStyle = c.ink;
+      g.globalAlpha = .22;
+      g.beginPath();
+      for (const [x, y, size, w] of field) dot(g, x + .7 * Math.sin(t * .3 + w), y + .7 * Math.cos(t * .27 + w), size);
+      g.fill();
+      // the life, thinner as it goes
+      const X0 = 22, BANDS = 12;
+      g.strokeStyle = c.ink;
+      for (let b = 0; b < BANDS; b++) {
+        const k = b / (BANDS - 1), xa = X0 + ((END - X0) * b) / BANDS, xb = X0 + ((END - X0) * (b + 1)) / BANDS;
+        g.globalAlpha = .9 - .35 * k;
+        g.lineWidth = .3 + 2.8 * (1 - k) ** 1.3;
+        g.beginPath();
+        for (let i = 0; i <= 12; i++) { const x = xa + ((xb - xa) * i) / 12; if (i) g.lineTo(x, life(x, t)); else g.moveTo(x, life(x, t)); }
+        g.stroke();
+      }
+      // its dust leaves the end and settles among the others
+      const ey = life(END, t), groups = [[], [], [], []];
+      for (const d of dust) {
+        const f = (t / L + d.off) % 1, e = 1 - (1 - f) ** 2.4, swirl = d.curl * 46 * Math.sin(Math.PI * e);
+        const [tx, ty, size] = d.to, dx = tx - END, dy = ty - ey, n = Math.hypot(dx, dy) || 1;
+        groups[Math.min(3, Math.floor(f * 4))].push(END + dx * e - (dy / n) * swirl, ey + dy * e + (dx / n) * swirl, 1.2 + (size - 1.2) * f);
+      }
+      groups.forEach((list, b) => {
+        g.globalAlpha = .85 - b * .17;
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 3) dot(g, list[i], list[i + 1], list[i + 2]);
+        g.fill();
+      });
+      g.globalAlpha = 1;
+      point(g, c, END, ey, 4, 28);
+    };
+  },
+
+  // Leaves fall, lie down and become ground; from that ground, something rises.
+  leaves() {
+    const PERIOD = 30, GROUND = 474, N = 13, r = rng(83);
+    const humus = Array.from({ length: 80 }, () => [40 + r() * 520, GROUND + 9 + r() ** 1.6 * 80, 3 + r() * 9, r() * .4 - .2]);
+    const leafAt = (k, i) => {
+      const m = rng(k * 211 + i * 7 + 1); m();
+      return { x: 60 + m() * 480, start: (i / N) * .55 + m() * .05, dur: .17 + m() * .08, sway: 18 + m() * 28, w: 1.4 + m() * 1.1, rot: m() * TAU, size: 14 + m() * 8, lie: m() < .5 ? 0 : Math.PI, ph: m() * TAU };
+    };
+    const leaf = (g, x, y, a, size, flat) => {
+      const ca = Math.cos(a), sa = Math.sin(a);
+      const P = (lx, ly) => [x + lx * ca - ly * sa, y + (lx * sa + ly * ca) * (1 - .6 * flat)];
+      for (const side of [1, -1]) for (let i = 0; i <= 12; i++) {
+        const v = i / 12, [X, Y] = P((v - .5) * size * 2, side * size * .42 * Math.sin(Math.PI * v) ** .9);
+        if (i) g.lineTo(X, Y); else g.moveTo(X, Y);
+      }
+      const [ax, ay] = P(-size * 1.25, 0), [bx, by] = P(size * .85, 0);
+      g.moveTo(ax, ay); g.lineTo(bx, by);
+    };
+    return (g, c, t) => {
+      const k = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD;
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      // the ground, made of all the leaves that came before
+      g.globalAlpha = .7;
+      g.lineWidth = .9;
+      g.beginPath(); g.moveTo(24, GROUND); g.lineTo(576, GROUND); g.stroke();
+      g.globalAlpha = .32;
+      g.lineWidth = .6;
+      g.beginPath();
+      for (const [x, y, len, tilt] of humus) { g.moveTo(x - len, y - tilt * len); g.lineTo(x + len, y + tilt * len); }
+      g.stroke();
+      g.lineWidth = .8;
+      for (let i = 0; i < N; i++) {
+        const L = leafAt(k, i), f = (u - L.start) / L.dur;
+        if (f < 0) continue;
+        const swing = Math.min(f, 1) * L.w * TAU + L.ph, x = L.x + L.sway * Math.sin(swing);
+        const fall = L.rot + .8 * Math.sin(swing + 1), settle = smooth(1, 1.35, f);
+        const y = f < 1 ? -30 + (GROUND - 4 + 30) * f : GROUND - 4 + 6 * smooth(.72, .97, u);
+        g.globalAlpha = .85 * (1 - smooth(.72, .97, u));
+        if (g.globalAlpha < .01) continue;
+        g.beginPath(); leaf(g, x, y, fall + (L.lie - fall) * settle, L.size, settle); g.stroke();
+      }
+      // a seed below the ground becomes a sprout
+      const grow = smooth(.36, .9, u), open = smooth(.62, .92, u), gone = 1 - smooth(.95, 1, u);
+      const top = GROUND + 12 - 170 * grow;
+      const stem = (v) => [300 + 9 * Math.sin(v * 2.6) * grow, GROUND + 12 - (GROUND + 12 - top) * v];
+      if (grow > .005) {
+        g.globalAlpha = .9 * gone;
+        g.lineWidth = 1.1;
+        g.beginPath();
+        for (let i = 0; i <= 20; i++) { const [x, y] = stem(i / 20); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+        if (open > .01) {
+          const [x, y] = stem(1);
+          g.lineWidth = .9;
+          g.beginPath();
+          leaf(g, x - 15 * open * Math.cos(.5 * open), y - 15 * open * Math.sin(.5 * open) + 2, Math.PI + .5 * open, 13 * open, 0);
+          leaf(g, x + 15 * open * Math.cos(.5 * open), y - 15 * open * Math.sin(.5 * open) + 2, -.5 * open, 13 * open, 0);
+          g.stroke();
+        }
+      }
+      g.globalAlpha = 1;
+      const [sx, sy] = stem(1);
+      point(g, c, sx, sy, (3 + 1.5 * grow) * (.4 + .6 * gone), 22 + 8 * grow);
+    };
+  },
+
+  // Converging from very different directions, by very different ways, toward the same point.
+  passers() {
+    const PTS = 150;
+    const paths = [[0, 0, .5], [5, 14, .5], [2, 26, .5], [9, 7, .5], [3.5, 18, .5], [1.4, 22, .5]].map(([f, amp, bend], i) => ({ a: -Math.PI / 2 + (i * TAU) / 6 + .25, f, amp, bend, ph: i * 1.3, off: i * .17 }));
+    const at = (p, s) => {
+      const q = 286 * (1 - s), a = p.a + p.bend * (1 - s) ** 2, lat = p.amp * Math.sin(p.f * s * Math.PI + p.ph) * (1 - s) ** .7;
+      return [300 + q * Math.cos(a) - lat * Math.sin(a), 300 + q * Math.sin(a) + lat * Math.cos(a)];
+    };
+    const pts = paths.map((p) => Array.from({ length: PTS + 1 }, (_, i) => at(p, i / PTS)));
+    const normal = (list, i) => { const a = list[Math.max(0, i - 1)], b = list[Math.min(PTS, i + 1)], d = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [-(b[1] - a[1]) / d, (b[0] - a[0]) / d]; };
+    const run = (g, list, from, to, dx = 0, dy = 0, side = 0) => {
+      for (let i = from; i <= to; i++) { const [nx, ny] = side ? normal(list, i) : [0, 0], x = list[i][0] + nx * side + dx, y = list[i][1] + ny * side + dy; if (i > from) g.lineTo(x, y); else g.moveTo(x, y); }
+    };
+    // six manners of walking: plain, in steps, doubled, broken, measured, beaded
+    const styles = [
+      (g, l) => { g.lineWidth = 1.1; g.beginPath(); run(g, l, 0, PTS); g.stroke(); },
+      (g, l) => { g.beginPath(); for (let i = 0; i < PTS; i += 4) dot(g, l[i][0], l[i][1], .95); g.fill(); },
+      (g, l) => { g.lineWidth = .5; g.beginPath(); run(g, l, 0, PTS, 0, 0, 2.6); run(g, l, 0, PTS, 0, 0, -2.6); g.stroke(); },
+      (g, l) => { g.lineWidth = .9; g.beginPath(); for (let i = 0; i < PTS; i += 7) run(g, l, i, Math.min(PTS, i + 4)); g.stroke(); },
+      (g, l) => { g.lineWidth = .5; g.beginPath(); run(g, l, 0, PTS); for (let i = 3; i < PTS; i += 6) { const [nx, ny] = normal(l, i), q = 5 * (1 - i / PTS) + 1.5; g.moveTo(l[i][0] - nx * q, l[i][1] - ny * q); g.lineTo(l[i][0] + nx * q, l[i][1] + ny * q); } g.stroke(); },
+      (g, l) => { g.lineWidth = .45; g.beginPath(); run(g, l, 0, PTS); for (let i = 5; i < PTS - 6; i += 11) dot(g, l[i][0], l[i][1], 2.6 * (1 - i / PTS) + .8); g.stroke(); },
+    ];
+    return (g, c, t) => {
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = g.fillStyle = c.ink;
+      pts.forEach((list, i) => { g.globalAlpha = .75; styles[i](g, list); });
+      // those who walk them, all going the same way
+      g.beginPath();
+      paths.forEach((p) => {
+        for (let m = 0; m < 2; m++) {
+          const s = (t * .028 + p.off + m / 2) % 1, [x, y] = at(p, s);
+          if (s < .9) dot(g, x, y, 2);
+        }
+      });
+      g.globalAlpha = .9;
+      g.fill();
+      g.globalAlpha = .3;
+      g.lineWidth = .5;
+      g.beginPath(); g.arc(300, 300, 24, 0, TAU); g.stroke();
+      g.globalAlpha = 1;
+      point(g, c, 300, 300, 6, 36);
+    };
+  },
+
+  // A flame handed on from one to the next: each carrier fades once it has passed it on.
+  relay() {
+    const P = 4.6, GAP = 132, BASE = 522;
+    const cupY = (j) => 300 + 50 * Math.sin(j * 1.9) + 18 * Math.sin(j * 4.1);
+    return (g, c, t) => {
+      const k = Math.floor(t / P), u = (t % P) / P, fly = smooth(.3, .8, u);
+      const X = (j) => 300 + (j - k - u) * GAP;
+      const strength = (j) => {
+        if (j > k + 1) return .3 * (1 - smooth(1.2, 3, j - k - u));
+        if (j === k + 1) return .3 + .7 * fly;
+        return Math.exp(-Math.max(0, t - (j + .8) * P) / 4);
+      };
+      const flame = (j) => [X(j), cupY(j) - 7];
+      const arcAt = (j, f) => { const [ax, ay] = flame(j), [bx, by] = flame(j + 1); return [ax + (bx - ax) * f, ay + (by - ay) * f - 70 * 4 * f * (1 - f)]; };
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = g.fillStyle = c.ink;
+      g.globalAlpha = .5;
+      g.lineWidth = .6;
+      g.beginPath(); g.moveTo(20, BASE); g.lineTo(580, BASE); g.stroke();
+      // where it went: the arcs of earlier passages
+      for (let j = k - 3; j < k; j++) {
+        g.globalAlpha = .4 * strength(j);
+        g.beginPath();
+        for (let i = 1; i < 18; i++) { const [x, y] = arcAt(j, i / 18); dot(g, x, y, .8); }
+        g.fill();
+      }
+      for (let j = k - 3; j <= k + 3; j++) {
+        const x = X(j), y = cupY(j);
+        if (x < -40 || x > 640) continue;
+        g.globalAlpha = .9 * strength(j);
+        g.lineWidth = 1;
+        g.beginPath();
+        g.arc(x, y, 17, .08 * Math.PI, .92 * Math.PI);
+        g.moveTo(x, y + 17); g.lineTo(x, BASE - 8);
+        g.moveTo(x - 9, BASE - 8); g.lineTo(x + 9, BASE - 8);
+        g.stroke();
+      }
+      const [px, py] = u < .3 ? flame(k) : u > .8 ? flame(k + 1) : arcAt(k, fly);
+      // the flame itself
+      g.strokeStyle = c.mark;
+      g.globalAlpha = .8;
+      g.lineWidth = .9;
+      g.beginPath();
+      const sway = 1.6 * Math.sin(t * 7) + 1.2 * Math.sin(t * 11.3);
+      for (const side of [1, -1]) for (let i = 0; i <= 10; i++) {
+        const v = i / 10, x = px + side * 6 * Math.sin(Math.PI * v) ** .8 * (1 - .45 * v) + sway * v * v, y = py - 4 - v * 22;
+        if (i) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+      g.stroke();
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      point(g, c, px, py, 4.5, 26);
+    };
+  },
+
+  // A knot seen up close, loosening slowly until the rope lies open around the point it held.
+  knot() {
+    const N = 360, PERIOD = 30, W = 7;
+    return (g, c, t) => {
+      const u = (t % PERIOD) / PERIOD, loose = smooth(.15, .72, u), fade = smooth(0, .05, u) * (1 - smooth(.9, .99, u));
+      const A = 2 - 1.75 * loose, S = 232 / (1 + A), rot = .12 * Math.sin(t * .1) - Math.PI / 2, ca = Math.cos(rot), sa = Math.sin(rot);
+      const P = [], Z = [];
+      for (let i = 0; i < N; i++) {
+        const s = (i / N) * TAU, x = Math.sin(s) + A * Math.sin(2 * s), y = Math.cos(s) - A * Math.cos(2 * s);
+        P.push([300 + S * (x * ca - y * sa), 300 + S * (x * sa + y * ca)]);
+        Z.push(-Math.sin(3 * s));
+      }
+      // where the rope passes under itself, it is hidden
+      const hide = new Uint8Array(N);
+      for (let i = 0; i < N; i++) {
+        const [ax, ay] = P[i], [bx, by] = P[(i + 1) % N];
+        for (let j = i + 3; j < N; j++) {
+          if (i + N - j < 3) continue;
+          const [cx, cy] = P[j], [dx, dy] = P[(j + 1) % N];
+          const den = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx);
+          if (!den) continue;
+          const p = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / den, q = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / den;
+          if (p < 0 || p > 1 || q < 0 || q > 1) continue;
+          const under = Z[i] < Z[j] ? i : j, len = Math.hypot(P[(under + 1) % N][0] - P[under][0], P[(under + 1) % N][1] - P[under][1]) || 1;
+          const m = Math.ceil((W * 1.1) / len);
+          for (let d = -m; d <= m; d++) hide[(under + d + N) % N] = 1;
+        }
+      }
+      const normal = (i) => { const a = P[(i + N - 1) % N], b = P[(i + 1) % N], d = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [-(b[1] - a[1]) / d, (b[0] - a[0]) / d]; };
+      let first = hide.indexOf(1);
+      if (first < 0) first = 0;
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      g.globalAlpha = .9 * fade;
+      g.lineWidth = 1;
+      g.beginPath();
+      for (const side of [W / 2, -W / 2]) {
+        let open = false;
+        for (let n = 0; n <= N; n++) {
+          const i = (first + n) % N;
+          if (hide[i]) { open = false; continue; }
+          const [nx, ny] = normal(i), x = P[i][0] + nx * side, y = P[i][1] + ny * side;
+          if (open) g.lineTo(x, y); else g.moveTo(x, y);
+          open = true;
+        }
+      }
+      g.stroke();
+      // the twist of the rope
+      g.globalAlpha = .4 * fade;
+      g.lineWidth = .5;
+      g.beginPath();
+      for (let i = 0; i < N; i += 4) {
+        const j = (i + 2) % N;
+        if (hide[i] || hide[j]) continue;
+        const [nx, ny] = normal(i), [mx, my] = normal(j);
+        g.moveTo(P[i][0] - nx * W * .4, P[i][1] - ny * W * .4); g.lineTo(P[j][0] + mx * W * .4, P[j][1] + my * W * .4);
+      }
+      g.stroke();
+      g.globalAlpha = 1;
+      point(g, c, 300, 300, (3.5 + 2 * loose) * (.4 + .6 * fade), 18 + 22 * loose);
+    };
+  },
 };
 
 // The frame used when the motion is stopped, and in the books.
-export const FROZEN = { source: 48, fractal: 36, void: 21, nested: 0, lives: 21, time: 6.2, worlds: 21, knowing: 60, balance: 3, field: 7, drop: 18.4, forms: 21, useful: 12.5, why: 21, river: 9, forgetting: 121, birth: 25.5, kin: 6, choice: 13, love: 30, days: 200, silence: 12, emerge: 25, zoom: 7, pages: 22, map: 44, ripple: 9.5, water: 9, gesture: 52 };
+export const FROZEN = { source: 48, fractal: 36, void: 21, nested: 0, lives: 21, time: 6.2, worlds: 21, knowing: 60, balance: 3, field: 7, drop: 18.4, forms: 21, useful: 12.5, why: 21, river: 9, forgetting: 121, birth: 25.5, kin: 6, choice: 13, love: 30, days: 200, silence: 12, emerge: 25, zoom: 7, pages: 22, map: 44, ripple: 9.5, water: 9, gesture: 52, body: 3.3, play: 8, dream: 10, fear: 6, alone: 30, beauty: 17, mend: 6.6, death: 12, leaves: 25.5, passers: 6, relay: 8, knot: 12 };
 
 export function createScene(name, labels = {}, options = {}) {
   return factories[name](labels, options);
