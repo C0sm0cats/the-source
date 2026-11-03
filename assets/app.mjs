@@ -86,7 +86,6 @@ document.querySelectorAll('canvas[data-scene]').forEach((canvas) => {
   let draw;
   try { draw = createScene(name, JSON.parse(canvas.dataset.labels || '{}'), { step: () => +(range?.value ?? 0) }); } catch { return; }
   const item = { canvas, name, g: canvas.getContext('2d'), state, visible: false, draw };
-  canvas.hidden = false;
   if (limit) {
     const output = limit.querySelector('output');
     const format = new Intl.NumberFormat(root.lang);
@@ -138,3 +137,13 @@ const syncMotion = () => { motion.textContent = paused ? motion.dataset.resume :
 motion.hidden = false;
 motion.addEventListener('click', () => { paused = !paused; syncMotion(); if (paused) repaint(); else wake(); });
 syncMotion();
+
+// Fonts can still shift the page after the browser has jumped to a #chapter: land there again, unless the reader has moved.
+const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+if (target) {
+  let moved = false;
+  for (const type of ['wheel', 'touchstart', 'keydown', 'pointerdown']) addEventListener(type, () => { moved = true; }, { once: true, passive: true });
+  const land = () => { if (!moved) target.scrollIntoView(); };
+  document.fonts?.ready.then(land);
+  addEventListener('load', land, { once: true });
+}

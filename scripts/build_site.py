@@ -48,7 +48,7 @@ def limit_control(ui):
 
 def live(name, label, ui, lang):
     labels = escape(json.dumps({key: typo(ui[key], lang) for key in LABELS}, ensure_ascii=False))
-    return f'<canvas data-scene="{name}" data-labels="{labels}" role="img" aria-label="{escape(label)}" hidden></canvas>'
+    return f'<canvas data-scene="{name}" data-labels="{labels}" role="img" aria-label="{escape(label)}"></canvas>'
 
 
 def chapter(ch, i, lang, ui):
@@ -125,6 +125,7 @@ def page(data, lang):
 <link rel="preload" href="{prefix}assets/fonts/Spectral-Light.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{prefix}assets/style.css?v={VERSION}">
 <script type="module" src="{prefix}assets/app.mjs?v={VERSION}"></script>
+<noscript><style>.fig canvas {{ display: none; }}</style></noscript>
 </head>
 <body data-tone="paper">
 <a class="skip" href="#{first}">{ui['skip']}</a>
