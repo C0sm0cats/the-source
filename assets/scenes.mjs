@@ -180,7 +180,7 @@ const factories = {
     const steps = [25, 100, 1000, 10000, 100000, Infinity];
     const R = rng(25);
     const seeds = Array.from({ length: 169 }, () => ({ a: 1 + Math.floor(R() * 4), b: 2 + Math.floor(R() * 5), p: R() * TAU, s: R() * .45 + .3 }));
-    let side = 5;
+    let side = 5, gridSide = 0, dist = null;
     return (g, c, t, s) => {
       const count = steps[options.step()];
       side = ease(s, side, count === Infinity ? 600 : Math.sqrt(count), .09);
@@ -188,14 +188,18 @@ const factories = {
       if (n >= 400) { g.globalAlpha = smooth(400, 560, side); g.fillRect(0, 0, 600, 600); g.globalAlpha = 1; }
       else if (n > 13) {
         const size = Math.max(.6, cell * (n > 60 ? .55 : .36));
+        if (n !== gridSide) {
+          gridSide = n;
+          dist = new Float64Array(n * n);
+          for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) dist[y * n + x] = Math.hypot(x - mid, y - mid) * cell / 62;
+        }
+        // One pass sorts every cell into its brightness band, then each band is filled once.
+        const bands = [[], [], [], []], phase = t * 1.25, half = size / 2;
+        for (let i = 0; i < n * n; i++) bands[Math.floor((.5 + .5 * Math.cos(dist[i] - phase)) * 3.99)].push(i);
         for (let b = 0; b < 4; b++) {
           g.globalAlpha = .4 + b * .2;
           g.beginPath();
-          for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-            const d = Math.hypot(x - mid, y - mid) * cell;
-            if (Math.floor((.5 + .5 * Math.cos(d / 62 - t * 1.25)) * 3.99) !== b) continue;
-            g.rect((x + .5) * cell - size / 2, (y + .5) * cell - size / 2, size, size);
-          }
+          for (const i of bands[b]) g.rect((i % n + .5) * cell - half, (Math.floor(i / n) + .5) * cell - half, size, size);
           g.fill();
         }
         g.globalAlpha = 1;
