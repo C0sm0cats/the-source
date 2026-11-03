@@ -254,9 +254,9 @@ const factories = {
       head = ease(s, head, goal, .05);
       g.lineCap = g.lineJoin = 'round';
       pages.forEach((page, i) => {
-        const near = Math.max(0, 1 - Math.abs(i - head) / 7);
-        g.globalAlpha = .34 + .66 * near * near;
-        g.lineWidth = .6 + near * .5;
+        const near = Math.max(0, 1 - Math.abs(i - head) / 7), board = i === 0 || i === N - 1;
+        g.globalAlpha = board ? 1 : .34 + .66 * near * near;
+        g.lineWidth = board ? 1.7 : .6 + near * .5;
         g.beginPath();
         page.forEach(([x, y], k) => { if (k) g.lineTo(x, y); else g.moveTo(x, y); });
         g.stroke();
@@ -572,6 +572,9 @@ const factories = {
       g.lineWidth = 1.5;
       line(other);
       g.strokeStyle = c.ink;
+      // the life itself, travelling from one form to the next
+      const [px, py] = at(.5 + .38 * Math.sin(t * .11), 0);
+      point(g, c, px, py, 5, 26);
     };
   },
 

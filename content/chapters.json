@@ -251,7 +251,7 @@
     "title": "Several lives at once",
     "thesis": "A soul could live several existences at the same time.",
     "body": [
-     "Take twenty-five lives, to make it concrete. Twenty-five distinct people, each with their own emotions and decisions, knowing nothing of one another. All of them still feed a single consciousness.",
+     "Take twenty-five lives, to make it concrete. Twenty-five distinct people, each with their own emotions and decisions, knowing nothing of one another. Yet all of them feed a single consciousness.",
      "The parallelism has a purpose: to learn more than a single point of view allows. One life discovers courage, another forgiveness, another attachment.",
      "None is a copy of another, and none can be replaced. Each point on the grid sees what the others will never see.",
      "> Twenty-five is an image. Nothing imposes a limit."
@@ -285,7 +285,7 @@
      "> Le passé ne serait pas derrière nous : seulement à une autre page.",
      "Elles ne se commanderaient pas. Ce qu'une vie comprend enrichirait seulement l'ensemble, et les autres en bénéficieraient sans en connaître l'origine."
     ],
-    "open": "Le livre est une image : il ne montre pas que le futur existe déjà. Que reste-t-il du choix si toutes les pages sont écrites ?",
+    "open": "Le livre est une image : il ne montre pas que le futur existe déjà. Et si toutes les pages coexistent, s'écrivent-elles au moment où on les vit ?",
     "echoes": [
      [
       "Augustin",
@@ -308,7 +308,7 @@
      "> The past would not be behind us: only on another page.",
      "They would not command one another. What one life understands would simply enrich the whole, and the others would benefit without knowing its source."
     ],
-    "open": "The book is an image: it does not show that the future already exists. What is left of choice if all the pages are written?",
+    "open": "The book is an image: it does not show that the future already exists. And if all the pages coexist, are they written as they are lived?",
     "echoes": [
      [
       "Augustine",
@@ -387,7 +387,8 @@
      "Comment un infini pourrait-il encore apprendre ? Parce qu'infini ne veut pas dire tout savoir. La Source contiendrait tous les possibles, mais contenir un possible ne revient pas à l'avoir traversé.",
      "Elle pourrait connaître la définition de l'amour sans avoir jamais tremblé pour quelqu'un, et celle du chagrin sans avoir jamais attendu quelqu'un qui ne reviendra pas. Le savoir lui donnerait la carte de toute chose. Il ne lui en donnerait pas le poids.",
      "> Il lui manquerait ce que seule une vie peut donner : une fois, ici, sans savoir la suite.",
-     "Une existence n'aurait donc rien d'un scénario connu d'avance. Le matin ordinaire d'un inconnu, sa peur avant d'ouvrir une lettre, le goût d'un fruit : rien de cela ne pouvait être déduit. Cela ne pouvait qu'arriver."
+     "Une existence n'aurait donc rien d'un scénario connu d'avance. Le matin ordinaire d'un inconnu, sa peur avant d'ouvrir une lettre, le goût d'un fruit : rien de cela ne pouvait être déduit. Cela ne pouvait qu'arriver.",
+     "C'est aussi ce qui laisse sa place au choix. Si la Source ne connaît pas la suite, personne ne peut la dicter : une vie n'exécute pas un plan venu d'en haut, elle cherche elle-même son chemin."
     ],
     "open": "La Source ressent-elle vraiment ce que vivent ses formes ? Le modèle le suppose, sans pouvoir l'établir.",
     "echoes": [
@@ -410,7 +411,8 @@
      "How could something infinite still learn? Because infinite does not mean knowing everything. The Source would contain every possibility, but containing a possibility is not the same as having passed through it.",
      "It could know the definition of love without ever having trembled for someone, and the definition of grief without ever having waited for someone who will not come back. Knowledge would give it the map of everything. It would not give it the weight.",
      "> It would lack what only a life can give: once, here, without knowing what comes next.",
-     "An existence would then be nothing like a script known in advance. A stranger's ordinary morning, their fear before opening a letter, the taste of a piece of fruit: none of this could be deduced. It could only happen."
+     "An existence would then be nothing like a script known in advance. A stranger's ordinary morning, their fear before opening a letter, the taste of a piece of fruit: none of this could be deduced. It could only happen.",
+     "This is also what leaves room for choice. If the Source does not know what comes next, no one can dictate it: a life does not carry out a plan handed down from above, it finds its own way."
     ],
     "open": "Does the Source really feel what its forms live through? The model assumes so, without being able to establish it.",
     "echoes": [
@@ -838,10 +840,6 @@
      "Une forme qui répète le même motif à toutes les échelles."
     ],
     [
-     "Singularité",
-     "Le point unique d'où partent l'infiniment grand et l'infiniment petit."
-    ],
-    [
      "Âme",
      "Une conscience plus vaste, qui rassemble plusieurs vies."
     ],
@@ -852,6 +850,10 @@
     [
      "Expérience",
      "Ce qu'aucun savoir ne remplace : traverser une chose une fois, sans connaître la suite."
+    ],
+    [
+     "Liberté",
+     "La part d'une vie que personne ne dicte, puisque nul, pas même la Source, n'en connaît la suite."
     ],
     [
      "Balance",
@@ -931,10 +933,6 @@
      "A shape that repeats the same pattern at every scale."
     ],
     [
-     "Singularity",
-     "The single point from which the infinitely large and the infinitely small set out."
-    ],
-    [
      "Soul",
      "A vaster consciousness that gathers several lives."
     ],
@@ -945,6 +943,10 @@
     [
      "Experience",
      "What no knowledge replaces: going through something once, without knowing what comes next."
+    ],
+    [
+     "Freedom",
+     "The part of a life no one dictates, since no one, not even the Source, knows what comes next."
     ],
     [
      "Balance",
