@@ -911,9 +911,18 @@ const factories = {
       const n = Math.max(1, Math.round(8 * end));
       for (let i = 1; i <= n; i++) { const u = (i / n) * end; g.lineTo(x0 + (x1 - x0) * u, y0 + (y1 - y0) * smooth(0, 1, u)); }
     };
-    return (g, c, t) => {
+    // a click above or below the point chooses the next branch; otherwise chance does
+    const chosen = new Map();
+    let lastClick = null;
+    const pick = (k) => chosen.get(k) ?? bit(k);
+    return (g, c, t, s) => {
       const k = Math.floor(t / STEP), f = smooth(.25, 1, (t % STEP) / STEP);
-      const first = bit(k + 1);
+      if (s.click && s.click !== lastClick) {
+        lastClick = s.click;
+        chosen.set(f > 0 && !s.snap ? k + 2 : k + 1, s.click[1] < Y0 ? -1 : 1);
+        for (const key of chosen.keys()) if (key < k - 8) chosen.delete(key);
+      }
+      const first = pick(k + 1);
       // the present point travels along the first edge; the view follows it
       const ox = X0 - f * DX, oy = Y0 - first * h(1 - f) * smooth(0, 1, f);
       g.lineCap = g.lineJoin = 'round';
@@ -941,11 +950,11 @@ const factories = {
       // behind: the path that was taken, and the first steps of those that were not
       let x = ox, y = oy;
       const past = [];
-      for (let j = k; j > k - 7; j--) { const py = y - bit(j) * h(0); past.push([x - DX, py, x, y, j]); x -= DX; y = py; }
+      for (let j = k; j > k - 7; j--) { const py = y - pick(j) * h(0); past.push([x - DX, py, x, y, j]); x -= DX; y = py; }
       g.lineWidth = .5;
       past.forEach(([x0, y0, , , j], i) => {
         g.globalAlpha = .35 * (1 - i / 7) * smooth(0, 120, x0 + DX);
-        g.beginPath(); edge(g, x0, y0, x0 + DX, y0 - bit(j) * h(0), .55); g.stroke();
+        g.beginPath(); edge(g, x0, y0, x0 + DX, y0 - pick(j) * h(0), .55); g.stroke();
       });
       g.globalAlpha = 1;
       g.lineWidth = 1.5;
@@ -961,9 +970,21 @@ const factories = {
   love() {
     const STRANDS = 4, PTS = 300;
     const A = (a, t, j) => { const q = 158 + 62 * Math.cos(3 * a + t * .04) + j * 1.6; return [300 + q * Math.cos(a), 300 + q * Math.sin(a)]; };
-    const B = (a, t, j) => { const b = a + .22 * Math.sin(2 * a + t * .07), q = 150 + 30 * Math.cos(5 * b - .8 - t * .03) + j * 1.6; return [300 + q * Math.cos(b), 300 + q * Math.sin(b)]; };
+    const free = (a, t, j) => { const b = a + .22 * Math.sin(2 * a + t * .07), q = 150 + 30 * Math.cos(5 * b - .8 - t * .03) + j * 1.6; return [300 + q * Math.cos(b), 300 + q * Math.sin(b)]; };
+    // the pointer draws the second life toward it, softly
+    let pull = 0, px = 300, py = 300;
+    const B = (a, t, j) => {
+      const p = free(a, t, j);
+      if (!pull) return p;
+      const dx = px - p[0], dy = py - p[1], w = pull * .45 * Math.exp(-(dx * dx + dy * dy) / 16200);
+      return [p[0] + dx * w, p[1] + dy * w];
+    };
     const curve = (g, F, t, j, a0, a1, n) => { for (let i = 0; i <= n; i++) { const [x, y] = F(a0 + ((a1 - a0) * i) / n, t, j); if (i) g.lineTo(x, y); else g.moveTo(x, y); } };
-    return (g, c, t) => {
+    return (g, c, t, s) => {
+      const near = s.x != null;
+      if (near) { px = pull ? ease(s, px, s.x, .06) : s.x; py = pull ? ease(s, py, s.y, .06) : s.y; }
+      pull = ease(s, pull, near ? 1 : 0, near ? .04 : .03);
+      if (pull < .002 && !near) pull = 0;
       const now = t * .16, span = TAU * .85;
       g.lineCap = g.lineJoin = 'round';
       // each one's whole shape, faint
@@ -1019,12 +1040,29 @@ const factories = {
       g.arc(d.x, d.y, d.rad, d.a + d.gap / 2, d.a + TAU - d.gap / 2);
       if (d.tick) { g.moveTo(d.x, d.y); g.lineTo(d.x + d.rad * .55 * Math.cos(d.a), d.y + d.rad * .55 * Math.sin(d.a)); }
     };
-    return (g, c, t) => {
+    // a lens under the pointer: the days near it grow apart and show their differences
+    const R = 92, M = 1.7;
+    let lens = 0, lx = 300, ly = 300;
+    const magnify = (d) => {
+      const dx = d.x - lx, dy = d.y - ly, e = Math.hypot(dx, dy);
+      if (e >= R) return null;
+      const grow = 1 + lens * M * (1 - e / R) ** 2;
+      const spread = 1 + lens * M / (1 + M * e / R) * (1 - e / R);
+      return { x: lx + dx * spread, y: ly + dy * spread, rad: d.rad * grow, a: d.a, gap: d.gap, tick: d.tick, m: lens * (1 - e / R) };
+    };
+    return (g, c, t, s) => {
+      const near = s.x != null;
+      if (near) { lx = lens ? ease(s, lx, s.x, .12) : s.x; ly = lens ? ease(s, ly, s.y, .12) : s.y; }
+      lens = ease(s, lens, near ? 1 : 0, .07);
+      if (lens < .002 && !near) lens = 0;
       const now = (t / PER) % N, today = Math.floor(now);
-      const buckets = Array.from({ length: B }, () => []), recent = [];
+      const buckets = Array.from({ length: B }, () => []), recent = [], close = [];
+      let here = cells[today];
       cells.forEach((d, i) => {
-        const age = (today - i + N) % N;
-        if (age < 7) recent.push([d, age]);
+        const age = (today - i + N) % N, big = lens ? magnify(d) : null;
+        if (big && i === today) here = big;
+        if (age < 7) recent.push([big || d, age]);
+        else if (big) close.push(big);
         else buckets[Math.min(B - 1, Math.floor((age / N) * B * 1.15))].push(d);
       });
       g.lineCap = 'round';
@@ -1043,10 +1081,15 @@ const factories = {
         g.lineWidth = .8;
         g.beginPath(); glyph(g, d); g.stroke();
       }
-      g.globalAlpha = 1;
       g.strokeStyle = c.ink;
-      const d = cells[today];
-      point(g, c, d.x, d.y, 3 + .6 * Math.sin((now % 1) * Math.PI), 20);
+      for (const d of close) {
+        g.globalAlpha = .55 + .4 * d.m;
+        g.lineWidth = .55 + .5 * d.m;
+        g.beginPath(); glyph(g, d); g.stroke();
+      }
+      g.globalAlpha = 1;
+      const grow = here.rad / (cells[today].rad);
+      point(g, c, here.x, here.y, (3 + .6 * Math.sin((now % 1) * Math.PI)) * grow, 20 * grow);
     };
   },
 
@@ -1058,9 +1101,18 @@ const factories = {
       return { k, rad: 9 + (OUT - 9) * k ** 1.25, modes: [2, 3, 5, 7].map((m) => [m, r() * TAU, (r() * .6 + .2) * (r() < .5 ? -1 : 1), r() * .8 + .2]) };
     });
     const E = Math.exp(-3.4);
-    return (g, c, t) => {
+    // a click disturbs the rings from where it falls; the disturbance spreads, then settles
+    let lastClick = null, touch = null;
+    return (g, c, t, s) => {
       const u = (t % PERIOD) / PERIOD;
       const stir = smooth(0, .07, u) * (Math.exp(-3.4 * u) - E) / (1 - E);
+      if (s.click && s.click !== lastClick) { lastClick = s.click; touch = { x: s.click[0], y: s.click[1], t0: t }; }
+      if (touch && (t < touch.t0 || t - touch.t0 > 14)) touch = null;
+      let tx = 0, ty = 0, front = 0, force = 0;
+      if (touch) {
+        const age = t - touch.t0;
+        tx = touch.x; ty = touch.y; front = 40 * age; force = 14 * smooth(0, .4, age) * Math.exp(-age / 3);
+      }
       g.lineCap = g.lineJoin = 'round';
       for (const { k, rad, modes } of rings) {
         const amp = (.5 + 11 * stir) * k ** 1.4, wave = Math.sin(k * 9 - t * .45);
@@ -1072,7 +1124,11 @@ const factories = {
           const a = (i / PTS) * TAU;
           let dr = 0;
           for (const [m, p, w, h] of modes) dr += h * Math.sin(m * a + p + t * w * .3);
-          const q = rad + amp * dr * (.6 + .4 * wave);
+          let q = rad + amp * dr * (.6 + .4 * wave);
+          if (force) {
+            const e = Math.hypot(300 + rad * Math.cos(a) - tx, 300 + rad * Math.sin(a) - ty), x = (e - front) / 46;
+            q += force * Math.exp(-x * x) * Math.sin(e / 13 - t * 2.2) * (.3 + .7 * k);
+          }
           if (i) g.lineTo(300 + q * Math.cos(a), 300 + q * Math.sin(a)); else g.moveTo(300 + q * Math.cos(a), 300 + q * Math.sin(a));
         }
         g.stroke();
@@ -1271,7 +1327,7 @@ const factories = {
       });
     });
     const sources = [0, 1, 2, 3, 4, 5].map(() => Math.floor(r() * N));
-    const dist = sources.map((s) => {
+    const spread = (s) => {
       const d = new Array(N).fill(Infinity), done = new Array(N).fill(false);
       d[s] = 0;
       for (let it = 0; it < N; it++) {
@@ -1282,19 +1338,29 @@ const factories = {
         for (const [a, b, w] of links) { if (a === m && d[m] + w < d[b]) d[b] = d[m] + w; if (b === m && d[m] + w < d[a]) d[a] = d[m] + w; }
       }
       return d.map((v) => (v === Infinity ? 1e4 : v));
-    });
+    };
+    const dist = sources.map(spread);
     const PERIOD = 7;
-    return (g, c, t) => {
+    // a click sends its own shock from the nearest node
+    let lastClick = null, shock = null;
+    const wave = (pos, d, age) => nodes.forEach((p, i) => {
+      const front = age * 85, x = (d[i] - front) / 38, w = Math.exp(-x * x) * Math.exp(-age / 6);
+      const s = w * Math.sin((d[i] - front) / 10) * 9;
+      pos[i][0] += p.dx * s; pos[i][1] += p.dy * s; pos[i][2] += w;
+    });
+    return (g, c, t, s) => {
       const k = Math.floor(t / PERIOD);
-      const pos = nodes.map((p) => [p.x, p.y, 0]);
-      for (let j = k - 2; j <= k; j++) {
-        const age = t - j * PERIOD, d = dist[((j % 6) + 6) % 6], front = age * 85;
-        nodes.forEach((p, i) => {
-          const x = (d[i] - front) / 38, w = Math.exp(-x * x) * Math.exp(-age / 6);
-          const s = w * Math.sin((d[i] - front) / 10) * 9;
-          pos[i][0] += p.dx * s; pos[i][1] += p.dy * s; pos[i][2] += w;
-        });
+      if (s.click && s.click !== lastClick) {
+        lastClick = s.click;
+        const [cx, cy] = s.click;
+        let src = 0;
+        nodes.forEach((p, i) => { if (Math.hypot(p.x - cx, p.y - cy) < Math.hypot(nodes[src].x - cx, nodes[src].y - cy)) src = i; });
+        shock = { src, d: spread(src), t0: t };
       }
+      const pos = nodes.map((p) => [p.x, p.y, 0]);
+      for (let j = k - 2; j <= k; j++) wave(pos, dist[((j % 6) + 6) % 6], t - j * PERIOD);
+      if (shock && (t < shock.t0 || t - shock.t0 > 3 * PERIOD)) shock = null;
+      if (shock) wave(pos, shock.d, t - shock.t0);
       const buckets = Array.from({ length: 6 }, () => []);
       for (const [a, b] of links) {
         const e = clamp((pos[a][2] + pos[b][2]) * .7);
@@ -1308,8 +1374,9 @@ const factories = {
       g.beginPath();
       for (const [x, y, e] of pos) dot(g, x, y, 1.1 + 1.6 * clamp(e));
       g.fill();
-      const src = sources[((k % 6) + 6) % 6], [sx, sy] = pos[src];
-      point(g, c, sx, sy, 3.5 + 4 * Math.exp(-(t - k * PERIOD) * .8), 32);
+      const own = shock && shock.t0 > k * PERIOD, start = own ? shock.t0 : k * PERIOD;
+      const src = own ? shock.src : sources[((k % 6) + 6) % 6], [sx, sy] = pos[src];
+      point(g, c, sx, sy, 3.5 + 4 * Math.exp(-(t - start) * .8), 32);
     };
   },
 
