@@ -348,6 +348,11 @@
       "Hugh Everett",
       "thèse, 1957",
       "Une lecture de la physique quantique où chaque possibilité se réalise dans une branche."
+     ],
+     [
+      "Nietzsche",
+      "*Ainsi parlait Zarathoustra*, 1883",
+      "Contre ceux qui inventent d'autres mondes pour se consoler de celui-ci. Le contrepoint."
      ]
     ]
    },
@@ -371,6 +376,11 @@
       "Hugh Everett",
       "doctoral thesis, 1957",
       "A reading of quantum physics in which each possibility is realised in a branch."
+     ],
+     [
+      "Nietzsche",
+      "*Thus Spoke Zarathustra*, 1883",
+      "Against those who invent other worlds to console themselves for this one. The counterpoint."
      ]
     ]
    }
@@ -632,6 +642,11 @@
       "Maurice Halbwachs",
       "*La Mémoire collective*, 1950",
       "Le souvenir d'une personne vit dans les groupes qui le portent."
+     ],
+     [
+      "Freud",
+      "*L'Avenir d'une illusion*, 1927",
+      "Une croyance née du désir qu'elle soit vraie. La question à poser à toute espérance."
      ]
     ]
    },
@@ -655,6 +670,11 @@
       "Maurice Halbwachs",
       "*La Mémoire collective*, 1950",
       "The memory of a person lives on in the groups that carry it."
+     ],
+     [
+      "Freud",
+      "*The Future of an Illusion*, 1927",
+      "A belief born of the wish that it be true. The question to put to any hope."
      ]
     ]
    }
@@ -784,7 +804,7 @@
    "subtitle": "Une vision de la conscience, de l'infini et du retour",
    "description": "La Source : une vision de la conscience, de l'infini et du sens de l'existence, en quatorze idées et autant de figures vivantes. Une métaphysique, pas une théorie scientifique.",
    "opening": "Et si exister était la façon dont le tout se découvre ?",
-   "intro": "Une origine commune, deux infinis, une multitude de vies, et un retour. Quatorze idées pour tenir ensemble la conscience, la mort et le sens. Ceci est une métaphysique : une vision à explorer, à contester, pas une théorie scientifique.",
+   "intro": "Une origine commune, deux infinis, une multitude de vies, et un retour. Quatorze idées pour tenir ensemble la conscience, la mort et le sens. Tout repose sur un postulat : chaque conscience serait une part d'une même conscience, et le reste en découle. Une différence avec les grandes traditions qui l'ont précédée : cette origine ne saurait pas elle-même pourquoi elle existe. Ceci est une métaphysique : une vision à explorer, à contester, pas une théorie scientifique.",
    "thread": "Sommaire",
    "read": "Entrer",
    "book": "Le livre",
@@ -812,11 +832,12 @@
     "IV": "Le retour",
     "V": "La question"
    },
-   "openTitle": "Trois questions restent ouvertes",
+   "openTitle": "Quatre questions restent ouvertes",
    "open": [
     "Si une conscience dirige ses vies, comment chacune peut-elle rester libre ?",
     "Si la Source ressent toute douleur, pourquoi n'apprendrait-elle pas davantage par l'amour ?",
-    "Si elle cherche pourquoi elle existe, une infinité d'expériences pourra-t-elle le lui dire ?"
+    "Si elle cherche pourquoi elle existe, une infinité d'expériences pourra-t-elle le lui dire ?",
+    "Si cette vision console, est-ce une raison d'y croire, ou de s'en méfier ?"
    ],
    "last": "Et une dernière, qui reste sans réponse.",
    "question": "La Source a-t-elle toujours su qu'elle existait, ou l'apprend-elle à travers nous ?",
@@ -877,7 +898,7 @@
    "subtitle": "A vision of consciousness, infinity and return",
    "description": "The Source: a vision of consciousness, infinity and the meaning of existence, in fourteen ideas and as many living figures. Metaphysics, not a scientific theory.",
    "opening": "What if existing is how everything discovers itself?",
-   "intro": "One shared origin, two infinities, countless lives, and a return. Fourteen ideas for holding consciousness, death and meaning together. This is metaphysics: a vision to explore and to challenge, not a scientific theory.",
+   "intro": "One shared origin, two infinities, countless lives, and a return. Fourteen ideas for holding consciousness, death and meaning together. Everything rests on one postulate: each consciousness would be part of a single consciousness, and the rest follows. One difference from the great traditions before it: this origin would not itself know why it exists. This is metaphysics: a vision to explore and to challenge, not a scientific theory.",
    "thread": "Contents",
    "read": "Enter",
    "book": "The book",
@@ -905,11 +926,12 @@
     "IV": "The return",
     "V": "The question"
    },
-   "openTitle": "Three questions remain open",
+   "openTitle": "Four questions remain open",
    "open": [
     "If a consciousness directs its lives, how can each one stay free?",
     "If the Source feels every pain, why would it not learn more through love?",
-    "If it is searching for why it exists, could an infinity of experiences ever tell it?"
+    "If it is searching for why it exists, could an infinity of experiences ever tell it?",
+    "If this vision consoles, is that a reason to believe it, or to distrust it?"
    ],
    "last": "And one last question, left unanswered.",
    "question": "Has the Source always known it exists, or is it learning this through us?",
