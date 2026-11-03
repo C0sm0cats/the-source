@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render assets/hero.png and assets/plates.jpg (README) and assets/social.png (link previews). Requires Poppler and Node."""
+"""Render assets/hero.jpg and assets/plates.jpg (README) and assets/social.jpg (link previews). Requires Poppler and Node."""
 import subprocess
 import tempfile
 from pathlib import Path
@@ -37,9 +37,9 @@ with tempfile.TemporaryDirectory() as folder:
     c.drawString(66, H - 480, 'What if existing is how')
     c.drawString(66, H - 506, 'everything discovers itself?')
     c.save()
-    for name, width in [('hero', 2400), ('social', 1200)]:
-        subprocess.run(['pdftoppm', '-scale-to-x', str(width), '-scale-to-y', str(width * H // W), '-singlefile', '-png', str(pdf), str(ROOT / 'assets' / name)], check=True)
-print('assets/hero.png, assets/social.png')
+    for name, width in [('hero', 1600), ('social', 1200)]:
+        subprocess.run(['pdftoppm', '-scale-to-x', str(width), '-scale-to-y', str(width * H // W), '-singlefile', '-jpeg', '-jpegopt', 'quality=86', str(pdf), str(ROOT / 'assets' / name)], check=True)
+print('assets/hero.jpg, assets/social.jpg')
 
 TONES = {'paper': ('#eeece5', '#17171b', '#e03c1f'), 'dusk': ('#3c4256', '#f0ede4', '#ff6b4d'),
          'night': ('#0b0c12', '#ece8dd', '#ff5a3a'), 'blank': ('#ffffff', '#111114', '#e03c1f')}

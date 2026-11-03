@@ -2,7 +2,7 @@
 
 **[Lire le site](https://c0sm0cats.github.io/the-source/) · [Read the site](https://c0sm0cats.github.io/the-source/en/) · [PDF FR](books/la-source-fr.pdf) · [PDF EN](books/the-source-en.pdf)**
 
-![La Source / The Source](assets/hero.png)
+![La Source / The Source](assets/hero.jpg)
 
 > *Et si exister était la façon dont le tout se découvre ?*
 > *What if existing is how everything discovers itself?*
@@ -43,4 +43,4 @@ One shared origin, two infinities, countless lives, a return. **The Source** is 
 - **The site**: one long reading thread, animated and interactive figures (touch them, freeze them, change the number of lives), echoes from thinkers who asked the same questions, and a glossary.
 - **Les livres / The books**: [La Source](books/la-source-fr.pdf) · [The Source](books/the-source-en.pdf). 36 pages, 14 × 21 cm. Chaque chapitre est une double page : la thèse et sa figure à gauche, le texte à droite. / Each chapter is a spread: the thesis and its figure on the left, the text on the right.
 
-© C0sm0cats. No general reuse license has been selected for the project's original text and code. Spectral: SIL Open Font License (`scripts/fonts/OFL-Spectral.txt`).
+© C0sm0cats. Texte, figures, livres et code : [CC BY-NC-ND 4.0](LICENSE). Spectral : SIL Open Font License (`scripts/fonts/OFL-Spectral.txt`).
