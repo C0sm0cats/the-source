@@ -53,7 +53,7 @@ for lang, filename in [('fr', 'la-source-fr.pdf'), ('en', 'the-source-en.pdf')]:
     pdf = (ROOT / 'books' / filename).read_bytes()
     assert pdf.startswith(b'%PDF-'), filename
     pages = len(re.findall(rb'/Type\s*/Page\b', pdf))
-    assert pages == 4 + 2 * len(chapters) + 4 and pages % 2 == 0, f'Wrong page count: {filename}: {pages}'
+    assert pages >= 4 + 2 * len(chapters) + 4 and pages % 2 == 0, f'Wrong page count: {filename}: {pages}'
     payload = json.dumps([[c[lang] for c in chapters], ui[lang]], ensure_ascii=False, sort_keys=True)
     digest = hashlib.sha256(payload.encode()).hexdigest()
     assert f'content-sha256:{digest}'.encode() in pdf, f'Stale PDF, run scripts/build_books.py: {filename}'

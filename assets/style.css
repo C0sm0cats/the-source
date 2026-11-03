@@ -95,6 +95,7 @@ a:hover { color: var(--mark); }
 .even .fig { grid-column: 8 / -1; grid-row: 2; }
 .even .text { grid-column: 1 / span 6; grid-row: 2; }
 .text p { margin: 0 0 1.1em; hanging-punctuation: first; }
+.text .fig-inline { margin: 2.2em auto; max-width: 30rem; }
 .text blockquote { margin: 1.5em 0; font-weight: 300; font-style: italic; font-size: clamp(1.55rem, 2.6vw, 2.35rem); line-height: 1.16; letter-spacing: -.01em; color: var(--mark); }
 .caveat { margin-top: 2em !important; font-size: .86em; line-height: 1.45; padding-top: .7em; border-top: 1px solid color-mix(in srgb, currentColor 40%, transparent); }
 .caveat span { display: block; font-style: italic; }

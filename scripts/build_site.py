@@ -15,7 +15,12 @@ def e(text, lang):
     return escape(typo(text, lang), quote=False)
 
 
-def block(item, lang):
+def block(item, lang, ch=None, ui=None):
+    if item.startswith('@'):
+        name, title = item[1:], typo(ch[lang]['title'], lang)
+        prefix = '' if lang == 'fr' else '../'
+        image = f'<noscript><img src="{prefix}assets/figures/{lang}-{ch["id"]}-{name}.jpg" alt="{escape(title)}" loading="lazy"></noscript>'
+        return f'<figure class="fig fig-inline">{live(name, title, ui, lang)}{image}</figure>'
     if item.startswith('> '):
         return f'<blockquote>{e(item[2:], lang)}</blockquote>'
     return f'<p>{e(item, lang)}</p>'
@@ -51,7 +56,7 @@ def chapter(ch, i, lang, ui):
     extra = limit_control(ui) if ch['figure'] == 'lives' else ''
     wide = ' fig-wide' if ch['figure'] == 'fractal' else ''
     side = 'even' if i % 2 else 'odd'
-    body = '\n        '.join(block(item, lang) for item in t['body'])
+    body = '\n        '.join(block(item, lang, ch, ui) for item in t['body'])
     part = ui['parts'][ch['part']]
     return f'''
   <section class="chapter {side}{wide}" id="{ch['id']}" data-tone="{ch['tone']}" aria-labelledby="ask-{ch['id']}">

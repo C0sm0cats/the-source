@@ -663,10 +663,775 @@ const factories = {
       point(g, c, 300, 300, 7, 26);
     };
   },
+
+  // A river followed back to its source: every channel meets at one point, and what flows goes back up.
+  river() {
+    const r = rng(41), N = 46, TOP = 70, LEN = 470;
+    const channels = Array.from({ length: N }, (_, i) => {
+      const side = ((i + .5) / N) * 2 - 1;
+      return { side: side + (r() - .5) * .04, phase: r() * TAU, wave: 30 + r() * 26, speed: .05 + r() * .05, offset: r() };
+    });
+    const at = (ch, u) => {
+      const spread = 262 * u ** 1.55, meander = 15 * Math.sin(u * LEN / ch.wave + ch.phase) * u;
+      return [300 + ch.side * spread + meander, TOP + u * LEN];
+    };
+    return (g, c, t) => {
+      g.lineCap = g.lineJoin = 'round';
+      for (const ch of channels) {
+        const near = 1 - Math.abs(ch.side);
+        g.strokeStyle = c.mix(1 - near ** 2.2);
+        g.globalAlpha = .3 + .5 * near;
+        g.lineWidth = .45 + .9 * near;
+        g.beginPath();
+        for (let k = 0; k <= 80; k++) { const [x, y] = at(ch, k / 80); if (k) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+      }
+      // what flows goes back up toward the point
+      g.globalAlpha = .85;
+      g.fillStyle = c.ink;
+      g.beginPath();
+      for (const ch of channels) for (let k = 0; k < 3; k++) {
+        const u = 1 - ((t * ch.speed + ch.offset + k / 3) % 1);
+        const [x, y] = at(ch, u);
+        dot(g, x, y, .6 + 1.4 * u);
+      }
+      g.fill();
+      g.globalAlpha = 1;
+      point(g, c, 300, TOP, 7, 40);
+    };
+  },
+
+  // Lives drawn one after another: each starts without the memory of the others, yet none is erased.
+  forgetting() {
+    const PERIOD = 14, KEEP = 9, PTS = 260;
+    const shape = (j) => {
+      const m = (v, n) => ((v % n) + n) % n;
+      return { a: 1 + m(j * 7, 4), b: 2 + m(j * 5, 5), p: m(j * 1.7, TAU), q: .72 + .2 * Math.sin(j * 2.3) };
+    };
+    const at = (s, u) => [300 + 205 * s.q * Math.sin(s.a * u * TAU + s.p), 300 + 205 * Math.sin(s.b * u * TAU)];
+    const trace = (g, s, end) => {
+      g.beginPath();
+      const n = Math.max(1, Math.round(PTS * end));
+      for (let i = 0; i <= n; i++) { const [x, y] = at(s, (i / PTS)); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+      g.stroke();
+    };
+    return (g, c, t) => {
+      const now = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD;
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      g.lineWidth = .5;
+      for (let j = now - KEEP; j < now; j++) {
+        g.globalAlpha = .1 + .24 * (1 - (now - j) / KEEP);
+        trace(g, shape(j), 1);
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.mark;
+      g.lineWidth = 1.5;
+      const s = shape(now);
+      trace(g, s, u);
+      g.strokeStyle = c.ink;
+      const [hx, hy] = at(s, Math.round(PTS * u) / PTS);
+      point(g, c, hx, hy, 5.5, 28);
+    };
+  },
+
+  // A part of the whole comes loose and, little by little, draws a shape of its own.
+  birth() {
+    const r = rng(5), golden = Math.PI * (3 - Math.sqrt(5)), N = 1500, MX = 205, MY = 300, R = 112, PERIOD = 30, PTS = 460, BANDS = 10;
+    const mass = Array.from({ length: N }, (_, i) => { const q = R * ((i + .5) / N) ** .5, a = i * golden; return [q * Math.cos(a), q * Math.sin(a), r() * .5 + .45, r() * TAU]; });
+    const life = (k) => {
+      const m = rng(k * 7 + 3); m();
+      const b = (m() - .5) * 1.1;
+      return { ox: MX + 232 * Math.cos(b), oy: MY + 232 * Math.sin(b), lobes: 3 + Math.floor(m() * 3), p: m() * TAU, dir: m() < .5 ? -1 : 1 };
+    };
+    const at = (L, s) => {
+      const go = smooth(0, .42, s), a = L.dir * s * TAU * 4.5 + L.p;
+      const k = (6 + 64 * smooth(.02, .5, s)) * (1 + .36 * smooth(.3, .95, s) * Math.cos(L.lobes * a));
+      return [MX + (L.ox - MX) * go + k * Math.cos(a), MY + (L.oy - MY) * go + k * Math.sin(a)];
+    };
+    const trace = (g, L, s0, s1, n) => {
+      for (let i = 0; i <= n; i++) { const [x, y] = at(L, s0 + ((s1 - s0) * i) / n); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+    };
+    return (g, c, t) => {
+      const k = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD, L = life(k);
+      const [px, py] = at(L, u);
+      // the whole it comes from, slightly drawn toward the part that leaves
+      const breath = 1 + .03 * Math.sin(t * .45);
+      const pull = 1 - smooth(.1, .5, u);
+      g.fillStyle = c.ink;
+      g.globalAlpha = .62;
+      g.beginPath();
+      for (const [dx, dy, size, w] of mass) {
+        let x = MX + dx * breath + .8 * Math.sin(t * .7 + w), y = MY + dy * breath + .8 * Math.cos(t * .6 + w);
+        const ex = px - x, ey = py - y, d2 = ex * ex + ey * ey;
+        const f = 22 * pull * Math.exp(-d2 / 2600);
+        if (f > .05) { const d = Math.sqrt(d2) || 1; x += (ex / d) * f; y += (ey / d) * f; }
+        dot(g, x, y, size);
+      }
+      g.fill();
+      // the shape left by the previous life fades as the next one begins
+      g.lineCap = g.lineJoin = 'round';
+      const ghost = .16 * (1 - smooth(0, .45, u));
+      if (ghost > .005) {
+        g.strokeStyle = c.ink; g.globalAlpha = ghost; g.lineWidth = .5;
+        g.beginPath(); trace(g, life(k - 1), .4, 1, 260); g.stroke();
+      }
+      // its own trajectory, older parts in ink, the newest in the mark
+      const fade = 1 - .8 * smooth(.9, 1, u), n = Math.max(BANDS, Math.round(PTS * u));
+      for (let b = 0; b < BANDS; b++) {
+        const kk = b / (BANDS - 1), s0 = (u * b) / BANDS, s1 = (u * (b + 1)) / BANDS;
+        g.strokeStyle = c.mix(1 - kk ** 4);
+        g.globalAlpha = (.3 + .65 * kk) * fade;
+        g.lineWidth = .45 + kk * kk * 1.1;
+        g.beginPath(); trace(g, L, s0, s1, Math.ceil(n / BANDS)); g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      point(g, c, px, py, 1.5 + 4 * smooth(0, .06, u) * (1 - .6 * smooth(.92, 1, u)), 30);
+    };
+  },
+
+  // Other living forms around the same centre, each growing and breathing at its own pace.
+  kin() {
+    const r = rng(9), RING = 178;
+    const poly = (g, M, pts) => { pts.forEach(([x, y], i) => { const [X, Y] = M(x, y); if (i) g.lineTo(X, Y); else g.moveTo(X, Y); }); };
+    // a shell: a logarithmic spiral and its chambers
+    const spiral = Array.from({ length: 160 }, (_, i) => { const a = (i / 159) * TAU * 3.1, q = 2.6 * Math.exp(.17 * a); return [q * Math.cos(a), q * Math.sin(a)]; });
+    const septa = [];
+    for (let a = TAU * 1.1; a <= TAU * 3.1; a += .42) {
+      const q0 = 2.6 * Math.exp(.17 * (a - TAU)), q1 = 2.6 * Math.exp(.17 * a), bend = .25;
+      septa.push(Array.from({ length: 6 }, (_, j) => { const v = j / 5, q = q0 + (q1 - q0) * v, b = a - bend * Math.sin(v * Math.PI); return [q * Math.cos(b), q * Math.sin(b)]; }));
+    }
+    // a plant: branches from one stem
+    const branches = [];
+    const grow = (x, y, a, len, depth) => {
+      if (depth === 0) return;
+      const nx = x + len * Math.cos(a), ny = y + len * Math.sin(a);
+      branches.push([x, y, nx, ny, depth]);
+      grow(nx, ny, a - .42 - r() * .2, len * (.68 + r() * .1), depth - 1);
+      grow(nx, ny, a + .38 + r() * .2, len * (.68 + r() * .1), depth - 1);
+    };
+    grow(-62, 0, 0, 30, 7);
+    // a cluster of cells
+    const golden = Math.PI * (3 - Math.sqrt(5));
+    const cells = Array.from({ length: 38 }, (_, i) => { const q = 9.5 * Math.sqrt(i + .3), a = i * golden; return [q * Math.cos(a), q * Math.sin(a), 4.6 + r() * 2.2, r() * TAU]; });
+    // a wing: feathers fanning from one joint
+    const feathers = Array.from({ length: 30 }, (_, i) => {
+      const k = i / 29, a = -1.15 + k * 1.5, len = 54 + 58 * Math.sin(k * Math.PI * .92) ** .8;
+      return Array.from({ length: 9 }, (_, j) => { const v = j / 8, b = a + .35 * v * v; return [-58 + len * v * Math.cos(b), 30 + len * v * Math.sin(b) * 1.05]; });
+    });
+    // a radiolarian: a ring with spines
+    const spines = Array.from({ length: 64 }, (_, i) => [(i / 64) * TAU, 40 + (i % 2 ? 6 : 16) + r() * 10]);
+    const forms = [
+      (g, M, t) => { g.beginPath(); poly(g, M, spiral); for (const s of septa) poly(g, M, s); g.stroke(); },
+      (g, M, t) => {
+        g.beginPath();
+        const sway = .05 * Math.sin(t * .55);
+        for (const [x0, y0, x1, y1, d] of branches) {
+          const A = M(x0, y0 + (sway * (x0 + 62) ** 2) / 60), B = M(x1, y1 + (sway * (x1 + 62) ** 2) / 60);
+          g.moveTo(A[0], A[1]); g.lineTo(B[0], B[1]);
+        }
+        g.stroke();
+      },
+      (g, M, t, s) => {
+        g.beginPath();
+        for (const [x, y, rad, p] of cells) { const [X, Y] = M(x, y), q = rad * s * (1 + .12 * Math.sin(t * .9 + p)); dot(g, X, Y, q); dot(g, X, Y, q * .3); }
+        g.stroke();
+      },
+      (g, M, t) => {
+        const flap = .9 + .1 * Math.sin(t * .8);
+        g.beginPath();
+        for (const f of feathers) poly(g, M, f.map(([x, y]) => [-58 + (x + 58) * flap, 30 + (y - 30) * (2 - flap)]));
+        g.stroke();
+      },
+      (g, M, t) => {
+        g.beginPath();
+        for (let j = 0; j < 4; j++) {
+          const rot = t * .05 * (j % 2 ? -1 : 1) + j * .3, q = 64 - j * 11, pts = [];
+          for (let i = 0; i <= 120; i++) { const a = (i / 120) * TAU, rr = q * Math.abs(Math.cos(2.5 * a)) ** .8; pts.push([rr * Math.cos(a + rot), rr * Math.sin(a + rot)]); }
+          poly(g, M, pts);
+        }
+        g.stroke();
+      },
+      (g, M, t) => {
+        g.beginPath();
+        const bell = [];
+        for (let i = 0; i <= 40; i++) { const a = -Math.PI / 2 + (i / 40) * Math.PI; bell.push([30 * Math.cos(a) * (1 + .08 * Math.sin(t * 1.2)), 36 * Math.sin(a)]); }
+        poly(g, M, bell);
+        for (let k = 0; k < 11; k++) {
+          const y0 = -32 + k * 6.4, pts = [];
+          for (let i = 0; i <= 24; i++) { const v = i / 24; pts.push([-v * (72 + 10 * Math.sin(k * 1.7)), y0 * (1 - .4 * v) + 7 * v * Math.sin(v * 7 - t * 1.3 + k * .6)]); }
+          poly(g, M, pts);
+        }
+        g.stroke();
+      },
+      (g, M, t, s) => {
+        g.beginPath();
+        const rot = t * .04, [X, Y] = M(0, 0);
+        dot(g, X, Y, 40 * s); dot(g, X, Y, 30 * s);
+        for (const [a, len] of spines) { const b = a + rot; const A = M(40 * Math.cos(b), 40 * Math.sin(b)), B = M(len * Math.cos(b), len * Math.sin(b)); g.moveTo(A[0], A[1]); g.lineTo(B[0], B[1]); }
+        for (let i = 0; i < 24; i++) { const b = (i / 24) * TAU - rot * 2, P = M(18 * Math.cos(b), 18 * Math.sin(b)); dot(g, P[0], P[1], 2.6 * s); }
+        g.stroke();
+      },
+    ];
+    const pace = forms.map(() => [.25 + r() * .9, r() * TAU]);
+    return (g, c, t) => {
+      g.lineCap = g.lineJoin = 'round';
+      // what they share: a faint thread to the same centre
+      g.fillStyle = c.ink;
+      g.globalAlpha = .45;
+      g.beginPath();
+      forms.forEach((_, i) => {
+        const a = -Math.PI / 2 + (i * TAU) / forms.length;
+        for (let d = 22; d < RING - 74; d += 6) dot(g, 300 + d * Math.cos(a), 300 + d * Math.sin(a), .7);
+      });
+      g.fill();
+      forms.forEach((draw, i) => {
+        const a = -Math.PI / 2 + (i * TAU) / forms.length, [w, p] = pace[i];
+        const s = .8 * (1 + .06 * Math.sin(t * w + p)), ca = Math.cos(a), sa = Math.sin(a);
+        const cx = 300 + RING * ca, cy = 300 + RING * sa;
+        const M = (x, y) => [cx + s * (x * ca - y * sa), cy + s * (x * sa + y * ca)];
+        g.strokeStyle = c.ink;
+        g.globalAlpha = .85;
+        g.lineWidth = .55;
+        draw(g, M, t, s);
+      });
+      g.globalAlpha = 1;
+      point(g, c, 300, 300, 6.5, 34);
+    };
+  },
+
+  // Behind, one settled line; ahead, possibilities that keep forking. Each moment, one of them is lived.
+  choice() {
+    const DX = 46, DEPTH = 7, H0 = 7, G = 1.4, STEP = 2.8, X0 = 236, Y0 = 300;
+    const h = (d) => H0 * G ** d;
+    const bit = (k) => { const m = rng(k * 131 + 17); m(); return m() < .5 ? -1 : 1; };
+    const edge = (g, x0, y0, x1, y1, end = 1) => {
+      g.moveTo(x0, y0);
+      const n = Math.max(1, Math.round(8 * end));
+      for (let i = 1; i <= n; i++) { const u = (i / n) * end; g.lineTo(x0 + (x1 - x0) * u, y0 + (y1 - y0) * smooth(0, 1, u)); }
+    };
+    return (g, c, t) => {
+      const k = Math.floor(t / STEP), f = smooth(.25, 1, (t % STEP) / STEP);
+      const first = bit(k + 1);
+      // the present point travels along the first edge; the view follows it
+      const ox = X0 - f * DX, oy = Y0 - first * h(1 - f) * smooth(0, 1, f);
+      g.lineCap = g.lineJoin = 'round';
+      // ahead: every possible path, fainter with distance
+      const levels = Array.from({ length: DEPTH + 1 }, () => [[], []]);
+      const walk = (x, y, depth, other) => {
+        if (depth > DEPTH) return;
+        for (const s of [-1, 1]) {
+          const ny = y + s * h(depth - f), side = depth === 1 ? +(s !== first) : other;
+          levels[depth][side].push(x, y, x + DX, ny);
+          walk(x + DX, ny, depth + 1, side);
+        }
+      };
+      walk(ox, oy, 1, 0);
+      g.lineWidth = .5;
+      g.strokeStyle = c.ink;
+      for (let d = 1; d <= DEPTH; d++) for (let side = 0; side < 2; side++) {
+        const list = levels[d][side];
+        g.globalAlpha = .5 * .82 ** (d - f) * (side ? 1 - f : 1) * (d === DEPTH ? f : 1);
+        if (g.globalAlpha < .004) continue;
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 4) edge(g, list[i], list[i + 1], list[i + 2], list[i + 3]);
+        g.stroke();
+      }
+      // behind: the path that was taken, and the first steps of those that were not
+      let x = ox, y = oy;
+      const past = [];
+      for (let j = k; j > k - 7; j--) { const py = y - bit(j) * h(0); past.push([x - DX, py, x, y, j]); x -= DX; y = py; }
+      g.lineWidth = .5;
+      past.forEach(([x0, y0, , , j], i) => {
+        g.globalAlpha = .35 * (1 - i / 7) * smooth(0, 120, x0 + DX);
+        g.beginPath(); edge(g, x0, y0, x0 + DX, y0 - bit(j) * h(0), .55); g.stroke();
+      });
+      g.globalAlpha = 1;
+      g.lineWidth = 1.5;
+      g.beginPath();
+      for (const [x0, y0, x1, y1] of past) edge(g, x0, y0, x1, y1);
+      edge(g, ox, oy, ox + DX, oy + first * h(1 - f), f);
+      g.stroke();
+      point(g, c, X0, Y0, 6, 32);
+    };
+  },
+
+  // Two lives turning together: they cross and interlace, and each keeps its own shape.
+  love() {
+    const STRANDS = 4, PTS = 300;
+    const A = (a, t, j) => { const q = 158 + 62 * Math.cos(3 * a + t * .04) + j * 1.6; return [300 + q * Math.cos(a), 300 + q * Math.sin(a)]; };
+    const B = (a, t, j) => { const b = a + .22 * Math.sin(2 * a + t * .07), q = 150 + 30 * Math.cos(5 * b - .8 - t * .03) + j * 1.6; return [300 + q * Math.cos(b), 300 + q * Math.sin(b)]; };
+    const curve = (g, F, t, j, a0, a1, n) => { for (let i = 0; i <= n; i++) { const [x, y] = F(a0 + ((a1 - a0) * i) / n, t, j); if (i) g.lineTo(x, y); else g.moveTo(x, y); } };
+    return (g, c, t) => {
+      const now = t * .16, span = TAU * .85;
+      g.lineCap = g.lineJoin = 'round';
+      // each one's whole shape, faint
+      g.lineWidth = .4;
+      g.strokeStyle = c.ink;
+      g.globalAlpha = .55;
+      g.lineWidth = .9;
+      g.beginPath(); curve(g, A, t, 0, 0, TAU, PTS); g.stroke();
+      g.lineWidth = .4;
+      g.beginPath(); for (let j = -STRANDS; j <= STRANDS; j += 2) curve(g, B, t, j, 0, TAU, PTS); g.stroke();
+      // the ties between them, stronger where they have just been together
+      g.strokeStyle = c.mark;
+      g.lineWidth = .5;
+      const TIES = 90;
+      for (let b = 0; b < 3; b++) {
+        g.globalAlpha = [.15, .35, .75][b];
+        g.beginPath();
+        for (let i = 0; i < TIES / 3; i++) {
+          const a = now - span + (span * (b * TIES / 3 + i)) / TIES;
+          const p = A(a, t, 0), q = B(a, t, 0);
+          g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]);
+        }
+        g.stroke();
+      }
+      // their recent paths, each with its own character
+      g.strokeStyle = c.ink;
+      for (let band = 0; band < 6; band++) {
+        const k = band / 5, a0 = now - span + (span * band) / 6, a1 = now - span + (span * (band + 1)) / 6;
+        g.globalAlpha = .45 * k;
+        g.lineWidth = 1.6;
+        g.beginPath(); curve(g, A, t, 0, a0, a1, 40); g.stroke();
+        g.lineWidth = .6;
+        g.beginPath(); for (let j = -STRANDS; j <= STRANDS; j += 2) curve(g, B, t, j, a0, a1, 40); g.stroke();
+      }
+      g.globalAlpha = 1;
+      const [bx, by] = B(now, t, 0);
+      g.lineWidth = 1.2;
+      g.beginPath(); dot(g, bx, by, 5); g.stroke();
+      const [ax, ay] = A(now, t, 0);
+      point(g, c, ax, ay, 5.5, 28);
+    };
+  },
+
+  // Hundreds of days that look alike; up close, none is the same as another.
+  days() {
+    const r = rng(23), COLS = 21, ROWS = 24, N = COLS * ROWS, PER = .6, B = 8;
+    const cells = Array.from({ length: N }, (_, i) => {
+      const col = i % COLS, row = Math.floor(i / COLS);
+      return { x: 64 + col * 22 + Math.floor(col / 7) * 12, y: 50 + row * 21.5, a: r() * TAU, gap: .35 + r() * 1.5, rad: 3.3 + r() * 1.3, tick: r() < .5 };
+    });
+    const glyph = (g, d) => {
+      g.moveTo(d.x + d.rad * Math.cos(d.a + d.gap / 2), d.y + d.rad * Math.sin(d.a + d.gap / 2));
+      g.arc(d.x, d.y, d.rad, d.a + d.gap / 2, d.a + TAU - d.gap / 2);
+      if (d.tick) { g.moveTo(d.x, d.y); g.lineTo(d.x + d.rad * .55 * Math.cos(d.a), d.y + d.rad * .55 * Math.sin(d.a)); }
+    };
+    return (g, c, t) => {
+      const now = (t / PER) % N, today = Math.floor(now);
+      const buckets = Array.from({ length: B }, () => []), recent = [];
+      cells.forEach((d, i) => {
+        const age = (today - i + N) % N;
+        if (age < 7) recent.push([d, age]);
+        else buckets[Math.min(B - 1, Math.floor((age / N) * B * 1.15))].push(d);
+      });
+      g.lineCap = 'round';
+      g.lineWidth = .55;
+      g.strokeStyle = c.ink;
+      buckets.forEach((list, b) => {
+        g.globalAlpha = .82 - b * .085;
+        g.beginPath();
+        for (const d of list) glyph(g, d);
+        g.stroke();
+      });
+      for (const [d, age] of recent) {
+        if (!age) continue;
+        g.strokeStyle = c.mix(age / 7);
+        g.globalAlpha = .95;
+        g.lineWidth = .8;
+        g.beginPath(); glyph(g, d); g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      const d = cells[today];
+      point(g, c, d.x, d.y, 3 + .6 * Math.sin((now % 1) * Math.PI), 20);
+    };
+  },
+
+  // Rings that settle: motion slowly comes to rest around one point.
+  silence() {
+    const r = rng(31), RINGS = 30, PERIOD = 40, OUT = 278, PTS = 180;
+    const rings = Array.from({ length: RINGS }, (_, i) => {
+      const k = (i + 1) / RINGS;
+      return { k, rad: 9 + (OUT - 9) * k ** 1.25, modes: [2, 3, 5, 7].map((m) => [m, r() * TAU, (r() * .6 + .2) * (r() < .5 ? -1 : 1), r() * .8 + .2]) };
+    });
+    const E = Math.exp(-3.4);
+    return (g, c, t) => {
+      const u = (t % PERIOD) / PERIOD;
+      const stir = smooth(0, .07, u) * (Math.exp(-3.4 * u) - E) / (1 - E);
+      g.lineCap = g.lineJoin = 'round';
+      for (const { k, rad, modes } of rings) {
+        const amp = (.5 + 11 * stir) * k ** 1.4, wave = Math.sin(k * 9 - t * .45);
+        g.strokeStyle = c.mix(clamp(k * 5 - .15));
+        g.globalAlpha = .25 + .6 * (1 - k) ** .8;
+        g.lineWidth = .45 + .5 * (1 - k);
+        g.beginPath();
+        for (let i = 0; i <= PTS; i++) {
+          const a = (i / PTS) * TAU;
+          let dr = 0;
+          for (const [m, p, w, h] of modes) dr += h * Math.sin(m * a + p + t * w * .3);
+          const q = rad + amp * dr * (.6 + .4 * wave);
+          if (i) g.lineTo(300 + q * Math.cos(a), 300 + q * Math.sin(a)); else g.moveTo(300 + q * Math.cos(a), 300 + q * Math.sin(a));
+        }
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      point(g, c, 300, 300, 5, 30);
+    };
+  },
+
+  // Out of a formless field, points gather into forms, then return to it.
+  emerge() {
+    const r = rng(17), N = 2900, FORMED = 2000, CURVES = 6, PERIOD = 36;
+    const items = Array.from({ length: N }, (_, i) => {
+      const q = 285 * Math.sqrt(r()), a = r() * TAU, item = { x: 300 + q * Math.cos(a), y: 300 + q * Math.sin(a), w: r() * TAU, v: .2 + r() * .4, lag: r() };
+      if (i < FORMED) {
+        const j = i % CURVES, m = Math.floor(i / CURVES), per = Math.ceil(FORMED / CURVES), th = (m / per) * TAU;
+        const rad = (38 + 42 * j) * (1 + .11 * Math.cos(6 * th + j * .7));
+        Object.assign(item, { tx: 300 + rad * Math.cos(th), ty: 300 + rad * Math.sin(th), start: .04 + .07 * j + .1 * item.lag, j });
+      }
+      return item;
+    });
+    return (g, c, t) => {
+      const u = (t % PERIOD) / PERIOD;
+      const groups = [[], [], [], []];
+      for (const it of items) {
+        let x = it.x + 5 * Math.sin(t * it.v + it.w), y = it.y + 5 * Math.cos(t * it.v * .8 + it.w);
+        let f = 0;
+        if (it.tx !== undefined) {
+          f = smooth(it.start, it.start + .3, u) * (1 - smooth(.8 + .06 * it.lag, .97, u));
+          x += (it.tx - x) * f; y += (it.ty - y) * f;
+        }
+        groups[Math.min(3, Math.floor(f * 4))].push(x, y);
+      }
+      g.fillStyle = c.ink;
+      groups.forEach((list, b) => {
+        g.globalAlpha = .28 + b * .2;
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 2) dot(g, list[i], list[i + 1], .6 + b * .1);
+        g.fill();
+      });
+      g.globalAlpha = 1;
+      point(g, c, 300, 300, 2 + 4.5 * smooth(0, .25, u) * (1 - smooth(.8, 1, u)), 30);
+    };
+  },
+
+  // A spiral of cells, each holding a smaller one, drawn ever closer to the point.
+  zoom() {
+    const n = 16, PERIOD = 9, s = Math.sin(Math.PI / n);
+    // ratio between rings so that neighbouring cells just touch
+    let lo = .3, hi = .99;
+    for (let i = 0; i < 50; i++) { const q = (lo + hi) / 2, gap = Math.sqrt(1 + q * q - 2 * q * Math.cos(Math.PI / n)) - s * (1 + q); if (gap > 0) lo = q; else hi = q; }
+    const Q = (lo + hi) / 2, R0 = 300;
+    return (g, c, t) => {
+      const u = (t / PERIOD) % 1;
+      g.lineCap = 'round';
+      for (let k = -2; k < 40; k++) {
+        const rho = R0 * Q ** (k - u), cell = rho * s * .97;
+        if (cell < .7) break;
+        const alpha = smooth(.7, 4, cell) * (1 - smooth(230, 300, rho + cell * .6));
+        if (alpha < .01) continue;
+        const off = ((k + u) * Math.PI) / n + u * .4 + k * .4;
+        g.strokeStyle = c.mix(clamp((rho - 14) / 120));
+        g.globalAlpha = alpha * .85;
+        g.lineWidth = clamp(cell / 28, .3, .8);
+        g.beginPath();
+        for (let i = 0; i < n; i++) {
+          const a = off + (i * TAU) / n, x = 300 + rho * Math.cos(a), y = 300 + rho * Math.sin(a);
+          dot(g, x, y, cell);
+          if (cell > 5) dot(g, x, y, cell * .46);
+          if (cell > 16) for (let j = 0; j < 6; j++) { const b = a + (j * TAU) / 6; dot(g, x + cell * .73 * Math.cos(b), y + cell * .73 * Math.sin(b), cell * .17); }
+        }
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      point(g, c, 300, 300, 4, 22);
+    };
+  },
+
+  // Every page of the book, there at once; the reader is only somewhere among them.
+  pages() {
+    const r = rng(8), N = 60, X0 = 64, X1 = 340, D = 240, H = 290, CX = .74, CY = .42, BASE = 478, LINES = 15;
+    const text = Array.from({ length: N }, () => Array.from({ length: LINES }, () => [.12 + r() * .04, .88 - (r() < .2 ? r() * .45 : r() * .06)]));
+    return (g, c, t) => {
+      const P = (N - 1) * (.5 - .5 * Math.cos((t * TAU) / 80)), here = Math.round(P);
+      const at = (k, z, y) => {
+        const lean = 7 * Math.sin(t * .35 + k * .16) * (y / H);
+        return [X0 + ((X1 - X0) * k) / (N - 1) + z * CX * D + lean, BASE - y - z * CY * D];
+      };
+      const page = (k) => { for (const [z, y] of [[0, 0], [0, H], [1, H], [1, 0], [0, 0]]) { const [x, yy] = at(k, z, y); if (z || y) g.lineTo(x, yy); else g.moveTo(x, yy); } };
+      const lines = (k) => text[k].forEach(([z0, z1], l) => { const y = H * (.86 - l * .048), A = at(k, z0, y), B = at(k, z1, y); g.moveTo(A[0], A[1]); g.lineTo(B[0], B[1]); });
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      g.lineWidth = .45;
+      g.globalAlpha = .3;
+      g.beginPath();
+      for (let k = 0; k < N; k++) if (k !== here) page(k);
+      g.stroke();
+      g.globalAlpha = .06;
+      g.beginPath();
+      for (let k = 0; k < N; k++) if (k !== here) lines(k);
+      g.stroke();
+      g.globalAlpha = 1;
+      g.lineWidth = .9;
+      g.beginPath(); page(here); g.stroke();
+      g.strokeStyle = c.mix(.45);
+      g.lineWidth = .6;
+      g.beginPath(); lines(here); g.stroke();
+      g.strokeStyle = c.ink;
+      const [px, py] = at(P, .5 + .22 * Math.sin(t * .23), H * (.5 + .26 * Math.sin(t * .17)));
+      point(g, c, px, py, 5.5, 30);
+    };
+  },
+
+  // A map drawn with precision, and the one path actually walked across it.
+  map() {
+    const r = rng(12), GRID = 80, X0 = 60, SIZE = 480, LEVELS = 22, PERIOD = 60;
+    const hills = Array.from({ length: 9 }, () => [r(), r(), .08 + r() * .16, (r() * .8 + .4) * (r() < .3 ? -.7 : 1)]);
+    const field = (x, y) => hills.reduce((sum, [hx, hy, s, h]) => sum + h * Math.exp(-((x - hx) ** 2 + (y - hy) ** 2) / (2 * s * s)), 0);
+    const v = [];
+    for (let j = 0; j <= GRID; j++) for (let i = 0; i <= GRID; i++) v.push(field(i / GRID, j / GRID));
+    const lo = Math.min(...v), hi = Math.max(...v);
+    const thin = [], thick = [];
+    for (let l = 1; l < LEVELS; l++) {
+      const level = lo + ((hi - lo) * l) / LEVELS, out = l % 5 === 0 ? thick : thin;
+      for (let j = 0; j < GRID; j++) for (let i = 0; i < GRID; i++) {
+        const c4 = [[i, j], [i + 1, j], [i + 1, j + 1], [i, j + 1]].map(([a, b]) => [a, b, v[b * (GRID + 1) + a]]);
+        const cross = [];
+        for (let e = 0; e < 4; e++) {
+          const [ax, ay, av] = c4[e], [bx, by, bv] = c4[(e + 1) % 4];
+          if ((av < level) !== (bv < level)) { const f = (level - av) / (bv - av); cross.push(X0 + ((ax + (bx - ax) * f) / GRID) * SIZE, X0 + ((ay + (by - ay) * f) / GRID) * SIZE); }
+        }
+        for (let e = 0; e + 3 < cross.length; e += 4) out.push(cross[e], cross[e + 1], cross[e + 2], cross[e + 3]);
+      }
+    }
+    const walk = (s) => [X0 + 30 + 420 * s + 34 * Math.sin(s * 11 + 1) + 18 * Math.sin(s * 27), 300 + 120 * Math.sin(s * 4.2 + .6) + 46 * Math.sin(s * 13 + 2) + 14 * Math.sin(s * 31)];
+    const pace = (u) => u + .035 * Math.sin(u * TAU * 7);
+    return (g, c, t) => {
+      g.lineCap = g.lineJoin = 'round';
+      g.strokeStyle = c.ink;
+      // frame and graduations
+      g.globalAlpha = .8;
+      g.lineWidth = .7;
+      g.beginPath(); g.rect(X0, X0, SIZE, SIZE); g.stroke();
+      g.lineWidth = .4;
+      g.beginPath();
+      for (let i = 0; i <= 48; i++) {
+        const p = X0 + (i * SIZE) / 48, len = i % 8 === 0 ? 9 : 4;
+        g.moveTo(p, X0); g.lineTo(p, X0 - len); g.moveTo(p, X0 + SIZE); g.lineTo(p, X0 + SIZE + len);
+        g.moveTo(X0, p); g.lineTo(X0 - len, p); g.moveTo(X0 + SIZE, p); g.lineTo(X0 + SIZE + len, p);
+      }
+      g.stroke();
+      g.globalAlpha = .12;
+      g.beginPath();
+      for (let i = 1; i < 6; i++) { const p = X0 + (i * SIZE) / 6; g.moveTo(p, X0); g.lineTo(p, X0 + SIZE); g.moveTo(X0, p); g.lineTo(X0 + SIZE, p); }
+      g.stroke();
+      // contour lines
+      for (const [list, width, alpha] of [[thin, .4, .45], [thick, .75, .7]]) {
+        g.globalAlpha = alpha; g.lineWidth = width;
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 4) { g.moveTo(list[i], list[i + 1]); g.lineTo(list[i + 2], list[i + 3]); }
+        g.stroke();
+      }
+      // the lived path: heavy where time was spent
+      const u = (t % PERIOD) / PERIOD, now = pace(u), fade = 1 - smooth(.92, 1, u), BANDS = 8, STEPS = 260;
+      for (let b = 0; b < BANDS; b++) {
+        const k = b / (BANDS - 1);
+        g.strokeStyle = c.mix(1 - k ** 3);
+        g.globalAlpha = (.55 + .45 * k) * fade;
+        g.lineWidth = 2.6 + k * .8;
+        g.beginPath();
+        const n = Math.ceil(STEPS / BANDS);
+        for (let i = 0; i <= n; i++) { const [x, y] = walk(now * ((b + i / n) / BANDS)); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      const [px, py] = walk(now);
+      point(g, c, px, py, 5.5, 30);
+    };
+  },
+
+  // A web of lives: a shock at one point reaches every other, through the links between them.
+  ripple() {
+    const r = rng(19), nodes = [];
+    for (let tries = 0; nodes.length < 210 && tries < 20000; tries++) {
+      const q = 272 * Math.sqrt(r()), a = r() * TAU, x = 300 + q * Math.cos(a), y = 300 + q * Math.sin(a);
+      if (nodes.every((p) => Math.hypot(p.x - x, p.y - y) > 25)) nodes.push({ x, y, dx: r() * 2 - 1, dy: r() * 2 - 1 });
+    }
+    const N = nodes.length, links = [], seen = new Set();
+    nodes.forEach((p, i) => {
+      nodes.map((q, j) => [Math.hypot(p.x - q.x, p.y - q.y), j]).sort((a, b) => a[0] - b[0]).slice(1, 4).forEach(([d, j]) => {
+        const key = Math.min(i, j) * N + Math.max(i, j);
+        if (!seen.has(key)) { seen.add(key); links.push([i, j, d]); }
+      });
+    });
+    const sources = [0, 1, 2, 3, 4, 5].map(() => Math.floor(r() * N));
+    const dist = sources.map((s) => {
+      const d = new Array(N).fill(Infinity), done = new Array(N).fill(false);
+      d[s] = 0;
+      for (let it = 0; it < N; it++) {
+        let m = -1;
+        for (let i = 0; i < N; i++) if (!done[i] && (m < 0 || d[i] < d[m])) m = i;
+        if (d[m] === Infinity) break;
+        done[m] = true;
+        for (const [a, b, w] of links) { if (a === m && d[m] + w < d[b]) d[b] = d[m] + w; if (b === m && d[m] + w < d[a]) d[a] = d[m] + w; }
+      }
+      return d.map((v) => (v === Infinity ? 1e4 : v));
+    });
+    const PERIOD = 7;
+    return (g, c, t) => {
+      const k = Math.floor(t / PERIOD);
+      const pos = nodes.map((p) => [p.x, p.y, 0]);
+      for (let j = k - 2; j <= k; j++) {
+        const age = t - j * PERIOD, d = dist[((j % 6) + 6) % 6], front = age * 85;
+        nodes.forEach((p, i) => {
+          const x = (d[i] - front) / 38, w = Math.exp(-x * x) * Math.exp(-age / 6);
+          const s = w * Math.sin((d[i] - front) / 10) * 9;
+          pos[i][0] += p.dx * s; pos[i][1] += p.dy * s; pos[i][2] += w;
+        });
+      }
+      const buckets = Array.from({ length: 6 }, () => []);
+      for (const [a, b] of links) {
+        const e = clamp((pos[a][2] + pos[b][2]) * .7);
+        buckets[Math.round((1 - e) * 5)].push(pos[a][0], pos[a][1], pos[b][0], pos[b][1]);
+      }
+      g.lineCap = 'round';
+      g.globalAlpha = .75;
+      strokeBuckets(g, c, buckets, .55);
+      g.globalAlpha = 1;
+      g.fillStyle = c.ink;
+      g.beginPath();
+      for (const [x, y, e] of pos) dot(g, x, y, 1.1 + 1.6 * clamp(e));
+      g.fill();
+      const src = sources[((k % 6) + 6) % 6], [sx, sy] = pos[src];
+      point(g, c, sx, sy, 3.5 + 4 * Math.exp(-(t - k * PERIOD) * .8), 32);
+    };
+  },
+
+  // The drop falls, joins the sea, rises again and returns; the sea keeps the trace of where it went.
+  water() {
+    const r = rng(29), PERIOD = 26, SEA = 408, CLOUD = 128, LINES = 18;
+    const puffs = Array.from({ length: 900 }, () => {
+      const a = r() * TAU, q = Math.sqrt(r()), x = (r() * 2 - 1);
+      const top = 58 * (1 - x * x) ** .6 * (.75 + .25 * Math.cos(x * 9));
+      return [300 + x * 210, CLOUD + 26 - r() ** .7 * (top + 20), r() * .5 + .45, a, q];
+    });
+    const rain = Array.from({ length: 60 }, () => [118 + r() * 140, .35 + r() * .25, r()]);
+    const vapour = Array.from({ length: 80 }, () => [370 + r() * 140, .05 + r() * .05, r(), r() * TAU]);
+    const route = (u) => {
+      if (u < .18) { const f = u / .18; return [188, CLOUD + 40 + (SEA - CLOUD - 40) * f * f, 4.5]; }
+      if (u < .5) { const f = smooth(.18, .5, u); return [188 + 254 * f, SEA + 16 + 30 * Math.sin(f * Math.PI), 4.5]; }
+      if (u < .76) { const f = smooth(.5, .76, u); return [442 + 6 * Math.sin(f * 4 * Math.PI), SEA + 16 - (SEA + 16 - CLOUD) * f, 4.5 - 2 * f]; }
+      const f = smooth(.76, 1, u);
+      return [442 - 254 * f, CLOUD + 40 * f + 10 * Math.sin(f * Math.PI) * -1, 2.5 + 2 * f];
+    };
+    return (g, c, t) => {
+      const u = (t % PERIOD) / PERIOD, k = Math.floor(t / PERIOD), hit = t - (k + .18) * PERIOD;
+      g.lineCap = g.lineJoin = 'round';
+      // the cloud
+      g.fillStyle = c.ink;
+      g.globalAlpha = .55;
+      g.beginPath();
+      for (const [x, y, s, a] of puffs) dot(g, x + 2 * Math.sin(t * .2 + a), y + 1.5 * Math.cos(t * .25 + a), s);
+      g.fill();
+      // rain on one side, vapour on the other
+      g.strokeStyle = c.ink;
+      g.globalAlpha = .45;
+      g.lineWidth = .5;
+      g.beginPath();
+      for (const [x, v, p] of rain) { const y = CLOUD + 40 + (((t * v + p) % 1) * (SEA - CLOUD - 46)); g.moveTo(x, y); g.lineTo(x - 1, y + 10); }
+      g.stroke();
+      g.beginPath();
+      for (const [x, v, p, w] of vapour) { const f = (t * v + p) % 1, y = SEA - 6 - f * (SEA - CLOUD - 50); dot(g, x + 8 * Math.sin(f * 7 + w), y, .5 + .5 * Math.sin(f * Math.PI)); }
+      g.globalAlpha = .5;
+      g.fillStyle = c.ink;
+      g.fill();
+      // the sea, with the rings of the last fall
+      g.lineWidth = .5;
+      for (let i = 0; i < LINES; i++) {
+        const z = i / (LINES - 1), y0 = SEA + 152 * z ** 1.35;
+        g.globalAlpha = .25 + .55 * (1 - z);
+        g.beginPath();
+        for (let j = 0; j <= 90; j++) {
+          const x = 30 + (j / 90) * 540;
+          let y = y0 + 1.6 * Math.sin(x * .03 + t * .5 + i * 1.3) * (1 + z);
+          if (hit > 0) { const d = Math.hypot(x - 188, (y0 - SEA) * 3.2), front = hit * 40; y -= 6 * Math.exp(-(((d - front) / 22) ** 2)) * Math.sin((d - front) / 6) * Math.exp(-hit / 4); }
+          if (j) g.lineTo(x, y); else g.moveTo(x, y);
+        }
+        g.stroke();
+      }
+      // what the sea keeps: the path the drop took through it
+      for (const [j, base] of [[k - 1, .3], [k, 1]]) {
+        const lived = j === k ? clamp((u - .18) / .32) : 1;
+        if (lived <= 0) continue;
+        const keep = j === k ? 1 : 1 - smooth(0, .6, u);
+        g.strokeStyle = c.mix(.35);
+        g.globalAlpha = .55 * keep * base;
+        g.lineWidth = 1;
+        g.beginPath();
+        for (let i = 0; i <= 50; i++) { const f = i / 50 * lived; const x = 188 + 254 * f, y = SEA + 16 + 30 * Math.sin(f * Math.PI) + (j - k) * 7; if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      const [px, py, size] = route(u);
+      point(g, c, px, py, size, 26);
+    };
+  },
+
+  // A gesture handed down: each line takes it from the one before and changes it a little.
+  gesture() {
+    const ROWS = 10, X0 = 40, X1 = 560, Y1 = 500, SP = 44, PER = 9, PTS = 260;
+    const gen = (k) => ({
+      a: 30 + 8 * Math.sin(k * .71) + 3 * Math.sin(k * 1.93), b: 30 + 9 * Math.sin(k * .53 + 1) + 4 * Math.sin(k * 2.3),
+      f: 2.2 + .7 * Math.sin(k * .37) + .25 * Math.sin(k * 1.4), w: 92 + 14 * Math.sin(k * .9), cx: 300 + 130 * Math.sin(k * .43),
+    });
+    const at = (G, s, y) => {
+      const x = X0 + s * (X1 - X0), v = (x - G.cx) / G.w;
+      if (Math.abs(v) >= 1) return [x, y];
+      const bump = (1 - v * v) ** 2, phi = Math.PI * (v + 1) * G.f;
+      return [x + G.a * Math.sin(phi) * bump, y - G.b * (1 - Math.cos(phi)) * .5 * bump];
+    };
+    const row = (g, G, y, end = 1) => { const n = Math.max(1, Math.round(PTS * end)); for (let i = 0; i <= n; i++) { const [x, yy] = at(G, (i / PTS), y); if (i) g.lineTo(x, yy); else g.moveTo(x, yy); } };
+    return (g, c, t) => {
+      const K = Math.floor(t / PER), u = (t % PER) / PER, rise = SP * (1 - smooth(0, .14, u)), pen = smooth(.08, .95, u);
+      g.lineCap = g.lineJoin = 'round';
+      // the gesture passes from one line to the next
+      g.fillStyle = c.ink;
+      g.globalAlpha = .4;
+      g.beginPath();
+      for (let j = K - ROWS + 1; j < K; j++) {
+        const A = gen(j), B = gen(j + 1), ya = Y1 - (K - j) * SP + rise - 14, yb = ya + SP;
+        for (let i = 1; i < 8; i++) { const f = i / 8; dot(g, A.cx + (B.cx - A.cx) * f, ya + (yb - ya) * f, .6); }
+      }
+      g.fill();
+      for (let j = K - ROWS; j <= K; j++) {
+        const age = K - j, y = Y1 - age * SP + rise, G = gen(j);
+        const fadeTop = j === K - ROWS ? 1 - smooth(0, .14, u) : 1;
+        g.strokeStyle = age ? c.ink : c.mix(.25);
+        g.globalAlpha = (age ? .65 * (1 - age / (ROWS + 1)) + .1 : 1) * fadeTop;
+        g.lineWidth = age ? .7 : 1.3;
+        g.beginPath(); row(g, G, y, age ? 1 : pen); g.stroke();
+        if (age) {
+          g.globalAlpha *= .35; g.lineWidth = .4;
+          g.beginPath(); row(g, { ...G, a: G.a * .9, b: G.b * 1.12 }, y, 1); g.stroke();
+        }
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = c.ink;
+      const [px, py] = at(gen(K), Math.round(PTS * pen) / PTS, Y1 + rise);
+      point(g, c, px, py, 5, 26);
+    };
+  },
 };
 
 // The frame used when the motion is stopped, and in the books.
-export const FROZEN = { source: 48, fractal: 36, void: 21, nested: 0, lives: 21, time: 6.2, worlds: 21, knowing: 60, balance: 3, field: 7, drop: 18.4, forms: 21, useful: 12.5, why: 21 };
+export const FROZEN = { source: 48, fractal: 36, void: 21, nested: 0, lives: 21, time: 6.2, worlds: 21, knowing: 60, balance: 3, field: 7, drop: 18.4, forms: 21, useful: 12.5, why: 21, river: 9, forgetting: 121, birth: 25.5, kin: 6, choice: 13, love: 30, days: 200, silence: 12, emerge: 25, zoom: 7, pages: 22, map: 44, ripple: 9.5, water: 9, gesture: 52 };
 
 export function createScene(name, labels = {}, options = {}) {
   return factories[name](labels, options);

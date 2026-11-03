@@ -31,7 +31,7 @@ TONES = {
 }
 HYPHEN = {'fr': 'fr_FR', 'en': 'en_GB'}
 BODY = (10.7, 14.7)
-FIGURES, CROPS = {}, {}
+FIGURES, CROPS, PAGES = {}, {}, {}
 FILES = {'fr': 'la-source-fr.pdf', 'en': 'the-source-en.pdf'}
 FONTS = {'Thin': 'ExtraLight', 'ThinI': 'ExtraLightItalic', 'Light': 'Light', 'LightI': 'LightItalic', 'Reg': 'Regular', 'Ital': 'Italic'}
 
@@ -43,12 +43,16 @@ def tone(name):
     return bg_c, ink_c, colors.HexColor(mark), faint
 
 
-def flow(c, text, y, size=10.2, leading=14.2, font='Light', color=None, lang=None, x=MX, width=TEXT_W, justify=False, after=0, tracking=0):
+def paragraph(text, size=10.2, leading=14.2, font='Light', color=None, lang=None, justify=False):
     kwargs = {}
     if justify and lang:
         kwargs = dict(hyphenationLang=HYPHEN[lang], uriWasteReduce=.3)
-    style = ParagraphStyle('p', fontName=font, fontSize=size, leading=leading, textColor=color, alignment=TA_JUSTIFY if justify else TA_LEFT, splitLongWords=0, **kwargs)
-    p = Paragraph(escape(text), style)
+    style = ParagraphStyle('p', fontName=font, fontSize=size, leading=leading, textColor=color, alignment=TA_JUSTIFY if justify else TA_LEFT, splitLongWords=0, allowWidows=0, allowOrphans=0, **kwargs)
+    return Paragraph(escape(text), style)
+
+
+def flow(c, text, y, size=10.2, leading=14.2, font='Light', color=None, lang=None, x=MX, width=TEXT_W, justify=False, after=0, tracking=0):
+    p = paragraph(text, size, leading, font, color, lang, justify)
     _, h = p.wrap(width, H)
     p.drawOn(c, x, y - h)
     return y - h - after
@@ -99,6 +103,11 @@ def inner_title(c, data, lang, chapters):
     y = flow(c, ui['contents'], H - TOP, size=10.5, leading=14, font='LightI', color=ink, after=8)
     current = None
     for i, chapter in enumerate(chapters):
+        if y < 1.2 * cm + 46:
+            folio(c, ink)
+            c.showPage()
+            ink, mark, faint = background(c, 'paper')
+            y = H - TOP
         if chapter['part'] != current:
             current = chapter['part']
             y = flow(c, typo(ui['parts'][current], lang), y - 9, size=9.4, leading=12, font='LightI', color=mark, after=5)
@@ -109,16 +118,17 @@ def inner_title(c, data, lang, chapters):
         c.setFillColor(ink)
         c.setFont('Reg', 8)
         c.drawString(MX, y - 13, f'{i + 1:02d}')
-        c.drawRightString(W - MX, y - 13, str(6 + i * 2))
+        c.drawRightString(W - MX, y - 13, str(PAGES.get(chapter['id'], '')))
         c.setFont('Light', 10.2)
         c.drawString(MX + 21, y - 13, typo(chapter[lang]['title'], lang))
         y -= 20
         c.linkRect('', chapter['id'], (MX, y, W - MX, top), relative=0, thickness=0)
-    if y < 1.2 * cm:
-        raise ValueError(f'Contents overflow {lang}: {y}')
     folio(c, ink)
     c.showPage()
     lexicon(c, ui, lang)
+    if c.getPageNumber() % 2:  # the first opener falls on a left-hand page
+        background(c, 'paper')
+        c.showPage()
 
 
 def lexicon(c, ui, lang):
@@ -144,6 +154,7 @@ def opener(c, chapter, i, data, lang):
     t = chapter[lang]
     ink, mark, faint = background(c, chapter['tone'])
     c.bookmarkPage(chapter['id'])
+    PAGES[chapter['id']] = c.getPageNumber()
     c.addOutlineEntry(typo(t['title'], lang), chapter['id'], level=0)
     c.setFillColor(ink)
     c.setFont('Reg', 8.6)
@@ -164,16 +175,66 @@ def opener(c, chapter, i, data, lang):
 def text_page(c, chapter, data, lang):
     ui = data['ui'][lang]
     t = chapter[lang]
-    ink, mark, faint = background(c, chapter['tone'])
-    y = H - TOP
+    title = typo(t['title'], lang)
+    state = {}
+
+    def new_page():
+        if state:
+            folio(c, state['ink'], title)
+            c.showPage()
+        state['ink'], state['mark'], state['faint'] = background(c, chapter['tone'])
+        return H - TOP
+
+    y = new_page()
     for item in t['body']:
-        if item.startswith('> '):
-            y = flow(c, typo(item[2:], lang), y - 3, size=15, leading=17.8, font='LightI', color=mark, after=11)
-        else:
-            y = flow(c, typo(item, lang), y, size=BODY[0], leading=BODY[1], color=ink, lang=lang, justify=True, after=8)
-    lay_foot(c, t, ui, lang, ink, mark, faint, y)
-    folio(c, ink, typo(t['title'], lang))
+        ink, mark = state['ink'], state['mark']
+        if item.startswith('@'):
+            name, size = item[1:], TEXT_W * .9
+            if y - size - 22 < BOTTOM:
+                y = new_page()
+            x, top = (W - size) / 2, y - 8
+            draw_figure(c, FIGURES[name], x, top, size, state['ink'], state['mark'], 'LightI')
+            CROPS[f"{chapter['id']}-{name}"] = (c.getPageNumber(), x, H - top, size)
+            y = top - size - 18
+            continue
+        quote = item.startswith('> ')
+        make = lambda: paragraph(typo(item[2:], lang), 15, 17.8, 'LightI', state['mark']) if quote else paragraph(typo(item, lang), BODY[0], BODY[1], 'Light', state['ink'], lang, True)
+        after = 11 if quote else 8
+        if quote:
+            y -= 3
+        p = make()
+        h = p.wrap(TEXT_W, H)[1]
+        if y - h < BOTTOM:
+            parts = [] if quote else make().split(TEXT_W, y - BOTTOM)
+            if len(parts) == 2:
+                parts[0].wrap(TEXT_W, H)
+                parts[0].drawOn(c, MX, y - parts[0].height)
+                y = new_page()
+                p = parts[1]
+            else:
+                y = new_page()
+                p = make()
+            h = p.wrap(TEXT_W, H)[1]
+        p.drawOn(c, MX, y - h)
+        y -= h + after
+    if y - 8 < foot_top(t, lang):
+        y = new_page()
+    lay_foot(c, t, ui, lang, state['ink'], state['mark'], state['faint'], y)
+    folio(c, state['ink'], title)
     c.showPage()
+    if c.getPageNumber() % 2:  # keep each opener on a left-hand page: a plate of the figure at another moment
+        ink, mark, faint = background(c, chapter['tone'])
+        size = W - 2 * .9 * cm
+        draw_figure(c, FIGURES[chapter['figure'] + '~'], (W - size) / 2, H / 2 + size / 2 + .4 * cm, size, ink, mark, 'LightI', labels=False)
+        c.showPage()
+
+
+def foot_top(t, lang):
+    height = flow_height(typo(t['open'], lang), 11.8, 14.6)
+    start = 1.75 * cm + height + 28
+    style = ParagraphStyle('e', fontName='Light', fontSize=8.5, leading=11.2)
+    heights = [Paragraph(echo_text(echo, lang), style).wrap(TEXT_W, H)[1] for echo in t['echoes']]
+    return start + 16 + sum(heights) + 5 * (len(heights) - 1) + 14
 
 
 def flow_height(text, size, leading, font='LightI', width=TEXT_W):
@@ -275,19 +336,24 @@ def main():
         path = ROOT / 'books' / filename
         FIGURES.clear()
         FIGURES.update(record(labels_for(data['ui'][lang], lang)))
-        c = canvas.Canvas(str(path), pagesize=(W, H), invariant=1, pageCompression=1, lang=lang)
-        c.setTitle(data['ui'][lang]['name'])
-        c.setSubject(data['ui'][lang]['subtitle'])
-        c.setAuthor('C0sm0cats')
-        c.setKeywords(f'content-sha256:{digest(chapters, data["ui"], lang)}')
-        c.showOutline()
-        cover(c, data, lang)
-        inner_title(c, data, lang, chapters)
-        for i, chapter in enumerate(chapters):
-            opener(c, chapter, i, data, lang)
-            text_page(c, chapter, data, lang)
-        ending(c, data, lang)
-        c.save()
+        PAGES.clear()
+        for final in (False, True):  # the first pass only finds where each chapter starts
+            CROPS.clear()
+            target = path if final else path.with_suffix('.draft.pdf')
+            c = canvas.Canvas(str(target), pagesize=(W, H), invariant=1, pageCompression=1, lang=lang)
+            c.setTitle(data['ui'][lang]['name'])
+            c.setSubject(data['ui'][lang]['subtitle'])
+            c.setAuthor('C0sm0cats')
+            c.setKeywords(f'content-sha256:{digest(chapters, data["ui"], lang)}')
+            c.showOutline()
+            cover(c, data, lang)
+            inner_title(c, data, lang, chapters)
+            for i, chapter in enumerate(chapters):
+                opener(c, chapter, i, data, lang)
+                text_page(c, chapter, data, lang)
+            ending(c, data, lang)
+            c.save()
+        path.with_suffix('.draft.pdf').unlink()
         print(path.relative_to(ROOT), f'{path.stat().st_size:,} bytes')
         fallback_images(path, lang)
         subprocess.run(['pdftoppm', '-f', '1', '-l', '1', '-scale-to-x', '560', '-scale-to-y', '840', '-jpeg', '-jpegopt', 'quality=84', '-singlefile', str(path), str(ROOT / f'assets/cover-{lang}')], check=True)

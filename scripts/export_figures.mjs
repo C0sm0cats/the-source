@@ -42,5 +42,9 @@ for (const name of Object.keys(FROZEN)) {
   const g = new Recorder();
   createScene(name, labels, { step: () => 0 })(g, colors, FROZEN[name], { x: null, y: null, click: null, snap: true });
   result[name] = g.ops;
+  // a second moment of the same figure, for the full-page plates in the books
+  const later = new Recorder();
+  createScene(name, labels, { step: () => 2 })(later, colors, FROZEN[name] * 1.37 + 9, { x: null, y: null, click: null, snap: true });
+  result[`${name}~`] = later.ops;
 }
 writeFileSync(out, JSON.stringify(result));
