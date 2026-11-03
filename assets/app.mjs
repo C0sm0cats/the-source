@@ -28,19 +28,28 @@ addEventListener('keydown', (event) => {
 document.addEventListener('click', (event) => { if (menu.open && !menu.contains(event.target)) menu.open = false; });
 
 /* ---------- Colours ---------- */
+const probe = document.createElement('canvas').getContext('2d');
 const parse = (value) => {
-  const probe = document.createElement('canvas').getContext('2d');
   probe.fillStyle = value;
   const hex = probe.fillStyle;
   if (hex.startsWith('#')) return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
   return hex.match(/[\d.]+/g).slice(0, 3).map(Number);
 };
+// Colours only change during a tone transition, so the palette is rebuilt only when ink or mark differ.
+const palettes = new Map();
 function palette(canvas) {
   const style = getComputedStyle(canvas);
   const ink = style.color, mark = style.getPropertyValue('--mark').trim();
-  const a = parse(mark), b = parse(ink);
-  const table = Array.from({ length: 17 }, (_, i) => `rgb(${a.map((v, k) => Math.round(v + (b[k] - v) * (i / 16))).join(',')})`);
-  return { ink, mark, mix: (t) => table[Math.round(Math.max(0, Math.min(1, t)) * 16)] };
+  const key = `${ink}|${mark}`;
+  let colors = palettes.get(key);
+  if (!colors) {
+    const a = parse(mark), b = parse(ink);
+    const table = Array.from({ length: 17 }, (_, i) => `rgb(${a.map((v, k) => Math.round(v + (b[k] - v) * (i / 16))).join(',')})`);
+    colors = { ink, mark, mix: (t) => table[Math.round(Math.max(0, Math.min(1, t)) * 16)] };
+    if (palettes.size > 256) palettes.clear();
+    palettes.set(key, colors);
+  }
+  return colors;
 }
 
 /* ---------- Running the scenes ---------- */

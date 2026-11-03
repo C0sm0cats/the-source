@@ -166,24 +166,36 @@ def page(data, lang):
 '''
 
 
-def fonts():
+def fonts(text):
+    """Subset Spectral to the characters the pages use, plus Latin-1 and common punctuation."""
+    from fontTools import subset
     from fontTools.ttLib import TTFont
     target = ROOT / 'assets/fonts'
     target.mkdir(exist_ok=True)
+    keep = set(range(0x20, 0x7F)) | set(range(0xA0, 0x100)) | {0x152, 0x153, 0x178, 0x2212, 0x20AC}
+    keep |= set(range(0x2010, 0x2027)) | {0x2030, 0x2039, 0x203A, 0x2044, 0x2192, 0x2193}
+    keep |= {ord(c) for c in text if not c.isspace() or c in '\u00a0\u202f\u2009'}
+    options = subset.Options()
+    options.flavor = 'woff2'
+    options.layout_features = ['*']
+    options.name_IDs = ['*']
+    options.notdef_outline = True
+    options.drop_tables += ['meta']
     for name in FONTS:
-        out = target / f'Spectral-{name}.woff2'
-        if not out.exists():
-            font = TTFont(ROOT / f'scripts/fonts/Spectral-{name}.ttf')
-            font.flavor = 'woff2'
-            font.save(out)
+        font = TTFont(ROOT / f'scripts/fonts/Spectral-{name}.ttf')
+        subsetter = subset.Subsetter(options)
+        subsetter.populate(unicodes=keep)
+        subsetter.subset(font)
+        subset.save_font(font, ROOT / f'assets/fonts/Spectral-{name}.woff2', options)
 
 
 def main():
-    fonts()
     data = load()
-    (ROOT / 'index.html').write_text(page(data, 'fr'), encoding='utf-8')
+    pages = {'index.html': page(data, 'fr'), 'en/index.html': page(data, 'en')}
     (ROOT / 'en').mkdir(exist_ok=True)
-    (ROOT / 'en/index.html').write_text(page(data, 'en'), encoding='utf-8')
+    for path, html in pages.items():
+        (ROOT / path).write_text(html, encoding='utf-8')
+    fonts(''.join(pages.values()))
     print('index.html, en/index.html')
 
 

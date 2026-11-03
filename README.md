@@ -1,44 +1,35 @@
-# La Source / The Source
+# The Source
 
-**[Lire le site](https://c0sm0cats.github.io/the-source/) · [Read the site](https://c0sm0cats.github.io/the-source/en/) · [PDF FR](books/la-source-fr.pdf) · [PDF EN](books/the-source-en.pdf)**
+**[Read online](https://c0sm0cats.github.io/the-source/en/) · [PDF](books/the-source-en.pdf)** — *En français : [lire le site](https://c0sm0cats.github.io/the-source/) · [PDF](books/la-source-fr.pdf)*
 
-![La Source / The Source](assets/hero.jpg)
+![The Source](assets/hero.jpg)
 
-> *Et si exister était la façon dont le tout se découvre ?*
 > *What if existing is how everything discovers itself?*
-
-Une origine commune, deux infinis, une multitude de vies, un retour. **La Source** est une vision de la conscience et du sens de l'existence, en quatorze idées. Chacune tient en une phrase, se déplie en une page, s'accompagne d'une figure vivante et se termine par ce qu'elle laisse ouvert. Une métaphysique à explorer et à contester, pas une théorie scientifique.
 
 One shared origin, two infinities, countless lives, a return. **The Source** is a vision of consciousness and the meaning of existence, in fourteen ideas. Each one fits in a sentence, unfolds over a page, comes with a living figure and ends with what it leaves open. Metaphysics to explore and to challenge, not a scientific theory.
 
-## Quatorze idées / Fourteen ideas
+## Fourteen ideas
 
-**I · L’origine** <sub>The origin</sub>  
-[La Source](https://c0sm0cats.github.io/the-source/#source) · [Deux fractales](https://c0sm0cats.github.io/the-source/#fractales) · [Tout et rien](https://c0sm0cats.github.io/the-source/#tout-et-rien)  
-<sub>[The Source](https://c0sm0cats.github.io/the-source/en/#source) · [Two fractals](https://c0sm0cats.github.io/the-source/en/#fractales) · [Everything and nothing](https://c0sm0cats.github.io/the-source/en/#tout-et-rien)</sub>
+**I · The origin**  
+[The Source](https://c0sm0cats.github.io/the-source/en/#source) · [Two fractals](https://c0sm0cats.github.io/the-source/en/#fractales) · [Everything and nothing](https://c0sm0cats.github.io/the-source/en/#tout-et-rien)
 
-**II · Le déploiement** <sub>The unfolding</sub>  
-[Les échelles](https://c0sm0cats.github.io/the-source/#echelles) · [Plusieurs vies à la fois](https://c0sm0cats.github.io/the-source/#vies) · [Hors du temps](https://c0sm0cats.github.io/the-source/#temps) · [Une infinité de mondes](https://c0sm0cats.github.io/the-source/#mondes)  
-<sub>[Scales](https://c0sm0cats.github.io/the-source/en/#echelles) · [Several lives at once](https://c0sm0cats.github.io/the-source/en/#vies) · [Outside time](https://c0sm0cats.github.io/the-source/en/#temps) · [An infinity of worlds](https://c0sm0cats.github.io/the-source/en/#mondes)</sub>
+**II · The unfolding**  
+[Scales](https://c0sm0cats.github.io/the-source/en/#echelles) · [Several lives at once](https://c0sm0cats.github.io/the-source/en/#vies) · [Outside time](https://c0sm0cats.github.io/the-source/en/#temps) · [An infinity of worlds](https://c0sm0cats.github.io/the-source/en/#mondes)
 
-**III · L’expérience** <sub>Experience</sub>  
-[Savoir et vivre](https://c0sm0cats.github.io/the-source/#savoir-vivre) · [La balance](https://c0sm0cats.github.io/the-source/#balance) · [La souffrance](https://c0sm0cats.github.io/the-source/#souffrance)  
-<sub>[Knowing and living](https://c0sm0cats.github.io/the-source/en/#savoir-vivre) · [The balance](https://c0sm0cats.github.io/the-source/en/#balance) · [Suffering](https://c0sm0cats.github.io/the-source/en/#souffrance)</sub>
+**III · Experience**  
+[Knowing and living](https://c0sm0cats.github.io/the-source/en/#savoir-vivre) · [The balance](https://c0sm0cats.github.io/the-source/en/#balance) · [Suffering](https://c0sm0cats.github.io/the-source/en/#souffrance)
 
-**IV · Le retour** <sub>The return</sub>  
-[Le retour](https://c0sm0cats.github.io/the-source/#retour) · [La vie sous d’autres formes](https://c0sm0cats.github.io/the-source/#liens) · [Ce qu’une vie apporte](https://c0sm0cats.github.io/the-source/#contribution)  
-<sub>[The return](https://c0sm0cats.github.io/the-source/en/#retour) · [Life in other forms](https://c0sm0cats.github.io/the-source/en/#liens) · [What a life brings](https://c0sm0cats.github.io/the-source/en/#contribution)</sub>
+**IV · The return**  
+[The return](https://c0sm0cats.github.io/the-source/en/#retour) · [Life in other forms](https://c0sm0cats.github.io/the-source/en/#liens) · [What a life brings](https://c0sm0cats.github.io/the-source/en/#contribution)
 
-**V · La question** <sub>The question</sub>  
-[Pourquoi](https://c0sm0cats.github.io/the-source/#pourquoi)  
-<sub>[Why](https://c0sm0cats.github.io/the-source/en/#pourquoi)</sub>
+**V · The question**  
+[Why](https://c0sm0cats.github.io/the-source/en/#pourquoi)
 
-![Les quatorze figures / The fourteen figures](assets/plates.jpg)
+![The fourteen figures](assets/plates.jpg)
 
-## Ce qu'on y trouve / What's inside
+## What's inside
 
-- **Le site** : un long fil de lecture, des figures animées et interactives (on peut y toucher, figer, faire varier le nombre de vies), des échos chez les penseurs qui ont posé les mêmes questions, et un lexique.
 - **The site**: one long reading thread, animated and interactive figures (touch them, freeze them, change the number of lives), echoes from thinkers who asked the same questions, and a glossary.
-- **Les livres / The books**: [La Source](books/la-source-fr.pdf) · [The Source](books/the-source-en.pdf). 36 pages, 14 × 21 cm. Chaque chapitre est une double page : la thèse et sa figure à gauche, le texte à droite. / Each chapter is a spread: the thesis and its figure on the left, the text on the right.
+- **The books**: [The Source](books/the-source-en.pdf) · [La Source](books/la-source-fr.pdf). 36 pages, 14 × 21 cm. Each chapter is a spread: the thesis and its figure on the left, the text on the right.
 
-© C0sm0cats. Texte, figures, livres et code : [CC BY-NC-ND 4.0](LICENSE). Spectral : SIL Open Font License (`scripts/fonts/OFL-Spectral.txt`).
+© C0sm0cats. Text, figures, books and code: [CC BY-NC-ND 4.0](LICENSE). Spectral: SIL Open Font License (`scripts/fonts/OFL-Spectral.txt`).
