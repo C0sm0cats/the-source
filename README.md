@@ -13,27 +13,25 @@ One shared origin, two infinities, countless lives, a return. **The Source** is 
 
 ## Quatorze idées / Fourteen ideas
 
-| | Français | English |
-|---|---|---|
-| **I** | **L'origine** | **The origin** |
-| 01 | [La Source](https://c0sm0cats.github.io/the-source/#source) | [The Source](https://c0sm0cats.github.io/the-source/en/#source) |
-| 02 | [Deux fractales](https://c0sm0cats.github.io/the-source/#fractales) | [Two fractals](https://c0sm0cats.github.io/the-source/en/#fractales) |
-| 03 | [Tout et rien](https://c0sm0cats.github.io/the-source/#tout-et-rien) | [Everything and nothing](https://c0sm0cats.github.io/the-source/en/#tout-et-rien) |
-| **II** | **Le déploiement** | **The unfolding** |
-| 04 | [Les échelles](https://c0sm0cats.github.io/the-source/#echelles) | [Scales](https://c0sm0cats.github.io/the-source/en/#echelles) |
-| 05 | [Plusieurs vies à la fois](https://c0sm0cats.github.io/the-source/#vies) | [Several lives at once](https://c0sm0cats.github.io/the-source/en/#vies) |
-| 06 | [Hors du temps](https://c0sm0cats.github.io/the-source/#temps) | [Outside time](https://c0sm0cats.github.io/the-source/en/#temps) |
-| 07 | [Une infinité de mondes](https://c0sm0cats.github.io/the-source/#mondes) | [An infinity of worlds](https://c0sm0cats.github.io/the-source/en/#mondes) |
-| **III** | **L'expérience** | **Experience** |
-| 08 | [Savoir et vivre](https://c0sm0cats.github.io/the-source/#savoir-vivre) | [Knowing and living](https://c0sm0cats.github.io/the-source/en/#savoir-vivre) |
-| 09 | [La balance](https://c0sm0cats.github.io/the-source/#balance) | [The balance](https://c0sm0cats.github.io/the-source/en/#balance) |
-| 10 | [La souffrance](https://c0sm0cats.github.io/the-source/#souffrance) | [Suffering](https://c0sm0cats.github.io/the-source/en/#souffrance) |
-| **IV** | **Le retour** | **The return** |
-| 11 | [Le retour](https://c0sm0cats.github.io/the-source/#retour) | [The return](https://c0sm0cats.github.io/the-source/en/#retour) |
-| 12 | [La vie sous d'autres formes](https://c0sm0cats.github.io/the-source/#liens) | [Life in other forms](https://c0sm0cats.github.io/the-source/en/#liens) |
-| 13 | [Ce qu'une vie apporte](https://c0sm0cats.github.io/the-source/#contribution) | [What a life brings](https://c0sm0cats.github.io/the-source/en/#contribution) |
-| **V** | **La question** | **The question** |
-| 14 | [Pourquoi](https://c0sm0cats.github.io/the-source/#pourquoi) | [Why](https://c0sm0cats.github.io/the-source/en/#pourquoi) |
+**I · L’origine** <sub>The origin</sub>  
+[La Source](https://c0sm0cats.github.io/the-source/#source) · [Deux fractales](https://c0sm0cats.github.io/the-source/#fractales) · [Tout et rien](https://c0sm0cats.github.io/the-source/#tout-et-rien)  
+<sub>[The Source](https://c0sm0cats.github.io/the-source/en/#source) · [Two fractals](https://c0sm0cats.github.io/the-source/en/#fractales) · [Everything and nothing](https://c0sm0cats.github.io/the-source/en/#tout-et-rien)</sub>
+
+**II · Le déploiement** <sub>The unfolding</sub>  
+[Les échelles](https://c0sm0cats.github.io/the-source/#echelles) · [Plusieurs vies à la fois](https://c0sm0cats.github.io/the-source/#vies) · [Hors du temps](https://c0sm0cats.github.io/the-source/#temps) · [Une infinité de mondes](https://c0sm0cats.github.io/the-source/#mondes)  
+<sub>[Scales](https://c0sm0cats.github.io/the-source/en/#echelles) · [Several lives at once](https://c0sm0cats.github.io/the-source/en/#vies) · [Outside time](https://c0sm0cats.github.io/the-source/en/#temps) · [An infinity of worlds](https://c0sm0cats.github.io/the-source/en/#mondes)</sub>
+
+**III · L’expérience** <sub>Experience</sub>  
+[Savoir et vivre](https://c0sm0cats.github.io/the-source/#savoir-vivre) · [La balance](https://c0sm0cats.github.io/the-source/#balance) · [La souffrance](https://c0sm0cats.github.io/the-source/#souffrance)  
+<sub>[Knowing and living](https://c0sm0cats.github.io/the-source/en/#savoir-vivre) · [The balance](https://c0sm0cats.github.io/the-source/en/#balance) · [Suffering](https://c0sm0cats.github.io/the-source/en/#souffrance)</sub>
+
+**IV · Le retour** <sub>The return</sub>  
+[Le retour](https://c0sm0cats.github.io/the-source/#retour) · [La vie sous d’autres formes](https://c0sm0cats.github.io/the-source/#liens) · [Ce qu’une vie apporte](https://c0sm0cats.github.io/the-source/#contribution)  
+<sub>[The return](https://c0sm0cats.github.io/the-source/en/#retour) · [Life in other forms](https://c0sm0cats.github.io/the-source/en/#liens) · [What a life brings](https://c0sm0cats.github.io/the-source/en/#contribution)</sub>
+
+**V · La question** <sub>The question</sub>  
+[Pourquoi](https://c0sm0cats.github.io/the-source/#pourquoi)  
+<sub>[Why](https://c0sm0cats.github.io/the-source/en/#pourquoi)</sub>
 
 ![Les quatorze figures / The fourteen figures](assets/plates.jpg)
 
