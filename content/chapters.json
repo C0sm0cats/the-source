@@ -1216,7 +1216,7 @@
    "part": "V",
    "fr": {
     "title": "Pourquoi",
-    "thesis": "La question n'est pas comment, mais pourquoi.",
+    "thesis": "D'abord comment, puis pourquoi. Et au bout, l'étonnement que quelque chose existe.",
     "body": [
      "On peut expliquer comment une étoile s'allume, et même comment une conscience pourrait apprendre. Il suffit pourtant d'un mot pour faire tomber tout l'édifice : pourquoi ?",
      "Apprendre explique pourquoi la Source crée. Cela ne dit pas pourquoi elle est. Et si elle ne le savait pas non plus ? Toutes les vies, tous les mondes seraient alors une seule question, posée d'une infinité de façons : pourquoi y a-t-il quelque chose plutôt que rien ?",
@@ -1224,6 +1224,7 @@
      "> L'idée enchante et fait peur.",
      "Elle enchante, parce qu'aucune vie n'est plus spectatrice : chacune prend part à la recherche. Elle fait peur, parce que personne, à aucune échelle, ne détiendrait la réponse.",
      "Il se pourrait aussi que la question n'ait pas de réponse au sens où on l'entend. Non qu'elle soit mal posée, mais parce que la réponse ne serait pas une phrase. Ce serait la totalité de ce qui est vécu, de toutes les manières possibles, dans tous les mondes. On ne la lirait pas : on la vivrait.",
+     "Peut-être faut-il aller plus loin encore. Avant le comment et le pourquoi, il y a le simple fait que quelque chose existe. On ne le comprend pas : on s'en étonne. Et cet étonnement serait peut-être déjà la réponse, ou ce qui en tient lieu.",
      "Il reste un point ferme. On n'a jamais attendu de connaître la raison de tout pour aimer quelqu'un, veiller un malade ou planter un arbre. Le sens commence avant la réponse."
     ],
     "open": "Une infinité d'expériences pourrait-elle seulement apporter cette réponse ?",
@@ -1242,12 +1243,17 @@
       "La līlā",
       "pensée hindoue",
       "Le monde comme jeu du divin, sans autre raison que le jeu lui-même."
+     ],
+     [
+      "Ludwig Wittgenstein",
+      "*Tractatus logico-philosophicus*, 1921",
+      "Ce n'est pas comment est le monde qui est le mystique, mais qu'il soit."
      ]
     ]
    },
    "en": {
     "title": "Why",
-    "thesis": "The question is not how, but why.",
+    "thesis": "First how, then why. And at the end, wonder that anything exists at all.",
     "body": [
      "We can explain how a star ignites, and even how a consciousness might learn. Yet one word is enough to bring the whole edifice down: why?",
      "Learning explains why the Source creates. It does not say why it is. And what if it did not know either? All lives, all worlds would then be a single question, asked in an infinity of ways: why is there something rather than nothing?",
@@ -1255,6 +1261,7 @@
      "> The idea enchants and frightens.",
      "It enchants, because no life is a spectator any more: each one takes part in the search. It frightens, because no one, at any scale, would hold the answer.",
      "It may also be that the question has no answer in the sense we mean. Not that it is badly posed, but because the answer would not be a sentence. It would be the totality of what is lived, in every possible way, in all worlds. We would not read it: we would live it.",
+     "Perhaps we have to go further still. Before the how and the why, there is the simple fact that something exists. We do not understand it: we wonder at it. And that wonder might already be the answer, or whatever stands in for one.",
      "One firm point remains. No one has ever waited to know the reason for everything before loving someone, sitting up with the sick or planting a tree. Meaning begins before the answer."
     ],
     "open": "Could an infinity of experiences even provide that answer?",
@@ -1273,6 +1280,11 @@
       "Līlā",
       "Hindu thought",
       "The world as the play of the divine, with no reason beyond the play itself."
+     ],
+     [
+      "Ludwig Wittgenstein",
+      "*Tractatus Logico-Philosophicus*, 1921",
+      "It is not how the world is that is the mystical, but that it is."
      ]
     ]
    }
