@@ -17,7 +17,8 @@ for chapter in chapters:
     fr, en = chapter['fr'], chapter['en']
     assert set(fr) == set(en) == required, chapter['id']
     assert [p.startswith('> ') for p in fr['body']] == [p.startswith('> ') for p in en['body']], chapter['id']
-    assert len(fr['echoes']) == len(en['echoes']) >= 1 and all(len(x) == 3 for x in fr['echoes'] + en['echoes']), chapter['id']
+    assert len(fr['echoes']) == len(en['echoes']) and all(len(x) == 3 for x in fr['echoes'] + en['echoes']), chapter['id']
+    assert bool(fr['open']) == bool(en['open']) and (fr['open'] or not fr['echoes']), chapter['id']  # echoes only under an open question
 assert len(ui['fr']['lexicon']) == len(ui['en']['lexicon'])
 
 

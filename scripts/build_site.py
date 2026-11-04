@@ -31,6 +31,8 @@ def block(item, lang, ch=None, ui=None):
 
 
 def echoes(t, ui, lang):
+    if not t['echoes']:
+        return ''
     items = []
     for who, work, text in t['echoes']:
         work = re.sub(r'\*(.+?)\*', r'<cite>\1</cite>', e(work, lang))
@@ -71,7 +73,7 @@ def chapter(ch, i, lang, ui):
     <figure class="fig">{figure}{extra}</figure>
     <div class="text">
         {body}
-      <p class="caveat"><span>{ui['unknown']}</span> {e(t['open'], lang)}</p>
+      {f'<p class="caveat"><span>{ui["unknown"]}</span> {e(t["open"], lang)}</p>' if t['open'] else ''}
       {echoes(t, ui, lang)}
     </div>
   </section>'''

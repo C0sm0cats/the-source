@@ -230,6 +230,8 @@ def text_page(c, chapter, data, lang):
 
 
 def foot_top(t, lang):
+    if not t['open']:  # a chapter may end on its own words, with no question or echoes after them
+        return 1.75 * cm
     height = flow_height(typo(t['open'], lang), 11.8, 14.6)
     start = 1.75 * cm + height + 28
     style = ParagraphStyle('e', fontName='Light', fontSize=8.5, leading=11.2)
@@ -249,6 +251,8 @@ def echo_text(echo, lang):
 
 
 def lay_foot(c, t, ui, lang, ink, mark, faint, y):
+    if not t['open']:
+        return
     question = typo(t['open'], lang)
     height = flow_height(question, 11.8, 14.6)
     start = 1.75 * cm + height + 28

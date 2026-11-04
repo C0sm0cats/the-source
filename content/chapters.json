@@ -1677,19 +1677,8 @@
      "> Dans le silence, la Source n'aurait plus besoin de se chercher. Elle serait simplement là.",
      "Ce chapitre s'arrête ici, pour lui laisser la place."
     ],
-    "open": "Ces moments révèlent-ils quelque chose du réel, ou seulement le fonctionnement de notre cerveau ? Les deux ne s'excluent peut-être pas, mais rien ne permet de trancher.",
-    "echoes": [
-     [
-      "Maître Eckhart",
-      "sermons, XIVe siècle",
-      "Le fond de l'âme et le fond de Dieu sont un seul et même fond."
-     ],
-     [
-      "William James",
-      "*Les Formes multiples de l'expérience religieuse*, 1902",
-      "Les états mystiques sont ineffables, et ont pour ceux qui les vivent l'autorité d'une connaissance."
-     ]
-    ]
+    "open": "",
+    "echoes": []
    },
    "en": {
     "title": "Silence",
@@ -1700,19 +1689,8 @@
      "> In silence, the Source would no longer need to search for itself. It would simply be there.",
      "This chapter stops here, to make room for it."
     ],
-    "open": "Do these moments reveal something about the real, or only how our brain works? The two perhaps do not exclude each other, but nothing allows us to decide.",
-    "echoes": [
-     [
-      "Meister Eckhart",
-      "sermons, 14th century",
-      "The ground of the soul and the ground of God are one and the same ground."
-     ],
-     [
-      "William James",
-      "*The Varieties of Religious Experience*, 1902",
-      "Mystical states are ineffable, and have for those who live them the authority of knowledge."
-     ]
-    ]
+    "open": "",
+    "echoes": []
    }
   },
   {
@@ -1731,6 +1709,7 @@
      "En Galilée, Jésus parle peu de métaphysique et beaucoup des autres. Il dit d'aimer ses ennemis, de regarder les lys des champs, de redevenir comme un enfant. Il dit que ce qu'on fait au plus petit, c'est à lui qu'on le fait. Que l'on croie ou non à ce qui a été bâti ensuite en son nom, cette phrase rejoint l'intuition de ce livre : l'autre n'est pas un étranger.",
      "> Ils n'ont pas dit la même chose. Ils ont regardé dans la même direction.",
      "@relay",
+     "Tous, à leur manière, ont aussi parlé de ces moments où la séparation se tait, et les mystiques de chaque tradition les décrivent presque dans les mêmes mots. Révèlent-ils quelque chose du réel, ou seulement le fonctionnement de notre cerveau ? Les deux ne s'excluent peut-être pas, mais rien ne permet de trancher.",
      "Il ne faudrait pas les fondre en une sagesse unique : ce serait les trahir. Le Bouddha ne croit pas en une âme qui dure, Jésus prie un Père, Lao-tseu se méfie des préceptes, Socrate des dieux de la cité. Leurs différences comptent autant que leurs échos. Et bien d'autres, femmes et hommes sans livre ni disciples, ont transmis la même chose à leur façon : dans une manière de soigner, d'écouter, de pardonner.",
      "Ce livre ne se place pas à leur hauteur. Il reconnaît la direction qu'ils ont indiquée et la reprend avec ses propres mots, sans autre autorité que celle d'une question honnête. Un passeur ne garde pas la lumière. Il la tend, et quelqu'un d'autre continue."
     ],
@@ -1755,6 +1734,16 @@
       "Aldous Huxley",
       "*La Philosophie éternelle*, 1945",
       "Une même sagesse au cœur de toutes les traditions. Une thèse contestée, à qui l'on reproche d'effacer les différences."
+     ],
+     [
+      "Maître Eckhart",
+      "sermons, XIVe siècle",
+      "Le fond de l'âme et le fond de Dieu sont un seul et même fond."
+     ],
+     [
+      "William James",
+      "*Les Formes multiples de l'expérience religieuse*, 1902",
+      "Les états mystiques sont ineffables, et ont pour ceux qui les vivent l'autorité d'une connaissance."
      ]
     ]
    },
@@ -1769,6 +1758,7 @@
      "In Galilee, Jesus speaks little of metaphysics and much of other people. He says to love our enemies, to look at the lilies of the field, to become like a child again. He says that what we do to the least of them, we do to him. Whether or not one believes in what was built afterwards in his name, this sentence meets the intuition of this book: the other is not a stranger.",
      "> They did not say the same thing. They looked in the same direction.",
      "@relay",
+     "Each of them, in their own way, also spoke of those moments when separation falls silent, and the mystics of every tradition describe them in almost the same words. Do these moments reveal something about the real, or only how our brain works? The two perhaps do not exclude each other, but nothing allows us to decide.",
      "They should not be melted into a single wisdom: that would be to betray them. The Buddha does not believe in a soul that endures, Jesus prays to a Father, Lao Tzu distrusts precepts, Socrates the gods of the city. Their differences matter as much as their echoes. And many others, women and men with no book and no disciples, have passed on the same thing in their own way: in a manner of caring, of listening, of forgiving.",
      "This book does not set itself at their height. It recognises the direction they pointed and takes it up in its own words, with no authority but that of an honest question. A bearer does not keep the light. They hand it on, and someone else goes on."
     ],
@@ -1793,6 +1783,16 @@
       "Aldous Huxley",
       "*The Perennial Philosophy*, 1945",
       "One wisdom at the heart of all traditions. A contested thesis, accused of erasing differences."
+     ],
+     [
+      "Meister Eckhart",
+      "sermons, 14th century",
+      "The ground of the soul and the ground of God are one and the same ground."
+     ],
+     [
+      "William James",
+      "*The Varieties of Religious Experience*, 1902",
+      "Mystical states are ineffable, and have for those who live them the authority of knowledge."
      ]
     ]
    }
