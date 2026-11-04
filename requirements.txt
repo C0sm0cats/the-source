@@ -2,3 +2,4 @@ reportlab>=4.2,<6
 pyphen>=0.14
 fonttools>=4.50
 brotli>=1.1
+pillow>=10

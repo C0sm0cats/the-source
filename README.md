@@ -2,7 +2,7 @@
 
 **[Read online](https://c0sm0cats.github.io/the-source/en/) · [PDF](books/the-source-en.pdf)** — *En français : [lire le site](https://c0sm0cats.github.io/the-source/) · [PDF](books/la-source-fr.pdf)*
 
-![The Source](assets/hero.jpg)
+![The Source](assets/hero.svg)
 
 > *What if existing is how everything discovers itself?*
 
@@ -25,11 +25,11 @@ One shared origin, two infinities, countless lives, a return. **The Source** is 
 **V · The question**  
 [The bearers](https://c0sm0cats.github.io/the-source/en/#passeurs) · [Why](https://c0sm0cats.github.io/the-source/en/#pourquoi)
 
-![The figures](assets/plates.jpg)
+![The figures](assets/plates.webp)
 
 ## What's inside
 
 - **The site**: one long reading thread, animated and interactive figures (touch them, freeze them, change the number of lives), echoes from thinkers who asked the same questions, and a glossary.
-- **The books**: [The Source](books/the-source-en.pdf) · [La Source](books/la-source-fr.pdf). 130 pages, 14 × 21 cm. Each chapter opens on its thesis and figure, then unfolds over a few pages, with further figures and full-page plates.
+- **The books**: [The Source](books/the-source-en.pdf) · [La Source](books/la-source-fr.pdf). 124 pages, 14 × 21 cm. Each chapter opens on its thesis and figure, then unfolds over a few pages, with further figures and full-page plates.
 
 © C0sm0cats. Text, figures, books and code: [CC BY-NC-ND 4.0](LICENSE). Spectral: SIL Open Font License (`scripts/fonts/OFL-Spectral.txt`).

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render assets/hero.jpg and assets/plates.jpg (README) and assets/social.jpg (link previews). Requires Poppler and Node."""
+"""Render assets/social.jpg (link previews). Requires Poppler and Node. The README images: build_hero.py, build_plates.py."""
 import subprocess
 import tempfile
 from pathlib import Path
@@ -37,28 +37,6 @@ with tempfile.TemporaryDirectory() as folder:
     c.drawString(66, H - 480, 'What if existing is how')
     c.drawString(66, H - 506, 'everything discovers itself?')
     c.save()
-    for name, width in [('hero', 1600), ('social', 1200)]:
+    for name, width in [('social', 1200)]:
         subprocess.run(['pdftoppm', '-scale-to-x', str(width), '-scale-to-y', str(width * H // W), '-singlefile', '-jpeg', '-jpegopt', 'quality=86', str(pdf), str(ROOT / 'assets' / name)], check=True)
-print('assets/hero.jpg, assets/social.jpg')
-
-TONES = {'paper': ('#eeece5', '#17171b', '#e03c1f'), 'dusk': ('#3c4256', '#f0ede4', '#ff6b4d'),
-         'night': ('#0b0c12', '#ece8dd', '#ff5a3a'), 'blank': ('#ffffff', '#111114', '#e03c1f')}
-CELL, COLS, PAD = 340, 7, 26
-chapters = data['chapters']
-rows = (len(chapters) + COLS - 1) // COLS
-PW, PH = CELL * COLS, (CELL + 64) * rows
-with tempfile.TemporaryDirectory() as folder:
-    pdf = Path(folder) / 'plates.pdf'
-    c = canvas.Canvas(str(pdf), pagesize=(PW, PH), invariant=1)
-    for i, ch in enumerate(chapters):
-        bg, fg, mk = (colors.HexColor(v) for v in TONES[ch['tone']])
-        x, top = (i % COLS) * CELL, PH - (i // COLS) * (CELL + 64)
-        c.setFillColor(bg)
-        c.rect(x, top - CELL - 64, CELL, CELL + 64, stroke=0, fill=1)
-        draw(c, figures[ch['figure']], x + PAD, top - PAD, CELL - 2 * PAD, fg, mk, 'LightI', labels=False)
-        c.setFillColor(fg)
-        c.setFont('LightI', 15)
-        c.drawString(x + PAD, top - CELL - 30, f"{i + 1:02d}  " + typo(ch['fr']['title'], 'fr'))
-    c.save()
-    subprocess.run(['pdftoppm', '-scale-to-x', '2380', '-scale-to-y', str(2380 * PH // PW), '-singlefile', '-jpeg', '-jpegopt', 'quality=86', str(pdf), str(ROOT / 'assets/plates')], check=True)
-print('assets/plates.jpg')
+print('assets/social.jpg')
