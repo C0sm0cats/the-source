@@ -72,35 +72,184 @@ const factories = {
     };
   },
 
-  // Two trees unfold from the point and return. The pointer opens or closes their angle.
+  // Two infinities born from one point. Upward, filaments open into stars, clusters and galaxies;
+  // downward, a cell divides into ever smaller ones, then molecules, atoms, grains. The pointer opens or closes them.
   fractal(labels) {
-    const DEPTH = 11;
+    const UP = 7, DOWN = 9, r = rng(36);
+    const jitter = (n) => Float64Array.from({ length: n }, () => r() * 2 - 1);
+    const ju = jitter(2 << UP), lu = jitter(2 << UP), jd = jitter(2 << DOWN), ld = jitter(2 << DOWN), kind = jitter(2 << UP);
+    // a few spiral galaxies, as dot templates in a unit disc
+    const galaxies = Array.from({ length: 7 }, (_, k) => {
+      const arms = k % 3 ? 2 : 3, pts = [], wind = 2.4 + r() * 1.8;
+      for (let i = 0; i < 26; i++) { const q = r() ** 2 * .3; pts.push(q * Math.cos(r() * TAU), q * Math.sin(r() * TAU), .35 + (1 - q) * .55); }
+      for (let a = 0; a < arms; a++) for (let i = 0; i < 30; i++) {
+        const u = (i + r()) / 30, q = .12 + u * .9, th = (a * TAU) / arms + u * wind, sc = .05 + u * .1;
+        pts.push(q * Math.cos(th) + (r() - .5) * sc, q * Math.sin(th) + (r() - .5) * sc, .25 + (1 - u) * .5);
+      }
+      return pts;
+    });
+    const clusters = Array.from({ length: 5 }, () => Array.from({ length: 14 }, () => { const q = Math.abs(r() + r() - 1) * 1.2, a = r() * TAU; return [q * Math.cos(a), q * Math.sin(a), .3 + r() * .5]; }));
+    const granules = Array.from({ length: 22 }, () => { const q = Math.sqrt(r()) * .78, a = r() * TAU; return [q * Math.cos(a), q * Math.sin(a), r()]; });
+    // the night above, finer below
+    const stars = Array.from({ length: 760 }, () => { const x = r() * 600, y = 300 - 290 * Math.sqrt(r()); return [x, y, .25 + r() ** 3 * 1.1, r()]; });
+    const grains = Array.from({ length: 520 }, () => { const x = 300 + (r() - .5) * 600 * (.55 + r() * .45), y = 312 + 270 * r() ** .7; return [x, y, .22 + r() * .35]; });
     let spread = .5;
     return (g, c, t, s) => {
-      const target = s.x == null ? .5 + .05 * Math.sin(t / 7) : .22 + .5 * (s.x / 600);
+      const target = s.x == null ? .5 + .05 * Math.sin(t / 7) : .3 + .42 * (s.x / 600);
       spread = ease(s, spread, target, .06);
-      const grown = (.48 + .52 * (.5 + .5 * Math.cos((t / 18) * TAU))) * (DEPTH + 1);
-      const levels = Array.from({ length: DEPTH + 1 }, () => []);
-      const grow = (x, y, angle, length, level) => {
-        const f = Math.min(1, grown - level);
+      const breath = .5 + .5 * Math.cos((t / 18) * TAU);
+      const lines = Array.from({ length: 11 }, () => []), up = [], down = [];
+      const growUp = (x, y, angle, length, level, id, reach) => {
+        const f = Math.min(1, reach - level);
         if (f <= 0) return;
         const nx = x + length * f * Math.cos(angle), ny = y + length * f * Math.sin(angle);
-        levels[level].push(x, y, nx, ny);
-        if (level < DEPTH && f === 1) { grow(nx, ny, angle - spread, length * .745, level + 1); grow(nx, ny, angle + spread, length * .745, level + 1); }
+        lines[level].push(x, y, nx, ny);
+        up.push(nx, ny, level, id, f);
+        if (level === UP || f < 1) return;
+        const open = spread * .78 * (1 - level * .1) * (1 + .22 * ju[id]);
+        for (const side of [-1, 1]) {
+          const a = clamp(angle + side * open, -Math.PI + .12, -.12);
+          growUp(nx, ny, a, length * (.84 + .07 * lu[id * 2 + (side > 0)]), level + 1, id * 2 + (side > 0), reach);
+        }
       };
-      grow(300, 300, -Math.PI / 2, 66, 0);
-      grow(300, 300, Math.PI / 2, 66, 0);
-      g.lineCap = 'round';
-      levels.forEach((line, level) => {
-        const k = level / DEPTH;
-        g.strokeStyle = c.mix(Math.min(1, k * 2.3));
-        g.globalAlpha = 1 - k * .3;
-        g.lineWidth = Math.max(.24, 2.5 * .77 ** level);
+      const growDown = (x, y, px, py, R, level, id, reach, pr) => {
+        const f = Math.min(1, reach - level);
+        if (f <= 0) return;
+        // the rows bend into a bowl that answers the crown above
+        const bend = (u, v) => v - 46 * ((u - 300) / 210) ** 2 * smooth(330, 520, v);
+        const bx = bend(x, y), bpx = bend(px, py);
+        const nx = px + (x - px) * f, ny = bpx + (bx - bpx) * f;
+        down.push(px, bpx, nx, ny, level, id, f, R * f, pr);
+        if (level === DOWN || f < 1) return;
+        const d = 96 * .5 ** level * (.6 + .8 * spread) * (1 + .1 * jd[id]), cr = R * .6;
+        for (const side of [-1, 1]) growDown(x + side * d, y + (R + cr) * (1.3 + .08 * ld[id * 2 + (side > 0)]), x, y, cr, level + 1, id * 2 + (side > 0), reach, R);
+      };
+      growUp(300, 300, -Math.PI / 2, 47, 0, 1, (.36 + .8 * breath) * (UP + 1));
+      growDown(300, 352, 300, 300, 36, 0, 1, (.36 + .8 * breath) * (DOWN + 1), 7);
+      g.lineCap = g.lineJoin = 'round';
+      // the background: stars above, fine grains below
+      g.fillStyle = c.ink;
+      for (let b = 0; b < 3; b++) {
+        g.globalAlpha = [.22, .4, .7][b];
         g.beginPath();
-        for (let i = 0; i < line.length; i += 4) { g.moveTo(line[i], line[i + 1]); g.lineTo(line[i + 2], line[i + 3]); }
+        for (const [x, y, size, tw] of stars) if (Math.floor(tw * 2.999) === b) dot(g, x, y, size * (.8 + .2 * Math.sin(t * .7 + tw * 40)));
+        g.fill();
+      }
+      g.globalAlpha = .3;
+      g.beginPath();
+      for (const [x, y, size] of grains) dot(g, x, y, size);
+      g.fill();
+      // the filaments of the large
+      lines.forEach((list, level) => {
+        if (!list.length) return;
+        g.strokeStyle = c.mix(Math.min(1, level * .34));
+        g.globalAlpha = .9 - level * .07;
+        g.lineWidth = Math.max(.3, 2.1 * .76 ** level);
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 4) { g.moveTo(list[i], list[i + 1]); g.lineTo(list[i + 2], list[i + 3]); }
         g.stroke();
       });
+      // what blooms on them: stars near the root, clusters further, galaxies at the edge
+      g.fillStyle = c.ink;
+      const dots = [[], [], []];
+      const add = (b, x, y, size) => dots[b].push(x, y, size);
+      for (let i = 0; i < up.length; i += 5) {
+        const x = up[i], y = up[i + 1], level = up[i + 2], id = up[i + 3], f = up[i + 4], k = kind[id];
+        if (level < 3) continue;
+        if (level < 6) {
+          if (k < .1) continue;
+          const cl = clusters[id % clusters.length], R = (1.6 + level * .9) * f;
+          for (const [px, py, size] of cl) add(0, x + px * R, y + py * R, size * .8);
+        } else if (level < UP) {
+          add(2, x, y, .9 * f);
+          if (k > .55) { const cl = clusters[(id >> 1) % clusters.length]; for (const [px, py, size] of cl) add(0, x + px * 4, y + py * 4, size * .7); }
+        } else if (k > .45) {
+          const tpl = galaxies[id % galaxies.length], R = (10 + 14 * (k - .45) / .55) * f;
+          const rot = id * 1.7 + t * .025 * (id % 2 ? 1 : -1), tilt = id * .9, incl = .35 + .6 * Math.abs(Math.sin(id * 2.3));
+          const cr = Math.cos(rot), sr = Math.sin(rot), ct = Math.cos(tilt), st = Math.sin(tilt);
+          for (let j = 0; j < tpl.length; j += 3) {
+            const px = tpl[j] * cr - tpl[j + 1] * sr, py = (tpl[j] * sr + tpl[j + 1] * cr) * incl;
+            add(j < 78 ? 2 : 1, x + R * (px * ct - py * st), y + R * (px * st + py * ct), tpl[j + 2] * (.55 + R / 22));
+          }
+        } else add(2, x, y, 1.1 * f);
+      }
+      dots.forEach((list, b) => {
+        g.globalAlpha = [.45, .7, .95][b];
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 3) dot(g, list[i], list[i + 1], list[i + 2]);
+        g.fill();
+      });
+      // the descent: each cell divides into smaller ones, down to molecules, atoms, grains
+      const membranes = Array.from({ length: 4 }, () => []), cores = [], vessels = Array.from({ length: 4 }, () => []), specks = [];
+      for (let i = 0; i < down.length; i += 9) {
+        const x0 = down[i], y0 = down[i + 1], x1 = down[i + 2], y1 = down[i + 3], level = down[i + 4], id = down[i + 5], f = down[i + 6], R = down[i + 7], pr = down[i + 8];
+        const dx = x1 - x0, dy = y1 - y0, d = Math.hypot(dx, dy) || 1;
+        if (d > R + pr) vessels[Math.min(3, level >> 1)].push(x0 + dx / d * pr, y0 + dy / d * pr, x1 - dx / d * R, y1 - dy / d * R);
+        if (level < 4) {
+          membranes[Math.min(3, level)].push(x1, y1, R, level);
+          if (level < 4) { cores.push(x1 + R * .18 * Math.cos(id), y1 + R * .18 * Math.sin(id), R * .36, R, id); }
+        } else if (level < 5) {
+          // a molecule: a few bonded atoms
+          const n = 2 + (id % 3), a0 = id * 2.1 + t * .05;
+          for (let j = 0; j < n; j++) {
+            const a = a0 + (j * TAU) / n, q = j ? R * .55 : 0;
+            membranes[3].push(x1 + q * Math.cos(a), y1 + q * Math.sin(a), R * (j ? .32 : .42), level);
+          }
+        } else if (level < 7) {
+          // an atom: a nucleus and its orbits
+          specks.push(x1, y1, .7 * f);
+          const a0 = id * .7 + t * .04, Ro = Math.max(1.5, R * 1.1);
+          for (let o = 0; o < 7 - level; o++) {
+            const a = a0 + o * 1.3, ca = Math.cos(a), sa = Math.sin(a);
+            for (let j = 0; j <= 14; j++) {
+              const u = (j / 14) * TAU, px = Ro * Math.cos(u), py = Ro * .35 * Math.sin(u);
+              const X = x1 + px * ca - py * sa, Y = y1 + px * sa + py * ca;
+              membranes[3].push(X, Y, j ? -1 : -2, level);
+            }
+          }
+        } else specks.push(x1, y1, (level < DOWN ? .45 : .35) * f);
+      }
+      vessels.forEach((list, b) => {
+        g.strokeStyle = c.mix(Math.min(1, b * .5));
+        g.globalAlpha = .85 - b * .12;
+        g.lineWidth = Math.max(.3, 1.6 * .62 ** b);
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 4) { g.moveTo(list[i], list[i + 1]); g.lineTo(list[i + 2], list[i + 3]); }
+        g.stroke();
+      });
+      g.strokeStyle = c.ink;
+      membranes.forEach((list, b) => {
+        g.globalAlpha = [.95, .85, .75, .62][b];
+        g.lineWidth = [1, .8, .6, .42][b];
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 4) {
+          const x = list[i], y = list[i + 1], R = list[i + 2];
+          if (R === -2) g.moveTo(x, y); else if (R === -1) g.lineTo(x, y);
+          else { g.moveTo(x + R, y); g.arc(x, y, R, 0, TAU); if (b < 2) { g.moveTo(x + R * .88, y); g.arc(x, y, R * .88, 0, TAU); } }
+        }
+        g.stroke();
+      });
+      // inside the large cells: a nucleus and its granules
+      g.lineWidth = .5;
+      g.globalAlpha = .8;
+      g.beginPath();
+      for (let i = 0; i < cores.length; i += 5) { const [x, y, R] = [cores[i], cores[i + 1], cores[i + 2]]; g.moveTo(x + R, y); g.arc(x, y, R, 0, TAU); }
+      g.stroke();
+      g.globalAlpha = .7;
+      g.beginPath();
+      for (let i = 0; i < cores.length; i += 5) {
+        const x = cores[i], y = cores[i + 1], R = cores[i + 3], id = cores[i + 4];
+        dot(g, x, y, Math.max(.6, cores[i + 2] * .3));
+        const cx = x - R * .18 * Math.cos(id), cy = y - R * .18 * Math.sin(id);
+        for (const [px, py, k] of granules) {
+          const gx = cx + px * R, gy = cy + py * R;
+          if (Math.hypot(gx - x, gy - y) > cores[i + 2] * 1.15) dot(g, gx, gy, .35 + k * .45 * R / 18);
+        }
+      }
+      for (let i = 0; i < specks.length; i += 3) dot(g, specks[i], specks[i + 1], specks[i + 2]);
+      g.fill();
       g.globalAlpha = 1;
+      g.fillStyle = g.strokeStyle = c.ink;
       point(g, c, 300, 300, 6.5, 44);
       label(g, c, labels.large, 300, 18, 'center', 17);
       label(g, c, labels.small, 300, 594, 'center', 17);
@@ -901,15 +1050,21 @@ const factories = {
     };
   },
 
-  // Behind, one settled line; ahead, possibilities that keep forking. Each moment, one of them is lived.
+  // Behind, one settled line, with the faint beginnings of the paths not taken; ahead, possibilities forking into thousands.
+  // Each moment, one of them is lived. A click above or below the point chooses the next branch and lights what it opens.
   choice() {
-    const DX = 46, DEPTH = 7, H0 = 7, G = 1.4, STEP = 2.8, X0 = 236, Y0 = 300;
-    const h = (d) => H0 * G ** d;
+    const DX = 34, DEPTH = 11, PAST = 8, STEP = 2.8, X0 = 236, Y0 = 300;
+    // the spread of a fork depends on its column only, so the tree keeps its shape as it scrolls
+    const h = (d, j) => 4.6 * 1.25 ** d * (1 + .22 * Math.sin(j * 2.31) + .12 * Math.sin(j * .77 + 1));
     const bit = (k) => { const m = rng(k * 131 + 17); m(); return m() < .5 ? -1 : 1; };
-    const edge = (g, x0, y0, x1, y1, end = 1) => {
+    // each fork also has its own lean and reach, known from its column and the last few turns that lead to it
+    const hash = (a) => { a = Math.imul(a ^ (a >>> 16), 0x45d9f3b); a = Math.imul(a ^ (a >>> 16), 0x45d9f3b); return ((a ^ (a >>> 16)) >>> 0) / 4294967296; };
+    const turn = (d, j, code, side) => { const H = h(d, j), id = j * 64 + code; return side * H * (.75 + .55 * hash(id)) + .3 * H * (hash(id + 7919) - .5); };
+    const next = (code, side) => ((code << 1) | (side > 0)) & 63;
+    const edge = (g, x0, y0, x1, y1, n, end = 1) => {
       g.moveTo(x0, y0);
-      const n = Math.max(1, Math.round(8 * end));
-      for (let i = 1; i <= n; i++) { const u = (i / n) * end; g.lineTo(x0 + (x1 - x0) * u, y0 + (y1 - y0) * smooth(0, 1, u)); }
+      const m = Math.max(1, Math.round(n * end));
+      for (let i = 1; i <= m; i++) { const u = (i / m) * end; g.lineTo(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u * u * (3 - 2 * u)); }
     };
     // a click above or below the point chooses the next branch; otherwise chance does
     const chosen = new Map();
@@ -920,47 +1075,67 @@ const factories = {
       if (s.click && s.click !== lastClick) {
         lastClick = s.click;
         chosen.set(f > 0 && !s.snap ? k + 2 : k + 1, s.click[1] < Y0 ? -1 : 1);
-        for (const key of chosen.keys()) if (key < k - 8) chosen.delete(key);
+        for (const key of chosen.keys()) if (key < k - PAST - 9) chosen.delete(key);
       }
-      const first = pick(k + 1);
+      const first = pick(k + 1), codes = new Map();
+      let code = 0;
+      for (let j = k - PAST - 6; j <= k + 1; j++) codes.set(j, (code = next(code, pick(j))));
       // the present point travels along the first edge; the view follows it
-      const ox = X0 - f * DX, oy = Y0 - first * h(1 - f) * smooth(0, 1, f);
+      const lead = turn(1 - f, k + 1, codes.get(k + 1), first), ox = X0 - f * DX, oy = Y0 - lead * smooth(0, 1, f);
+      // the user's choices still ahead, if any: what they open is lit
+      const wish = chosen.has(k + 1) || chosen.has(k + 2);
       g.lineCap = g.lineJoin = 'round';
-      // ahead: every possible path, fainter with distance
-      const levels = Array.from({ length: DEPTH + 1 }, () => [[], []]);
-      const walk = (x, y, depth, other) => {
-        if (depth > DEPTH) return;
-        for (const s of [-1, 1]) {
-          const ny = y + s * h(depth - f), side = depth === 1 ? +(s !== first) : other;
-          levels[depth][side].push(x, y, x + DX, ny);
-          walk(x + DX, ny, depth + 1, side);
+      // ahead: every possible path, fainter with distance; the branch left behind fades as the point leaves the fork
+      const levels = Array.from({ length: DEPTH + 1 }, () => [[], [], []]);
+      const walk = (x, y, depth, other, lit, code) => {
+        for (const side of [-1, 1]) {
+          const nc = next(code, side), ny = y + turn(depth - f, k + depth, nc, side), off = depth === 1 ? side !== first : other;
+          const on = lit && (depth === 1 ? side === first : !chosen.has(k + depth) || chosen.get(k + depth) === side);
+          levels[depth][off ? 1 : on ? 2 : 0].push(x, y, x + DX, ny);
+          if (depth < DEPTH) walk(x + DX, ny, depth + 1, off, on, nc);
         }
       };
-      walk(ox, oy, 1, 0);
-      g.lineWidth = .5;
-      g.strokeStyle = c.ink;
-      for (let d = 1; d <= DEPTH; d++) for (let side = 0; side < 2; side++) {
-        const list = levels[d][side];
-        g.globalAlpha = .5 * .82 ** (d - f) * (side ? 1 - f : 1) * (d === DEPTH ? f : 1);
-        if (g.globalAlpha < .004) continue;
+      walk(ox, oy, 1, false, wish, codes.get(k));
+      g.lineCap = 'butt';
+      for (let d = 1; d <= DEPTH; d++) for (let b = 0; b < 3; b++) {
+        const list = levels[d][b];
+        if (!list.length) continue;
+        let alpha = (b === 2 ? .85 : .72) * .86 ** (d - f) * (b === 1 ? 1 - f : 1) * (d === DEPTH ? f : 1);
+        if (alpha < .004) continue;
+        g.globalAlpha = alpha;
+        g.strokeStyle = b === 2 ? c.mix(.15 + d * .06) : c.ink;
+        g.lineWidth = b === 2 ? .7 : d < 4 ? .55 : .42;
         g.beginPath();
-        for (let i = 0; i < list.length; i += 4) edge(g, list[i], list[i + 1], list[i + 2], list[i + 3]);
+        const n = d < 4 ? 8 : d < 7 ? 5 : 3;
+        for (let i = 0; i < list.length; i += 4) edge(g, list[i], list[i + 1], list[i + 2], list[i + 3], n);
         g.stroke();
       }
-      // behind: the path that was taken, and the first steps of those that were not
+      g.lineCap = 'round';
+      // behind: the path that was taken, and the first steps of those that were not, already fading
       let x = ox, y = oy;
       const past = [];
-      for (let j = k; j > k - 7; j--) { const py = y - pick(j) * h(0); past.push([x - DX, py, x, y, j]); x -= DX; y = py; }
-      g.lineWidth = .5;
+      for (let j = k; j > k - PAST; j--) { const py = y - turn(0, j, codes.get(j), pick(j)); past.push([x - DX, py, x, y, j]); x -= DX; y = py; }
+      g.strokeStyle = c.ink;
+      g.lineWidth = .45;
       past.forEach(([x0, y0, , , j], i) => {
-        g.globalAlpha = .35 * (1 - i / 7) * smooth(0, 120, x0 + DX);
-        g.beginPath(); edge(g, x0, y0, x0 + DX, y0 - pick(j) * h(0), .55); g.stroke();
+        // the fork not taken at that step, and a few of its own forks
+        const age = (i + f) / PAST, side = -pick(j);
+        g.globalAlpha = .4 * (1 - age) * smooth(0, 90, x0 + DX);
+        if (g.globalAlpha < .01) return;
+        g.beginPath();
+        const ghost = (gx, gy, d, a, gc) => {
+          const nc = next(gc, a), ny = gy + turn(d - 1, j + d - 1, nc, a);
+          edge(g, gx, gy, gx + DX, ny, 4, d === 1 ? 1 : .9);
+          if (d < 4) for (const b of [-1, 1]) ghost(gx + DX, ny, d + 1, b, nc);
+        };
+        ghost(x0, y0, 1, side, codes.get(j - 1));
+        g.stroke();
       });
       g.globalAlpha = 1;
       g.lineWidth = 1.5;
       g.beginPath();
-      for (const [x0, y0, x1, y1] of past) edge(g, x0, y0, x1, y1);
-      edge(g, ox, oy, ox + DX, oy + first * h(1 - f), f);
+      for (const [x0, y0, x1, y1] of past) edge(g, x0, y0, x1, y1, 8);
+      edge(g, ox, oy, ox + DX, oy + lead, 8, f);
       g.stroke();
       point(g, c, X0, Y0, 6, 32);
     };
@@ -1028,68 +1203,115 @@ const factories = {
     };
   },
 
-  // Hundreds of days that look alike; up close, none is the same as another.
+  // A year as a weave: one thread runs back and forth through the days, each day a small dial of twenty-four hours knotted on it.
+  // They look alike; up close, none is the same as another. A lens under the pointer shows their differences.
   days() {
-    const r = rng(23), COLS = 21, ROWS = 24, N = COLS * ROWS, PER = .6, B = 8;
-    const cells = Array.from({ length: N }, (_, i) => {
-      const col = i % COLS, row = Math.floor(i / COLS);
-      return { x: 64 + col * 22 + Math.floor(col / 7) * 12, y: 50 + row * 21.5, a: r() * TAU, gap: .35 + r() * 1.5, rad: 3.3 + r() * 1.3, tick: r() < .5 };
+    const r = rng(23), N = 365, COLS = 19, ROWS = 20, PER = 3, STEP = 28.6, X0 = 300 - ((COLS - 1) * STEP) / 2, Y0 = 300 - ((ROWS - 1) * STEP) / 2;
+    // an ordinary day: sleep, the kettle, the bus, a queue at noon, the hollow of the afternoon, the stairwell, the light going out
+    const base = [.05, .04, .04, .04, .05, .07, .16, .7, .85, .6, .55, .6, .95, .62, .5, .38, .2, .36, .78, .62, .5, .4, .16, .07];
+    const cells = Array.from({ length: N }, (_, d) => {
+      const weekend = d % 7 >= 5, late = weekend ? 1 + Math.floor(r() * 3) : 0, mood = .8 + r() * .35;
+      const hours = base.map((v, h) => {
+        let a = base[Math.max(0, Math.min(23, h - (h < 12 ? late : 0)))];
+        if (weekend && h > 9 && h < 18) a = a * .6 + .3;
+        return clamp(a * mood + (r() - .5) * .34 * (a > .1 ? 1 : .2), .03, 1);
+      });
+      const row = Math.floor(d / COLS), col = row % 2 ? COLS - 1 - (d % COLS) : d % COLS;
+      return { x: X0 + col * STEP, y: Y0 + row * STEP, row, col, hours };
     });
-    const glyph = (g, d) => {
-      g.moveTo(d.x + d.rad * Math.cos(d.a + d.gap / 2), d.y + d.rad * Math.sin(d.a + d.gap / 2));
-      g.arc(d.x, d.y, d.rad, d.a + d.gap / 2, d.a + TAU - d.gap / 2);
-      if (d.tick) { g.moveTo(d.x, d.y); g.lineTo(d.x + d.rad * .55 * Math.cos(d.a), d.y + d.rad * .55 * Math.sin(d.a)); }
+    const ANG = Array.from({ length: 24 }, (_, h) => [Math.cos(-Math.PI / 2 + (h / 24) * TAU), Math.sin(-Math.PI / 2 + (h / 24) * TAU)]);
+    const glyph = (g, d, x, y, k, upto = 24) => {
+      g.moveTo(x + 2.2 * k, y);
+      g.arc(x, y, 2.2 * k, 0, TAU);
+      for (let h = 0; h < upto; h++) {
+        const [ca, sa] = ANG[h], L = (3.2 + 10.5 * d.hours[h]) * k;
+        g.moveTo(x + 3.4 * k * ca, y + 3.4 * k * sa);
+        g.lineTo(x + L * ca, y + L * sa);
+      }
     };
     // a lens under the pointer: the days near it grow apart and show their differences
-    const R = 92, M = 1.7;
+    const R = 100, M = 1.6;
     let lens = 0, lx = 300, ly = 300;
-    const magnify = (d) => {
-      const dx = d.x - lx, dy = d.y - ly, e = Math.hypot(dx, dy);
-      if (e >= R) return null;
-      const grow = 1 + lens * M * (1 - e / R) ** 2;
-      const spread = 1 + lens * M / (1 + M * e / R) * (1 - e / R);
-      return { x: lx + dx * spread, y: ly + dy * spread, rad: d.rad * grow, a: d.a, gap: d.gap, tick: d.tick, m: lens * (1 - e / R) };
+    const magnify = (x, y) => {
+      const dx = x - lx, dy = y - ly, e = Math.hypot(dx, dy);
+      if (!lens || e >= R) return [x, y, 1];
+      const spread = 1 + (lens * M) / (1 + (M * e) / R) * (1 - e / R);
+      return [lx + dx * spread, ly + dy * spread, 1 + lens * M * (1 - e / R) ** 2];
     };
     return (g, c, t, s) => {
       const near = s.x != null;
       if (near) { lx = lens ? ease(s, lx, s.x, .12) : s.x; ly = lens ? ease(s, ly, s.y, .12) : s.y; }
       lens = ease(s, lens, near ? 1 : 0, .07);
       if (lens < .002 && !near) lens = 0;
-      const now = (t / PER) % N, today = Math.floor(now);
-      const buckets = Array.from({ length: B }, () => []), recent = [], close = [];
-      let here = cells[today];
-      cells.forEach((d, i) => {
-        const age = (today - i + N) % N, big = lens ? magnify(d) : null;
-        if (big && i === today) here = big;
-        if (age < 7) recent.push([big || d, age]);
-        else if (big) close.push(big);
-        else buckets[Math.min(B - 1, Math.floor((age / N) * B * 1.15))].push(d);
-      });
-      g.lineCap = 'round';
-      g.lineWidth = .55;
+      const now = (t / PER) % N, today = Math.floor(now), hour = (now - today) * 24;
+      g.lineCap = g.lineJoin = 'round';
       g.strokeStyle = c.ink;
-      buckets.forEach((list, b) => {
-        g.globalAlpha = .82 - b * .085;
+      // the warp: threads between the columns, hidden where the weft passes over them
+      const seg = (x0, y0, x1, y1) => { const a = magnify(x0, y0), b = magnify(x1, y1); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); };
+      g.globalAlpha = .26;
+      g.lineWidth = .45;
+      g.beginPath();
+      for (let j = 0; j < COLS - 1; j++) for (const o of [-.8, .8]) {
+        const x = X0 + (j + .5) * STEP + o;
+        for (let i = 0; i < ROWS; i++) {
+          const y = Y0 + i * STEP, under = (i + j) % 2 === 0;
+          if (under) { seg(x, y - STEP / 2, x, y - 3); seg(x, y + 3, x, y + STEP / 2); } else seg(x, y - STEP / 2, x, y + STEP / 2);
+        }
+      }
+      g.stroke();
+      // the weft: one thread through every day in turn, rising over the warp and dipping under it, turning at the edges
+      const age = (d) => (today - d + N) % N, weft = Array.from({ length: 4 }, () => []);
+      for (let d = 0; d < N - 1; d++) {
+        const a = cells[d], b = cells[d + 1], list = weft[Math.min(3, Math.floor((age(d) / N) * 4))];
+        if (a.row === b.row) {
+          const dir = Math.sign(b.x - a.x), mx = (a.x + b.x) / 2, bump = (a.row + Math.min(a.col, b.col)) % 2 ? -1.3 : 1.3;
+          list.push([a.x + dir * 3, a.y, mx - dir * 5, a.y + bump * .6, mx, a.y + bump, mx + dir * 5, a.y + bump * .6, b.x - dir * 3, b.y]);
+        } else {
+          const side = a.col === 0 ? -1 : 1, cy = (a.y + b.y) / 2, pts = [];
+          for (let k = 0; k <= 12; k++) { const q = -Math.PI / 2 + (k / 12) * Math.PI; pts.push(a.x + side * (3 + (STEP / 2) * Math.cos(q) * 1.1), cy + (STEP / 2) * Math.sin(q)); }
+          list.push(pts);
+        }
+      }
+      weft.forEach((list, b) => {
+        g.globalAlpha = .6 - b * .1;
+        g.lineWidth = .55;
         g.beginPath();
-        for (const d of list) glyph(g, d);
+        for (const pts of list) for (let i = 0; i < pts.length; i += 2) { const [x, y] = magnify(pts[i], pts[i + 1]); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
         g.stroke();
       });
-      for (const [d, age] of recent) {
-        if (!age) continue;
-        g.strokeStyle = c.mix(age / 7);
+      // the days, fainter the longer ago they were; the last week still warm
+      const B = 7, buckets = Array.from({ length: B }, () => []), recent = [];
+      for (let d = 0; d < N; d++) {
+        if (d === today) continue;
+        const old = age(d);
+        if (old < 7) recent.push(d, old);
+        else buckets[Math.min(B - 1, Math.floor(((old - 7) / (N - 7)) * B))].push(d);
+      }
+      buckets.forEach((list, b) => {
+        g.globalAlpha = .9 - b * .095;
+        g.lineWidth = .5;
+        g.beginPath();
+        for (const d of list) { const [x, y, k] = magnify(cells[d].x, cells[d].y); glyph(g, cells[d], x, y, k); }
+        g.stroke();
+      });
+      for (let i = 0; i < recent.length; i += 2) {
+        const d = cells[recent[i]], [x, y, k] = magnify(d.x, d.y);
+        g.strokeStyle = c.mix(recent[i + 1] / 7);
         g.globalAlpha = .95;
-        g.lineWidth = .8;
-        g.beginPath(); glyph(g, d); g.stroke();
+        g.lineWidth = .65;
+        g.beginPath(); glyph(g, d, x, y, k); g.stroke();
       }
-      g.strokeStyle = c.ink;
-      for (const d of close) {
-        g.globalAlpha = .55 + .4 * d.m;
-        g.lineWidth = .55 + .5 * d.m;
-        g.beginPath(); glyph(g, d); g.stroke();
-      }
+      // today, hour after hour
+      const d = cells[today], [x, y, k] = magnify(d.x, d.y), h = Math.floor(hour);
+      g.strokeStyle = c.mark;
       g.globalAlpha = 1;
-      const grow = here.rad / (cells[today].rad);
-      point(g, c, here.x, here.y, (3 + .6 * Math.sin((now % 1) * Math.PI)) * grow, 20 * grow);
+      g.lineWidth = .8;
+      g.beginPath(); glyph(g, d, x, y, k, h); g.stroke();
+      const [ca, sa] = ANG[Math.min(23, h)], L = (3.2 + 10.5 * d.hours[Math.min(23, h)] * smooth(0, 1, hour - h)) * k;
+      g.lineWidth = 1.2;
+      g.beginPath(); g.moveTo(x + 3.4 * k * ca, y + 3.4 * k * sa); g.lineTo(x + L * ca, y + L * sa); g.stroke();
+      g.strokeStyle = c.ink;
+      point(g, c, x, y, 2.6 * k, 16 * k);
     };
   },
 
@@ -1538,192 +1760,439 @@ const factories = {
     };
   },
 
-  // Shapes that bounce for nothing, each at its own rhythm. A click throws one more.
+  // A puddle on the pavement: pebbles fall, circles widen and cross, the sky trembles in the water. A click throws a pebble.
   play() {
-    const FLOOR = 488, LEFT = 40, RIGHT = 560, G = 300;
-    const ring = (n, f) => Array.from({ length: n + 1 }, (_, i) => { const a = -Math.PI / 2 + (i / n) * TAU, q = f(i); return [q * Math.cos(a), q * Math.sin(a)]; });
-    const shapes = [
-      (s) => [ring(28, () => s), [[-s, 0], [s, 0]]],
-      (s) => [ring(3, () => s * 1.15)],
-      (s) => [ring(4, () => s * 1.1).map(([x, y]) => [x * Math.SQRT1_2 - y * Math.SQRT1_2, x * Math.SQRT1_2 + y * Math.SQRT1_2])],
-      (s) => [ring(10, (i) => (i % 2 ? s * .48 : s * 1.1))],
-    ];
-    const toys = [
-      { kind: 0, size: 30, x0: 90, vx: 34, T: 2.6, p: 0, spin: .5 },
-      { kind: 1, size: 25, x0: 260, vx: -27, T: 2.1, p: .37, spin: -.8 },
-      { kind: 2, size: 22, x0: 430, vx: 22, T: 2.9, p: .66, spin: .6 },
-      { kind: 3, size: 20, x0: 520, vx: -40, T: 1.7, p: .2, spin: 1.3 },
-    ];
-    const bounce = (v, lo, hi) => { const w = hi - lo, m = (((v - lo) % (2 * w)) + 2 * w) % (2 * w); return lo + (m < w ? m : 2 * w - m); };
-    const hop = (o, t) => {
-      const f = (((t / o.T + o.p) % 1) + 1) % 1, H = (G * o.T * o.T) / 8;
-      return [bounce(o.x0 + o.vx * t, LEFT + o.size, RIGHT - o.size), FLOOR - o.size - H * 4 * f * (1 - f), Math.exp(-((Math.min(f, 1 - f) / .035) ** 2)), H];
-    };
-    const draw = (g, kind, size, x, y, rot, squash) => {
-      const ca = Math.cos(rot), sa = Math.sin(rot), sx = 1 + .15 * squash, sy = 1 - .22 * squash;
-      g.beginPath();
-      for (const line of shapes[kind](size)) line.forEach(([lx, ly], i) => {
-        const X = x + (lx * ca - ly * sa) * sx, Y = y + size + ((lx * sa + ly * ca) - size) * sy;
-        if (i) g.lineTo(X, Y); else g.moveTo(X, Y);
-      });
-      g.stroke();
-    };
-    // what a click throws, simulated from the moment it left the hand
-    const thrown = [];
-    let lastClick = null, count = 0;
-    const flight = (o, t) => {
-      let x = o.x, y = o.y, vx = o.vx, vy = o.vy, rot = 0;
-      const steps = Math.min(960, Math.floor((t - o.t0) * 60));
-      for (let i = 0; i < steps; i++) {
-        vy += G / 60; x += vx / 60; y += vy / 60; rot += (o.spin + vx / o.size * .5) / 60;
-        if (x < LEFT + o.size) { x = LEFT + o.size; vx = -vx; }
-        if (x > RIGHT - o.size) { x = RIGHT - o.size; vx = -vx; }
-        if (y > FLOOR - o.size) { y = FLOOR - o.size; vy = Math.abs(vy) < 30 ? 0 : -vy * .7; vx *= .94; o.spin *= .9; }
+    const CX = 300, CY = 312, W = 240, H = 160, SQ = .5, PERIOD = 4.4, LIFE = 13;
+    const shore = (a) => 1 + .05 * Math.sin(3 * a + 1) + .035 * Math.sin(5 * a + 2.2) + .02 * Math.sin(9 * a + .4) + .015 * Math.sin(14 * a) + .02 * Math.cos(2 * a);
+    const SHORE = Float64Array.from({ length: 721 }, (_, i) => shore((i / 720) * TAU - Math.PI));
+    const inside = (x, y, margin = 1) => { const u = (x - CX) / W, v = (y - CY) / H; return Math.hypot(u, v) < SHORE[Math.round(((Math.atan2(v, u) + Math.PI) / TAU) * 720)] * margin; };
+    const border = Array.from({ length: 241 }, (_, i) => { const a = (i / 240) * TAU, q = shore(a); return [CX + W * q * Math.cos(a), CY + H * q * Math.sin(a)]; });
+    // each line of the reflected sky, cut to the water
+    const spans = [];
+    for (let y = CY - H * 1.2; y < CY + H * 1.2; y += 3.1) {
+      const xs = [];
+      for (let i = 0; i < 240; i++) {
+        const [x0, y0] = border[i], [x1, y1] = border[i + 1];
+        if ((y0 - y) * (y1 - y) < 0) xs.push(x0 + ((y - y0) / (y1 - y0)) * (x1 - x0));
       }
-      return [x, y, rot];
-    };
+      xs.sort((a, b) => a - b);
+      for (let i = 0; i + 1 < xs.length; i += 2) spans.push(y, xs[i] + 2, xs[i + 1] - 2);
+    }
+    const r = rng(52);
+    const grit = Array.from({ length: 1400 }, () => {
+      const x = r() * 600, y = 40 + r() * 545, u = (x - CX) / W, v = (y - CY) / H;
+      const rim = Math.hypot(u, v) / shore(Math.atan2(v, u));
+      return rim < 1.02 ? null : [x, y, .3 + r() * .6, rim];
+    }).filter(Boolean);
+    const stones = Array.from({ length: 22 }, (_, k) => {
+      const a = r() * TAU, q = 1.08 + r() * .4, x = CX + W * shore(a) * q * Math.cos(a), y = CY + H * shore(a) * q * Math.sin(a), s = 1.2 + r() * 3.2;
+      return Array.from({ length: 9 }, (_, i) => { const b = (i / 8) * TAU, w = s * (.75 + .25 * Math.sin(b * 3 + k)); return [x + w * Math.cos(b), y + w * .62 * Math.sin(b)]; });
+    }).filter((p) => p[0][1] < 590 && p[0][1] > 30);
+    const clouds = Array.from({ length: 10 }, () => [r() * 900, CY - H * .9 + r() * H * 1.8, 55 + r() * 80, 12 + r() * 14, r()]);
+    const auto = (j) => { const m = rng(j * 71 + 9); m(); let x, y; do { x = CX + (m() - .5) * W * 1.3; y = CY + (m() - .5) * H * 1.2; } while (!inside(x, y, .8)); return { x, y, at: j * PERIOD + 1.2 }; };
+    const clicks = [];
+    let lastClick = null;
     return (g, c, t, s) => {
       if (s.click && s.click !== lastClick) {
         lastClick = s.click;
         if (!s.snap) {
-          const m = rng(++count * 41 + 3); m();
-          const [cx, cy] = s.click;
-          thrown.push({ x: clamp(cx, 70, 530), y: Math.min(cy, FLOOR - 60), vx: (300 - cx) * .45 + (m() - .5) * 160, vy: -200 - m() * 140, t0: t, kind: Math.floor(m() * 4), size: 12 + m() * 13, spin: (m() - .5) * 4 });
-          if (thrown.length > 6) thrown.shift();
+          let [x, y] = s.click;
+          for (let k = 0; k < 40 && !inside(x, y, .9); k++) { x += (CX - x) * .08; y += (CY - y) * .08; }
+          clicks.push({ x, y, at: t + .45 });
+          if (clicks.length > 3) clicks.shift();
         }
       }
-      for (let i = thrown.length - 1; i >= 0; i--) if (t < thrown[i].t0 || t - thrown[i].t0 > 16) thrown.splice(i, 1);
+      for (let i = clicks.length - 1; i >= 0; i--) if (t < clicks[i].at - 1 || t - clicks[i].at > LIFE) clicks.splice(i, 1);
+      const k = Math.floor(t / PERIOD), drops = [];
+      for (let j = k - 2; j <= k; j++) drops.push(auto(j));
+      drops.push(...clicks);
+      const live = drops.filter((d) => t > d.at && t - d.at < LIFE);
+      // the height of the water, and how a slope facing us darkens it
+      let slope = 0;
+      const n = live.length, DX = live.map((d) => d.x), DY = live.map((d) => d.y), FRONT = live.map((d) => (t - d.at) * 46), DAMP = live.map((d) => Math.exp(-(t - d.at) / 6));
+      const wave = (x, y) => {
+        let h = 0;
+        slope = 0;
+        for (let i = 0; i < n; i++) {
+          const dy = (y - DY[i]) / SQ, dx = x - DX[i], front = FRONT[i];
+          if (dx > front + 6 || dx < -front - 6 || dy > front + 6 || dy < -front - 6) continue;
+          const dist = Math.sqrt(dx * dx + dy * dy), u = front - dist;
+          if (u < -6) continue;
+          const env = (u < 2 ? smooth(-6, 2, u) : 1) * Math.exp(-u / 90) * DAMP[i], a = u / 8.5;
+          h += Math.sin(a) * env;
+          slope += Math.cos(a) * env * (dy / (dist + 1));
+        }
+        return h;
+      };
+      // the clouds that reach a given line of water
+      const sky = clouds.map(([x0, y0, w, h, p]) => [((x0 + t * (4 + p * 3)) % 900) - 150, y0, w, h, p * 9]);
+      let row = [];
+      const cloudRow = (y) => {
+        row = [];
+        const shimmer = .35 * Math.sin(y * .2 + t * .3);
+        for (const [cx, y0, w, h, p] of sky) { const k = Math.exp(-(((y - y0) / h) ** 2)); if (k > .01) row.push(cx, w, k, p, shimmer); }
+      };
+      const cloud = (x) => {
+        let v = 0;
+        for (let i = 0; i < row.length; i += 5) { const dx = (x - row[i]) / row[i + 1]; if (dx < 3 && dx > -3) v += Math.exp(-dx * dx) * row[i + 2] * (1 + row[i + 4] * Math.sin(x * .09 + row[i + 3])); }
+        return v;
+      };
       g.lineCap = g.lineJoin = 'round';
-      g.strokeStyle = c.ink;
-      g.globalAlpha = .7;
-      g.lineWidth = .8;
-      g.beginPath(); g.moveTo(24, FLOOR); g.lineTo(576, FLOOR); g.stroke();
-      // their shadows on the ground, shorter as they fly
-      g.globalAlpha = .3;
-      g.lineWidth = 1.6;
+      // the pavement around it, darker where it is wet
+      g.fillStyle = c.ink;
+      for (let b = 0; b < 3; b++) {
+        g.globalAlpha = [.55, .35, .2][b];
+        g.beginPath();
+        for (const [x, y, size, rim] of grit) if ((rim < 1.12 ? 0 : rim < 1.35 ? 1 : 2) === b) dot(g, x, y, size);
+        g.fill();
+      }
+      g.globalAlpha = .5;
       g.beginPath();
-      for (const o of toys) { const [x, y, , H] = hop(o, t), near = 1 - (FLOOR - o.size - y) / H; g.moveTo(x - o.size * (.3 + .6 * near), FLOOR + 5); g.lineTo(x + o.size * (.3 + .6 * near), FLOOR + 5); }
-      g.stroke();
-      g.globalAlpha = .9;
+      for (const p of stones) p.forEach(([x, y], i) => { if (i) g.lineTo(x, y); else g.moveTo(x, y); });
+      g.fill();
+      // the shore, and the wet ring around it
+      g.globalAlpha = .85;
       g.lineWidth = 1.1;
-      for (const o of toys) { const [x, y, squash] = hop(o, t); draw(g, o.kind, o.size, x, y, o.spin * t, squash); }
-      for (const o of thrown) {
-        const [x, y, rot] = flight({ ...o }, t);
-        g.globalAlpha = .9 * (1 - smooth(11, 16, t - o.t0));
-        draw(g, o.kind, o.size, x, y, rot, 0);
+      g.beginPath();
+      border.forEach(([x, y], i) => { const dx = x - CX, dy = y - CY, q = 1 + .006 * Math.sin(i * .9 + t * .8); if (i) g.lineTo(CX + dx * q, CY + dy * q); else g.moveTo(CX + dx * q, CY + dy * q); });
+      g.stroke();
+      g.globalAlpha = .35;
+      g.lineWidth = .5;
+      g.beginPath();
+      border.forEach(([x, y], i) => { const X = CX + (x - CX) * 1.045, Y = CY + (y - CY) * 1.06; if (i % 2) g.lineTo(X, Y); else g.moveTo(X, Y); });
+      g.stroke();
+      // the sky in the water, engraved: lines thicken where it is dark, vanish in the clouds, and every circle shades them
+      const tones = [[], [], [], []];
+      for (let i = 0; i < spans.length; i += 3) {
+        const y = spans[i], x0 = spans[i + 1], x1 = spans[i + 2], depth = (y - (CY - H)) / (2 * H);
+        cloudRow(y);
+        let px = x0, py = y + wave(x0, y) * 5.5;
+        for (let x = x0 + 4.5; x <= x1 + 4.4; x += 4.5) {
+          const X = Math.min(x, x1), h = wave(X, y), Y = y + h * 5.5 + .5 * Math.sin(X * .05 + t * 1.1 + y * .3);
+          const tone = .22 + .5 * depth - 1.1 * clamp(cloud(X + h * 8) - .25) + .85 * slope;
+          const b = Math.floor(tone * 4.6);
+          if (b >= 0) {
+            // a stroke that continues the last one of the same weight extends it
+            const list = tones[Math.min(3, b)], n = list.length;
+            if (n && list[n - 2] === px && list[n - 1] === py) list.push(X, Y); else list.push(NaN, px, py, X, Y);
+          }
+          px = X; py = Y;
+        }
       }
-      // the red ball hops lightly, and leaves a trail of where it played
-      const ball = { size: 7, x0: 200, vx: 51, T: 1.35, p: .5 };
-      g.fillStyle = c.mark;
-      for (let i = 14; i > 0; i--) {
-        const [x, y] = hop(ball, t - i * .07);
-        g.globalAlpha = .45 * (1 - i / 15);
-        g.beginPath(); dot(g, x, y, 1.6); g.fill();
+      tones.forEach((list, b) => {
+        g.globalAlpha = [.4, .6, .78, .92][b];
+        g.lineWidth = [.32, .5, .72, 1][b];
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 2) { if (Number.isNaN(list[i])) { i++; g.moveTo(list[i], list[i + 1]); } else g.lineTo(list[i], list[i + 1]); }
+        g.stroke();
+      });
+      // the circles, crossing one another
+      g.lineWidth = .7;
+      for (const d of live) {
+        const age = t - d.at;
+        for (let j = 0; j < 5; j++) {
+          const R = age * 46 - j * 17 - 4;
+          if (R < 2) continue;
+          const amp = Math.exp(-age / 5 - j * .3);
+          g.globalAlpha = Math.min(.85, amp * 1.1);
+          if (g.globalAlpha < .03) continue;
+          g.beginPath();
+          let open = false;
+          const m = Math.max(24, Math.round(R * .7));
+          for (let i = 0; i <= m; i++) {
+            const a = (i / m) * TAU, q = R + 1.3 * Math.sin(a * 7 + t * 1.7 + j * 2);
+            const x = d.x + q * Math.cos(a), y = d.y + q * SQ * Math.sin(a);
+            if (!inside(x, y, .985)) { open = false; continue; }
+            if (open) g.lineTo(x, y); else g.moveTo(x, y);
+            open = true;
+          }
+          g.stroke();
+        }
       }
+      // a leaf rides the circles
+      const lx = CX - 120 + 60 * Math.sin(t * .045), ly = CY + 52 + 18 * Math.sin(t * .06 + 1), lh = wave(lx, ly);
+      const la = .5 + .25 * Math.sin(t * .07) + lh * .15, ca = Math.cos(la), sa = Math.sin(la), L = 26;
+      const leaf = (u, side) => { const w = side * 8 * Math.sin(Math.PI * u) ** .9; return [lx + (u - .5) * L * ca - w * sa, ly + lh * 3 + ((u - .5) * L * sa + w * ca) * .7]; };
+      g.globalAlpha = .9;
+      g.lineWidth = .8;
+      g.beginPath();
+      for (const side of [-1, 1]) for (let i = 0; i <= 14; i++) { const [x, y] = leaf(i / 14, side); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+      const [ax, ay] = leaf(0, 0), [bx, by] = leaf(1, 0);
+      g.moveTo(ax - 5 * ca, ay - 5 * sa * .7); g.lineTo(bx, by);
+      for (let i = 1; i < 6; i++) for (const side of [-1, 1]) { const [x0, y0] = leaf(i / 6, 0), [x1, y1] = leaf(i / 6 + .1, side * .75); g.moveTo(x0, y0); g.lineTo(x1, y1); }
+      g.stroke();
+      // the last pebble: falling, then resting under the water
+      let last = null;
+      for (const d of drops) if (t > d.at - .6 && (!last || d.at > last.at)) last = d;
       g.globalAlpha = 1;
-      const [bx, by, squash] = hop(ball, t);
-      point(g, c, bx, by + 7 * .2 * squash, 6, 26);
+      if (last) {
+        const age = t - last.at;
+        if (age < 0) {
+          const f = 1 + age / .6, y = last.y - 220 * (1 - f * f);
+          point(g, c, last.x, y, 4, 16);
+        } else {
+          // the splash
+          if (age < .7) {
+            g.fillStyle = c.ink;
+            g.globalAlpha = 1 - age / .7;
+            g.beginPath();
+            for (let i = 0; i < 14; i++) { const a = (i / 14) * TAU + last.x, v = 30 + (i % 3) * 14; dot(g, last.x + Math.cos(a) * v * age, last.y + Math.sin(a) * v * SQ * age - (60 + (i % 4) * 20) * age + 160 * age * age, 1.1); }
+            g.fill();
+            g.globalAlpha = 1;
+          }
+          const h = wave(last.x + 6, last.y);
+          point(g, c, last.x + h * 1.5, last.y + 4 + h * 2, 4.5 - 1.2 * smooth(0, 3, age), 26 * Math.exp(-age / 5) + 12);
+        }
+      }
     };
   },
 
-  // A line that dreams: it becomes a fish, a house, an eye, and nothing about it surprises.
+  // A landscape dreamed line by line: a city becomes the sea, the sea a sleeping face, the face mountains.
+  // What it was a moment ago rises into the sky and fades. The red point lives in every world without knowing it.
   dream() {
-    const PTS = 220, STAGE = 7;
-    const curve = (f) => Array.from({ length: PTS + 1 }, (_, i) => f((i / PTS) * TAU));
-    const polygon = (corners) => {
-      const len = corners.map((p, i) => Math.hypot(corners[(i + 1) % corners.length][0] - p[0], corners[(i + 1) % corners.length][1] - p[1]));
-      const total = len.reduce((a, b) => a + b, 0);
-      return Array.from({ length: PTS + 1 }, (_, i) => {
-        let d = ((i / PTS) * total) % total, e = 0;
-        while (d > len[e]) d -= len[e++];
-        const a = corners[e], b = corners[(e + 1) % corners.length], f = d / len[e];
-        return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
-      });
-    };
-    const forms = [
-      curve((a) => [Math.cos(a), Math.sin(a)]),
-      curve((a) => [1.05 * (Math.cos(a) - Math.sin(a) ** 2 / Math.SQRT2) + .12, 1.05 * Math.cos(a) * Math.sin(a)]),
-      polygon([[.7, .3], [.7, .72], [-.7, .72], [-.7, -.1], [0, -.8], [.7, -.1]]),
-      curve((a) => [Math.cos(a), .55 * Math.sin(2 * a)]),
-      curve((a) => { const q = .5 + .5 * Math.cos(3 * a); return [q * Math.cos(a), q * Math.sin(a)]; }),
-      curve((a) => [Math.cos(a), .5 * Math.sin(a) * Math.abs(Math.sin(a)) ** .35]),
-      curve((a) => { const q = .62 * (.45 + .75 * Math.cos(a)); return [q * Math.cos(a) - .2, q * Math.sin(a)]; }),
+    const ROWS = 66, COLS = 150, STAGE = 9, r = rng(19);
+    const hash = (a, b) => { const m = rng(a * 374761 + b * 668265 + 7); m(); return m(); };
+    const blocks = new Float64Array(22 * 12).map((_, i) => hash(i % 22, Math.floor(i / 22)));
+    const worlds = [
+      // a city: blocks and streets, a few towers
+      (u, z) => {
+        const gu = (u + 1.1) * 7, gz = z * 8, fu = gu % 1, fz = gz % 1;
+        if (fu < .16 || fu > .84 || fz < .2 || fz > .8) return 0;
+        const h = blocks[(Math.floor(gz) % 12) * 22 + (Math.floor(gu) % 22)];
+        return (.05 + .38 * h * h + (h > .88 ? .3 : 0)) * (1.1 - z * .45);
+      },
+      // the sea
+      (u, z, t) => .16 + .1 * Math.sin(u * 7 + z * 16 - t * .9) + .05 * Math.sin(u * 15 - z * 11 + t * 1.3) + .04 * Math.sin(z * 31 + u * 3 - t * 1.7),
+      // a face, asleep, lying under the sky: brow, closed eyes, nose, lips, chin
+      (u, z) => {
+        const a = u / .6, b = (z - .46) / .47, mask = 1 - a * a - b * b;
+        if (mask <= 0) return .015 * Math.sin(u * 20 + z * 9);
+        let h = .26 * Math.sqrt(mask);
+        h += .3 * Math.exp(-((a / .1) ** 2)) * smooth(-.3, .2, b) * (b < .24 ? 1 : Math.exp(-(((b - .24) / .06) ** 2)));
+        for (const s of [-1, 1]) {
+          const e = a - s * .37;
+          h += .045 * Math.exp(-(((b + .06 - 1.2 * e * e) / .035) ** 2)) * smooth(.22, .12, Math.abs(e));
+          h += .05 * Math.exp(-(((b + .3 - .9 * e * e) / .05) ** 2)) * smooth(.3, .18, Math.abs(e));
+          h -= .05 * Math.exp(-((e / .14) ** 2) - (((b + .14) / .1) ** 2));
+        }
+        h += .07 * Math.exp(-((a / .24) ** 2) - (((b - .47) / .05) ** 2)) + .06 * Math.exp(-((a / .2) ** 2) - (((b - .58) / .05) ** 2));
+        h += .06 * Math.exp(-((a / .22) ** 2) - (((b - .82) / .08) ** 2));
+        return h;
+      },
+      // mountains
+      (u, z) => {
+        const m = 1 - Math.abs(Math.sin(u * 2.4 + .7 + z * .8)), n = 1 - Math.abs(Math.sin(u * 6.1 - z * 3.3 + 2));
+        return (.62 * m * m + .2 * n * n) * (1.15 - z * .7) + .03 * Math.sin(u * 30 + z * 23);
+      },
     ];
-    const shape = (time) => {
-      const j = Math.floor(time / STAGE), f = smooth(.45, 1, (time % STAGE) / STAGE);
-      const A = forms[((j % forms.length) + forms.length) % forms.length], B = forms[(((j + 1) % forms.length) + forms.length) % forms.length];
-      const cx = 300 + 26 * Math.sin(time * .11), cy = 296 + 18 * Math.sin(time * .15), rot = .22 * Math.sin(time * .05), ca = Math.cos(rot), sa = Math.sin(rot);
-      return A.map(([ax, ay], i) => {
-        const v = (i / PTS) * TAU, x = ax + (B[i][0] - ax) * f + .035 * Math.sin(3 * v + time * .8), y = ay + (B[i][1] - ay) * f + .035 * Math.cos(2 * v - time * .6);
-        return [cx + 178 * (x * ca - y * sa), cy + 178 * (x * sa + y * ca)];
-      });
+    const height = (u, z, t) => {
+      const j = Math.floor(t / STAGE), p = t / STAGE - j;
+      const A = worlds[((j % 4) + 4) % 4], B = worlds[(((j + 1) % 4) + 4) % 4];
+      // the change sweeps in from the far side
+      const f = smooth(0, 1, (p - .4) * 3.6 - z * .9 - .2 * u * u);
+      return f <= 0 ? A(u, z, t) : f >= 1 ? B(u, z, t) : A(u, z, t) * (1 - f) + B(u, z, t) * f;
     };
-    const line = (g, pts, dx, dy) => { pts.forEach(([x, y], i) => { if (i) g.lineTo(x + dx, y + dy); else g.moveTo(x + dx, y + dy); }); };
+    const project = (u, z, h) => [300 + u * (150 + 300 * z ** 1.2), 236 + 318 * z ** 1.35 - h * (70 + 150 * z)];
+    const stars = Array.from({ length: 260 }, () => [r() * 600, r() ** 1.6 * 220, .3 + r() * .6]);
+    const horizon = new Float64Array(COLS + 1), skyline = new Float64Array(COLS + 1);
+    const HOME = [.16, .64];
     return (g, c, t) => {
       g.lineCap = g.lineJoin = 'round';
+      g.fillStyle = c.ink;
+      g.globalAlpha = .35;
+      g.beginPath();
+      for (const [x, y, s] of stars) dot(g, x, y, s);
+      g.fill();
+      // what it dreamed a moment ago: only its outline is left, rising and fading
       g.strokeStyle = c.ink;
-      // what it was a moment ago drifts up and fades
-      for (let d = 7; d >= 1; d--) {
-        g.globalAlpha = .3 * (1 - d / 8);
-        g.lineWidth = .45;
-        g.beginPath(); line(g, shape(t - d * 1.3), d * 4, -d * 8); g.stroke();
+      g.lineWidth = .5;
+      for (let d = 5; d >= 1; d--) {
+        const then = t - d * 1.7;
+        skyline.fill(1e9);
+        for (let row = ROWS - 1; row >= 0; row -= 5) {
+          const z = row / (ROWS - 1);
+          for (let col = 0; col <= COLS; col += 2) { const u = (col / COLS) * 2 - 1, y = project(u, z, height(u, z, then))[1]; if (y < skyline[col]) skyline[col] = y; }
+        }
+        g.globalAlpha = .6 * (1 - d / 6);
+        g.beginPath();
+        for (let col = 0; col + 2 <= COLS; col += 4) {
+          const z = 0, u0 = (col / COLS) * 2 - 1, u1 = ((col + 2) / COLS) * 2 - 1;
+          g.moveTo(project(u0, z, 0)[0] * (1 + d * .02) - d * 6, skyline[col] - d * 17);
+          g.lineTo(project(u1, z, 0)[0] * (1 + d * .02) - d * 6, skyline[col + 2] - d * 17);
+        }
+        g.stroke();
       }
+      // the world itself, drawn from the nearest line to the farthest; what is in front hides what is behind
+      horizon.fill(1e9);
+      const BANDS = 7, bands = Array.from({ length: BANDS }, () => []);
+      let home = null;
+      const ys = new Float64Array(COLS + 1), xs = new Float64Array(COLS + 1);
+      for (let row = ROWS - 1; row >= 0; row--) {
+        const z = row / (ROWS - 1), list = bands[Math.min(BANDS - 1, Math.floor((1 - z) * BANDS))];
+        for (let col = 0; col <= COLS; col++) {
+          const u = (col / COLS) * 2 - 1, [x, y] = project(u, z, height(u, z, t));
+          xs[col] = x; ys[col] = y;
+        }
+        if (!home && z <= HOME[1]) {
+          const col = Math.round(((HOME[0] + 1) / 2) * COLS);
+          if (ys[col] < horizon[col]) home = [xs[col], ys[col]];
+        }
+        // visible runs, as continuous lines: NaN starts a new one
+        let open = false;
+        for (let col = 0; col < COLS; col++) {
+          const a = horizon[col] - ys[col], b = horizon[col + 1] - ys[col + 1];
+          if (a <= 0 && b <= 0) { open = false; continue; }
+          const k = a / (a - b), mx = xs[col] + (xs[col + 1] - xs[col]) * k, my = ys[col] + (ys[col + 1] - ys[col]) * k;
+          if (!open) { if (a > 0) list.push(NaN, xs[col], ys[col]); else list.push(NaN, mx, my); }
+          if (b > 0) { list.push(xs[col + 1], ys[col + 1]); open = true; } else { list.push(mx, my); open = false; }
+        }
+        for (let col = 0; col <= COLS; col++) if (ys[col] < horizon[col]) horizon[col] = ys[col];
+      }
+      bands.forEach((list, b) => {
+        g.globalAlpha = .95 - b * .1;
+        g.lineWidth = .75 - b * .06;
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 2) { if (Number.isNaN(list[i])) { i++; g.moveTo(list[i], list[i + 1]); } else g.lineTo(list[i], list[i + 1]); }
+        g.stroke();
+      });
       g.globalAlpha = 1;
-      g.lineWidth = 1.3;
-      g.beginPath(); line(g, shape(t), 0, 0); g.stroke();
-      // no one is dreaming it: the point floats, held by nothing
-      point(g, c, 300 + 70 * Math.sin(t * .21), 300 + 52 * Math.sin(t * .29 + 1), 5, 28);
+      if (home) point(g, c, home[0], home[1] - 4, 4.5, 26);
     };
   },
 
-  // A small point and the immense shadow it casts. Bring the pointer closer: the shadow returns to its true size.
+  // A small point, a low light, and the immense shadow it throws on the wall, its trembling rings magnified.
+  // Bring the pointer closer: the shadow returns to its true size.
   fear() {
-    const PX = 300, PY = 446, FLOOR = 462, STEP = 3.6;
+    const PX = 300, PY = 476, FLOOR = 430, LX = 300, LY = 690, RINGS = 4, r = rng(17);
+    const motes = Array.from({ length: 170 }, () => { const a = -Math.PI / 2 + (r() - .5) * 1.25, q = 140 + r() * 560; return [LX + q * Math.cos(a), LY + q * Math.sin(a), .3 + r() * .5, r() * TAU]; });
     let calm = 0;
     return (g, c, t, s) => {
       const near = s.x == null ? 0 : 1 - smooth(70, 320, Math.hypot(s.x - PX, s.y - PY));
       calm = ease(s, calm, near, .035);
       const size = (1 - .9 * calm) * (1 + .025 * Math.sin(t * 1.3) + .015 * Math.sin(t * 2.9 + 1));
-      const H = 410 * size, W = 236 * size, lean = 18 * Math.sin(t * .21) * size;
-      const by = FLOOR - H * .4, bb = H * .32, hy = FLOOR - H * .83, hb = H * .15, hr = W * .24;
-      const half = (y) => {
-        let w = 0;
-        const v = (y - by) / bb;
-        if (v >= 0) w = (W / 2) * (1 + .1 * v); else if (v > -1) w = (W / 2) * Math.sqrt(1 - v * v);
-        const h = (y - hy) / hb;
-        if (Math.abs(h) < 1) w = Math.max(w, hr * Math.sqrt(1 - h * h));
-        return w * (1 + .035 * Math.sin(y * .045 + t * 1.3) + .012 * Math.sin(y * .11 - t * 2.3));
+      // the rings around the point, and their shadows, the same rings many times larger
+      const rings = Array.from({ length: RINGS }, (_, i) => (9 + 3.2 * i) * (1 - calm) + (16 + 15 * i) * calm + .7 * Math.sin(t * 2.2 + i * 2.1) * (1 - calm));
+      const rx = 112 * size, ry = 146 * size, cx = PX + 10 * Math.sin(t * .21) * size, cy = FLOOR - ry * .9, band = 6 + 9 * size;
+      const edge = (a) => 1 + .022 * Math.sin(5 * a + t * .9) + .014 * Math.sin(11 * a - t * 1.7) + .007 * Math.sin(23 * a + t * 3.1);
+      const scales = rings.map((q) => q / 5.5), half = band / 2 / rx;
+      // 0: lit, 1: inside the shadow of the point, 2: inside the shadow of a ring
+      const shade = (x, y) => {
+        if (y > FLOOR) return 0;
+        const dx = (x - cx) / rx, dy = (y - cy) / ry, e = Math.hypot(dx, dy);
+        if (e < .95) return 1;
+        let k = 0;
+        if (e < 1.05) { k = edge(Math.atan2(dy, dx)); if (e < k) return 1; }
+        for (const q of scales) {
+          if (Math.abs(e - q) > half + .045 * q) continue;
+          if (!k) k = edge(Math.atan2(dy, dx));
+          if (Math.abs(e - q * k) < half) return 2;
+        }
+        return 0;
       };
-      const mid = (y) => PX + (lean * (FLOOR - y)) / Math.max(1, H);
-      g.lineCap = g.lineJoin = 'round';
+      // the light: strongest low and in the middle, fading up the wall and to the sides
+      const light = (x, y) => Math.exp(-(((x - LX) / 290) ** 2) - (((FLOOR - y) / 330) ** 2));
+      g.lineCap = 'butt';
       g.strokeStyle = c.ink;
-      // the shadow, drawn line by line
-      g.globalAlpha = .4;
-      g.lineWidth = .55;
+      // the wall, engraved in horizontal strokes, brighter where the light falls; the shadows cut them
+      const tones = [[], [], [], [], []];
+      // consecutive strokes of the same weight on a line become one
+      const lay = (b, x0, y0, x1, y1) => {
+        const list = tones[b], n = list.length;
+        if (n && list[n - 2] === x0 && list[n - 1] === y0 && y0 === y1) list[n - 2] = x1;
+        else list.push(x0, y0, x1, y1);
+      };
+      for (let y = 6; y < FLOOR - 1; y += 3.2) {
+        const wob = .3 * Math.sin(y * 1.7);
+        for (let x = 0; x < 600; x += 4.5) {
+          if (shade(x + 2.25, y)) continue;
+          const b = Math.floor(light(x + 2.25, y) * (1 + .12 * Math.sin(x * .05 + y * .9)) * 5.6 - .4);
+          if (b >= 0) lay(Math.min(4, b), x, y + wob, x + 4.5, y + wob);
+        }
+      }
+      // the floor, lit from in front; the shadow runs from the point to the foot of the wall
+      const foot = rx * Math.sqrt(Math.max(0, 1 - ((FLOOR - cy) / ry) ** 2));
+      for (let k = 0; k < 22; k++) {
+        const y = FLOOR + 3 + 168 * (k / 21) ** 1.5, f = (y - FLOOR) / (PY - FLOOR), sw = f < 1 ? foot * (1 - f) + 5 * f : 0;
+        for (let x = 0; x < 600; x += 4.5) {
+          if (sw && Math.abs(x + 2.25 - (cx + (PX - cx) * f)) < sw) continue;
+          const b = Math.floor(Math.exp(-(((x - LX) / 300) ** 2)) * (.45 + .55 * (y - FLOOR) / 170) * 5.2 - .4);
+          if (b >= 0) lay(Math.min(4, b), x, y, x + 4.5, y);
+        }
+      }
+      tones.forEach((list, b) => {
+        g.globalAlpha = [.16, .26, .38, .5, .64][b];
+        g.lineWidth = [.4, .5, .6, .7, .8][b];
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 4) { g.moveTo(list[i], list[i + 1]); g.lineTo(list[i + 2], list[i + 3]); }
+        g.stroke();
+      });
+      g.lineCap = g.lineJoin = 'round';
+      // inside the great shadow, a fine crossing hatch
+      g.globalAlpha = .12;
+      g.lineWidth = .4;
       g.beginPath();
-      const left = [], right = [];
-      for (let y = FLOOR - H * .985; y <= FLOOR; y += STEP) {
-        const w = half(y), x = mid(y);
-        if (w < .5) continue;
-        g.moveTo(x - w, y); g.lineTo(x + w, y);
-        left.push([x - w, y]); right.push([x + w, y]);
+      for (const dir of [-1, 1]) for (let k = -60; k < 60; k++) {
+        let open = false;
+        for (let y = cy - ry * 1.1; y <= FLOOR; y += 4) {
+          const x = cx + k * 5.5 + dir * (y - cy) * .9;
+          if (Math.hypot((x - cx) / rx, (y - cy) / ry) < .955 - 3 / rx) { if (open) g.lineTo(x, y); else g.moveTo(x, y); open = true; } else open = false;
+        }
       }
       g.stroke();
-      g.globalAlpha = .75;
-      g.lineWidth = .8;
-      for (const edge of [left, right]) { g.beginPath(); edge.forEach(([x, y], i) => { if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.stroke(); }
+      // the rays that graze the point and carry its outline up the wall
+      g.globalAlpha = .08;
+      g.lineWidth = .5;
+      g.beginPath();
+      for (let i = -10; i <= 10; i++) { const ex = PX + i * 31; g.moveTo(PX + i * 2, PY + 30); g.lineTo(ex, FLOOR - 6 - Math.abs(i) * 6); }
+      g.stroke();
+      g.globalAlpha = .35;
+      g.beginPath();
+      for (const side of [-1, 1]) { g.moveTo(PX + side * 5, PY - 5); g.lineTo(cx + side * rx * edge(side > 0 ? 0 : Math.PI), cy); }
+      g.stroke();
+      // dust in the beam
+      g.fillStyle = c.ink;
+      g.globalAlpha = .45;
+      g.beginPath();
+      for (const [x, y, sz, p] of motes) { const X = x + 3 * Math.sin(t * .2 + p), Y = y + 4 * Math.sin(t * .13 + p * 2); if (!shade(X, Y)) dot(g, X, Y, sz); }
+      g.fill();
+      // the trembling outlines: the shadow of the point, three times, and the edges of the ring shadows
+      const outline = (scale, grow, wobble) => {
+        g.beginPath();
+        let open = false;
+        for (let k = 0; k <= 180; k++) {
+          const a = (k / 180) * TAU, q = edge(a) * scale + grow / rx + wobble * Math.sin(a * 17 + t * 2.4) / rx;
+          const x = cx + rx * q * Math.cos(a), y = cy + ry * q * Math.sin(a);
+          if (y > FLOOR) { open = false; continue; }
+          if (open) g.lineTo(x, y); else g.moveTo(x, y);
+          open = true;
+        }
+        g.stroke();
+      };
+      for (let pass = 0; pass < 3; pass++) {
+        g.globalAlpha = [.8, .3, .14][pass];
+        g.lineWidth = [.8, .5, .5][pass];
+        outline(1, pass * 3.5, .8);
+      }
+      g.lineWidth = .5;
+      rings.forEach((q, i) => {
+        g.globalAlpha = .4 - i * .06;
+        outline(q / 5.5, -band / 2, .5);
+        outline(q / 5.5, band / 2, .5);
+      });
+      // where floor meets wall
       g.globalAlpha = .7;
       g.lineWidth = .8;
-      g.beginPath(); g.moveTo(30, FLOOR); g.lineTo(570, FLOOR); g.stroke();
+      g.beginPath(); g.moveTo(0, FLOOR); g.lineTo(600, FLOOR); g.stroke();
       // the rings it keeps around itself: tight and trembling, they loosen when someone comes near
       g.lineWidth = .7;
-      for (let i = 0; i < 3; i++) {
-        const rad = (10 + 3.4 * i) * (1 - calm) + (18 + 17 * i) * calm + .6 * Math.sin(t * 8 + i * 2.1) * (1 - calm);
-        g.globalAlpha = .8 * (1 - .65 * calm);
-        g.beginPath(); g.arc(PX, PY, rad, 0, TAU); g.stroke();
-      }
+      rings.forEach((rad, i) => {
+        g.globalAlpha = (.8 - i * .12) * (1 - .6 * calm);
+        g.beginPath();
+        for (let k = 0; k <= 48; k++) { const a = (k / 48) * TAU, x = PX + rad * Math.cos(a), y = PY + rad * .42 * Math.sin(a); if (k) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+      });
       g.globalAlpha = 1;
-      point(g, c, PX, PY, 5.5, 22);
+      point(g, c, PX, PY - 5, 5.5, 22);
     };
   },
 
@@ -1812,34 +2281,133 @@ const factories = {
     };
   },
 
-  // A tangled line loosens, the smallest loops first, until only a circle is left. Then another knot comes.
+  // A rope of many fibres, tied in a knot. The knot loosens, then gives way thread by thread,
+  // until the threads lie free, still faintly marked where they were held. Then another knot is tied.
   mend() {
-    const PERIOD = 44, PTS = 520, R = 128;
-    const knot = (k) => { const m = rng(k * 53 + 11); m(); return [3, 4, 5, 6, 7, 9].map((h) => [h * (m() < .5 ? -1 : 1), 17 + m() * 13, m() * TAU]); };
-    const weights = (u) => [0, 1, 2, 3, 4, 5].map((i) => 1 - smooth(.1 + .075 * (5 - i), .34 + .075 * (5 - i), u));
-    const at = (H, w, a) => {
-      let x = R * Math.cos(a), y = R * Math.sin(a);
-      H.forEach(([h, amp, p], i) => { const q = amp * w[i]; x += q * Math.cos(h * a + p); y += q * Math.sin(h * a + p); });
-      return [300 + x, 300 + y];
-    };
-    const trace = (g, H, w) => { for (let i = 0; i <= PTS; i++) { const [x, y] = at(H, w, (i / PTS) * TAU); if (i) g.lineTo(x, y); else g.moveTo(x, y); } };
-    return (g, c, t) => {
-      const k = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD, H = knot(k);
-      const fade = smooth(0, .06, u) * (1 - smooth(.9, 1, u));
-      g.lineCap = g.lineJoin = 'round';
-      g.strokeStyle = c.ink;
-      // what the line was a little earlier, still faintly there
-      g.lineWidth = .5;
-      for (let e = 3; e >= 1; e--) {
-        g.globalAlpha = .1 * fade * (1 - e / 4);
-        g.beginPath(); trace(g, H, weights(u - e * .03)); g.stroke();
+    const PERIOD = 48, FIBRES = 48, DS = 4, r = rng(66);
+    const fibres = Array.from({ length: FIBRES }, (_, f) => ({ strand: f % 3, a: r() * TAU, q: 1 + r() * 4.4, at: 0, spread: 0, wave: r() * TAU, dir: r() < .5 }));
+    // they give way one after another, strand by strand
+    fibres.map((fb, f) => f).sort((a, b) => fibres[a].strand - fibres[b].strand || fibres[a].a - fibres[b].a)
+      .forEach((f, k) => { fibres[f].at = .3 + .48 * (k / FIBRES) + (r() - .5) * .02; fibres[f].spread = (k / (FIBRES - 1) - .5) * 2; });
+    const hermite = (out, a, ta, b, tb, n) => {
+      for (let i = 1; i <= n; i++) {
+        const u = i / n, u2 = u * u, u3 = u2 * u, h1 = 2 * u3 - 3 * u2 + 1, h2 = u3 - 2 * u2 + u, h3 = -2 * u3 + 3 * u2, h4 = u3 - u2;
+        out.push([h1 * a[0] + h2 * ta[0] + h3 * b[0] + h4 * tb[0], h1 * a[1] + h2 * ta[1] + h3 * b[1] + h4 * tb[1]]);
       }
-      g.globalAlpha = .9 * fade;
-      g.lineWidth = 1.3;
-      g.beginPath(); trace(g, H, weights(u)); g.stroke();
+    };
+    // the centre line: tails that cross below, and an open trefoil above them
+    const centre = (S, sway) => {
+      const T = (s) => [300 + S * (Math.sin(s) + 2 * Math.sin(2 * s)) + sway, 250 - S * (Math.cos(s) - 2 * Math.cos(2 * s))];
+      const dT = (s, k) => [k * S * (Math.cos(s) + 4 * Math.cos(2 * s)), -k * S * (-Math.sin(s) + 4 * Math.sin(2 * s))];
+      const d = .55, P1 = T(Math.PI + d), P2 = T(3 * Math.PI - d), C = [300 + sway * .5, 250 + 2.75 * S + 20], L = [-14, 410], R = [614, 410];
+      const pts = [L];
+      hermite(pts, L, [260, -30], C, [170, -170], 30);
+      hermite(pts, C, [120, -140], P1, dT(Math.PI + d, .35), 14);
+      for (let i = 1; i <= 120; i++) pts.push(T(Math.PI + d + ((2 * Math.PI - 2 * d) * i) / 120));
+      hermite(pts, P2, dT(3 * Math.PI - d, .35), C, [120, 140], 14);
+      hermite(pts, C, [170, 170], R, [260, 30], 30);
+      // resampled every DS pixels
+      const out = [pts[0]];
+      let carry = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const [ax, ay] = pts[i - 1], [bx, by] = pts[i], len = Math.hypot(bx - ax, by - ay);
+        let s = DS - carry;
+        while (s <= len) { out.push([ax + ((bx - ax) * s) / len, ay + ((by - ay) * s) / len]); s += DS; }
+        carry = len - (s - DS);
+      }
+      return out;
+    };
+    return (g, c, t) => {
+      const k = Math.floor(t / PERIOD), u = t / PERIOD - k;
+      const fade = smooth(0, .04, u) * (1 - smooth(.95, 1, u));
+      const loose = smooth(.04, .3, u), S = 60 + 22 * loose;
+      const P = centre(S, 6 * Math.sin(t * .13)), M = P.length;
+      const normal = P.map((_, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(M - 1, i + 1)], d = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [-(b[1] - a[1]) / d, (b[0] - a[0]) / d]; });
+      // where the rope crosses itself, the strand that passes under is hidden; crossings alternate over and under
+      const events = [], STEP = 3;
+      for (let i = 0; i + STEP < M; i += STEP) {
+        const [ax, ay] = P[i], [bx, by] = P[i + STEP];
+        for (let j = i + 2 * STEP; j + STEP < M; j += STEP) {
+          const [cx, cy] = P[j], [dx, dy] = P[j + STEP];
+          if (Math.max(cx, dx) < Math.min(ax, bx) || Math.min(cx, dx) > Math.max(ax, bx) || Math.max(cy, dy) < Math.min(ay, by) || Math.min(cy, dy) > Math.max(ay, by)) continue;
+          const den = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx);
+          if (!den) continue;
+          const p = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / den, q = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / den;
+          if (p >= 0 && p <= 1 && q >= 0 && q <= 1) events.push([Math.round(i + p * STEP), Math.round(j + q * STEP)]);
+        }
+      }
+      const order = events.flatMap(([i, j], e) => [[i, e], [j, e]]).sort((a, b) => a[0] - b[0]);
+      const hold = fibres.filter((fb) => u < fb.at + .08).length / FIBRES, gap = Math.round(3 + 4 * hold);
+      const under = new Uint8Array(M), seen = new Map();
+      order.forEach(([i, e], n) => {
+        const isUnder = seen.has(e) ? !seen.get(e) : n % 2 === 1;
+        seen.set(e, isUnder);
+        if (isUnder) for (let d = -gap; d <= gap; d++) if (i + d >= 0 && i + d < M) under[i + d] = 1;
+      });
+      g.lineCap = g.lineJoin = 'round';
+      const front = [[], []], back = [[], []];
+      // shared along the rope: the turn of the three strands, the twist of the fibres, the shape of the loose threads
+      const strandC = [0, 1, 2].map((k) => Float64Array.from({ length: M }, (_, i) => Math.cos((k * TAU) / 3 + i * DS * .1)));
+      const strandS = [0, 1, 2].map((k) => Float64Array.from({ length: M }, (_, i) => Math.sin((k * TAU) / 3 + i * DS * .1)));
+      const twistC = Float64Array.from({ length: M }, (_, i) => Math.cos(i * DS * .23)), twistS = Float64Array.from({ length: M }, (_, i) => Math.sin(i * DS * .23));
+      const V = Float64Array.from({ length: M }, (_, i) => i / (M - 1));
+      const MID = V.map((v) => Math.exp(-(((v - .5) / .13) ** 2))), ARC = V.map((v) => Math.sin(Math.PI * v));
+      const crimpC = V.map((v) => Math.cos(v * 34)), crimpS = V.map((v) => Math.sin(v * 34)), driftC = V.map((v) => Math.cos(v * 7 + t * .05)), driftS = V.map((v) => Math.sin(v * 7 + t * .05));
+      for (let f = 0; f < FIBRES; f++) {
+        // a thread is drawn out of the rope from one end to the other
+        const fb = fibres[f], pull = clamp((u - fb.at) / .08), sc = strandC[fb.strand], ss = strandS[fb.strand];
+        const ca = Math.cos(fb.a), sa = Math.sin(fb.a), cw = Math.cos(fb.wave), sw = Math.sin(fb.wave);
+        let open = false, lastList = null;
+        for (let i = 0; i < M; i++) {
+          // cos(a - l), sin(a - l) from the shared tables
+          const c2 = ca * twistC[i] + sa * twistS[i], s2 = sa * twistC[i] - ca * twistS[i];
+          const off = 7.5 * sc[i] + fb.q * c2, depth = 7.5 * ss[i] + fb.q * s2, v = V[i];
+          const free = pull <= 0 ? 0 : smooth(0, 1, (pull * 1.35 - (fb.dir ? v : 1 - v)) / .35), lane = free > .5 ? 1 : 0;
+          let x = P[i][0] + normal[i][0] * off, y = P[i][1] + normal[i][1] * off;
+          if (free > 0) {
+            const mid = MID[i], arc = ARC[i], crimpSin = crimpS[i] * cw + crimpC[i] * sw, crimpCos = crimpC[i] * cw - crimpS[i] * sw;
+            const lx = -14 + 628 * v + 7 * mid * crimpCos;
+            const ly = 340 + 10 * arc + fb.spread * (30 + 22 * arc) + 5 * (driftS[i] * cw + driftC[i] * sw) + 11 * mid * crimpSin;
+            x += (lx - x) * free; y += (ly - y) * free;
+          }
+          if (free < .5 && under[i]) { open = false; continue; }
+          const side = depth > 0 || free > .5 ? 0 : 1, list = (side ? back : front)[lane];
+          if (open && list === lastList) list.push(x, y);
+          else {
+            if (open) lastList.push(x, y);
+            list.push(NaN, x, y);
+          }
+          open = true; lastList = list;
+        }
+      }
+      const draw = (list, alpha, width, colour) => {
+        g.strokeStyle = colour;
+        g.globalAlpha = alpha * fade;
+        g.lineWidth = width;
+        g.beginPath();
+        for (let i = 0; i < list.length; i += 2) {
+          if (Number.isNaN(list[i])) { i++; g.moveTo(list[i], list[i + 1]); } else g.lineTo(list[i], list[i + 1]);
+        }
+        g.stroke();
+      };
+      // where the knot was, its trace remains, faintly
+      if (hold < 1) {
+        g.strokeStyle = c.ink;
+        g.globalAlpha = .2 * (1 - hold) * fade;
+        g.lineWidth = .5;
+        g.beginPath();
+        for (let i = 0; i + 2 < M; i += 4) if (!under[i]) { g.moveTo(P[i][0], P[i][1]); g.lineTo(P[i + 2][0], P[i + 2][1]); }
+        g.stroke();
+      }
+      draw(back[0], .3, .45, c.ink);
+      draw(back[1], .3, .4, c.ink);
+      draw(front[1], .7, .5, c.ink);
+      draw(front[0], .92, .55, c.ink);
       g.globalAlpha = 1;
-      const [px, py] = at(H, weights(u), t * .22);
-      point(g, c, px, py, 1.5 + 3.5 * fade, 26);
+      g.strokeStyle = c.ink;
+      // the heart of the knot: what was held there, smaller as the threads let go
+      const settle = smooth(.15, 0, hold);
+      point(g, c, 300 + 6 * Math.sin(t * .13) * (1 - settle), 262 + 88 * settle, (2.8 + 3.2 * hold) * (.3 + .7 * fade), 18 + 22 * hold);
     };
   },
 
@@ -2116,7 +2684,7 @@ const factories = {
 };
 
 // The frame used when the motion is stopped, and in the books.
-export const FROZEN = { source: 48, fractal: 36, void: 21, nested: 0, lives: 21, time: 6.2, worlds: 21, knowing: 60, balance: 3, field: 7, drop: 18.4, forms: 21, useful: 12.5, why: 21, river: 9, forgetting: 121, birth: 25.5, kin: 6, choice: 13, love: 30, days: 200, silence: 12, emerge: 25, zoom: 7, pages: 22, map: 44, ripple: 9.5, water: 9, gesture: 52, body: 3.3, play: 8, dream: 10, fear: 6, alone: 30, beauty: 17, mend: 6.6, death: 12, leaves: 25.5, passers: 6, relay: 8, knot: 12 };
+export const FROZEN = { source: 48, fractal: 18, void: 21, nested: 0, lives: 21, time: 6.2, worlds: 21, knowing: 60, balance: 3, field: 7, drop: 18.4, forms: 21, useful: 12.5, why: 21, river: 9, forgetting: 121, birth: 25.5, kin: 6, choice: 13, love: 30, days: 752, silence: 12, emerge: 25, zoom: 7, pages: 22, map: 44, ripple: 9.5, water: 9, gesture: 52, body: 3.3, play: 24, dream: 15.5, fear: 6, alone: 30, beauty: 17, mend: 26, death: 12, leaves: 25.5, passers: 6, relay: 8, knot: 12 };
 
 export function createScene(name, labels = {}, options = {}) {
   return factories[name](labels, options);
