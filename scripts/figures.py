@@ -1,7 +1,7 @@
 """Render the figures of assets/scenes/*.mjs as images, exactly as the site draws them, through a headless Chromium.
 
 Used by the books (each figure on its chapter's night) and for the site's images when JavaScript is off.
-Requires `npm install` (playwright) and optionally CHROME=/path/to/chromium.
+Requires `npm i --no-save playwright` (local only) and optionally CHROME=/path/to/chromium.
 """
 import json
 import subprocess

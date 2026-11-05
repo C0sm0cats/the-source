@@ -2,7 +2,7 @@
 """Render assets/strip.webp (README): one figure per part, large on the night with its thesis, fading into the next.
 
 The frames come from the real scenes (assets/scenes.mjs) drawn by a headless Chromium through playwright.
-Requires `npm install` (playwright) and optionally CHROME=/path/to/chromium. Pillow with WebP.
+Requires `npm i --no-save playwright` (local only) and optionally CHROME=/path/to/chromium. Pillow with WebP.
 """
 import functools
 import http.server

@@ -1,8 +1,0 @@
-{
-  "name": "the-source",
-  "private": true,
-  "description": "Build tools for La Source / The Source: figure renders, README strip, books.",
-  "devDependencies": {
-    "playwright": "1.64.1"
-  }
-}

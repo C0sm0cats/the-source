@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Render assets/social.jpg (link previews): the Source on the night, with the opening question.
-Requires `npm install` (playwright) and Pillow. The README images: build_hero.py, build_strip.py."""
+Requires `npm i --no-save playwright` (local only) and Pillow. The README images: build_hero.py, build_strip.py."""
 import tempfile
 from pathlib import Path
 

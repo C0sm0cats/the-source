@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Look at figures without the site: render scenes to PNG on their night, and time them.
-// Usage (after npm install): node scripts/shoot.cjs <outdir> name[:t1,t2,...][@x,y] ...
+// Usage (after npm i --no-save playwright): node scripts/shoot.cjs <outdir> name[:t1,t2,...][@x,y] ...
 // Writes <outdir>/<name>-<t>.png (900 px) and prints the mean draw time per frame (budget: < 8 ms).
 const http = require('http'), fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
