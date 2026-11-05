@@ -1,73 +1,37 @@
-"""Draw the figures recorded from assets/scenes.mjs on a ReportLab canvas."""
+"""Render the figures of assets/scenes/*.mjs as images, exactly as the site draws them, through a headless Chromium.
+
+Used by the books (each figure on its chapter's night) and for the site's images when JavaScript is off.
+Requires `npm install` (playwright) and optionally CHROME=/path/to/chromium.
+"""
 import json
 import subprocess
 import tempfile
 from pathlib import Path
 
-from reportlab.lib import colors
-
 from common import ROOT, typo
 
 LABELS = ['you', 'past', 'future', 'large', 'small', 'everything', 'nothing', 'knowing', 'living']
+# The four nights of assets/style.css: background, ink, mark.
+TONES = {
+    'paper': ('#0f0b10', '#ede6dc', '#ff5a3a'),
+    'dusk': ('#090d1c', '#e6e9f3', '#ff6b4d'),
+    'night': ('#07080c', '#ece8dd', '#ff5a3a'),
+    'blank': ('#030305', '#f2efe8', '#ff5a3a'),
+}
 
 
 def labels_for(ui, lang):
     return {key: typo(ui[key], lang) for key in LABELS}
 
 
-def record(labels):
+def render(jobs):
+    """jobs: [{scene, labels, tone, size, file, later?, t?}] → writes each JPEG."""
+    for job in jobs:
+        job['bg'] = TONES[job.pop('tone')][0]
+        job['file'] = str(job['file'])
+        job.setdefault('later', False)
+        job.setdefault('t', None)
     with tempfile.TemporaryDirectory() as folder:
-        source, out = Path(folder) / 'labels.json', Path(folder) / 'figures.json'
-        source.write_text(json.dumps(labels), encoding='utf-8')
-        subprocess.run(['node', str(ROOT / 'scripts/export_figures.mjs'), str(source), str(out)], check=True)
-        return json.loads(out.read_text(encoding='utf-8'))
-
-
-def draw(canvas, ops, x, top, size, ink, mark, font, labels=True):
-    """Draw recorded operations in a square whose top-left corner is (x, top), y up, clipped to it."""
-    k = size / 600
-    px = lambda v: x + v * k
-    py = lambda v: top - v * k
-
-    def colour(name):
-        if name == 'ink':
-            return ink
-        if name == 'mark':
-            return mark
-        return colors.linearlyInterpolatedColor(mark, ink, 0, 1, float(name[4:]))
-
-    canvas.saveState()
-    clip = canvas.beginPath()
-    clip.rect(x, top - size, size, size)
-    canvas.clipPath(clip, stroke=0, fill=0)
-    canvas.setLineCap(1)
-    canvas.setLineJoin(1)
-    for op in ops:
-        if op['k'] == 't':
-            if labels:
-                canvas.setFillColor(ink)
-                canvas.setFillAlpha(1)
-                canvas.setFont(font, max(7.5, op['s'] * k))
-                write = {'left': canvas.drawString, 'right': canvas.drawRightString, 'center': canvas.drawCentredString}[op['al']]
-                write(px(op['x']), py(op['y']), op['t'])
-            continue
-        path = canvas.beginPath()
-        for item in op['d']:
-            if item[0] == 'M':
-                path.moveTo(px(item[1]), py(item[2]))
-            elif item[0] == 'L':
-                path.lineTo(px(item[1]), py(item[2]))
-            elif item[0] == 'C':
-                path.circle(px(item[1]), py(item[2]), item[3] * k)
-            else:
-                path.close()
-        if op['k'] == 'f':
-            canvas.setFillColor(colour(op['c']))
-            canvas.setFillAlpha(op['a'])
-            canvas.drawPath(path, stroke=0, fill=1)
-        else:
-            canvas.setStrokeColor(colour(op['c']))
-            canvas.setStrokeAlpha(op['a'])
-            canvas.setLineWidth(op['w'] * k)
-            canvas.drawPath(path, stroke=1, fill=0)
-    canvas.restoreState()
+        source = Path(folder) / 'jobs.json'
+        source.write_text(json.dumps(jobs), encoding='utf-8')
+        subprocess.run(['node', str(ROOT / 'scripts/render_figures.cjs'), str(source)], check=True)

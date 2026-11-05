@@ -1,42 +1,29 @@
 #!/usr/bin/env python3
-"""Render assets/social.jpg (link previews). Requires Poppler and Node. The README images: build_hero.py, build_plates.py."""
-import subprocess
+"""Render assets/social.jpg (link previews): the Source on the night, with the opening question.
+Requires `npm install` (playwright) and Pillow. The README images: build_hero.py, build_strip.py."""
 import tempfile
 from pathlib import Path
 
-from reportlab.lib import colors
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
+from PIL import Image, ImageDraw, ImageFont
 
 from common import ROOT, load, typo
-from figures import draw, labels_for, record
+from figures import labels_for, render
 
 W, H = 1200, 630
-for name, file in [('Thin', 'ExtraLight'), ('LightI', 'LightItalic')]:
-    pdfmetrics.registerFont(TTFont(name, str(ROOT / f'scripts/fonts/Spectral-{file}.ttf')))
-night, ink, mark = colors.HexColor('#0b0c12'), colors.HexColor('#ece8dd'), colors.HexColor('#ff5a3a')
-data = load()
-ui = data['ui']
-figures = record(labels_for(ui['fr'], 'fr'))
-
+ui = load()['ui']
 with tempfile.TemporaryDirectory() as folder:
-    pdf = Path(folder) / 'social.pdf'
-    c = canvas.Canvas(str(pdf), pagesize=(W, H), invariant=1)
-    c.setFillColor(night)
-    c.rect(0, 0, W, H, stroke=0, fill=1)
-    size = 880
-    draw(c, figures['useful'], 905 - size / 2, H / 2 + size / 2, size, ink, mark, 'LightI', labels=False)
-    c.setFillColor(ink)
-    c.setFont('LightI', 25)
-    c.drawString(66, H - 118, 'La Source')
-    c.setFont('Thin', 57)
-    for i, line in enumerate(['Et si exister', 'était la façon', 'dont le tout', 'se découvre ?']):
-        c.drawString(64, H - 212 - i * 63, typo(line, 'fr'))
-    c.setFont('LightI', 20)
-    c.drawString(66, H - 480, 'What if existing is how')
-    c.drawString(66, H - 506, 'everything discovers itself?')
-    c.save()
-    for name, width in [('social', 1200)]:
-        subprocess.run(['pdftoppm', '-scale-to-x', str(width), '-scale-to-y', str(width * H // W), '-singlefile', '-jpeg', '-jpegopt', 'quality=86', str(pdf), str(ROOT / 'assets' / name)], check=True)
+    fig = Path(folder) / 'source.jpg'
+    render([dict(scene='source', tone='night', size=760, file=fig, labels=labels_for(ui['fr'], 'fr'))])
+    image = Image.new('RGB', (W, H), '#07080c')
+    image.paste(Image.open(fig).crop((0, 65, 760, 695)), (W - 760 + 40, 0))
+thin = ImageFont.truetype(str(ROOT / 'scripts/fonts/Spectral-ExtraLight.ttf'), 57)
+italic = ImageFont.truetype(str(ROOT / 'scripts/fonts/Spectral-LightItalic.ttf'), 25)
+small = ImageFont.truetype(str(ROOT / 'scripts/fonts/Spectral-LightItalic.ttf'), 21)
+d = ImageDraw.Draw(image)
+d.text((66, 92), 'La Source', font=italic, fill='#ece8dd')
+for i, line in enumerate(['Et si exister', 'était la façon', 'dont le tout', 'se découvre ?']):
+    d.text((64, 160 + i * 66), typo(line, 'fr'), font=thin, fill='#ece8dd')
+d.text((66, 470), 'What if existing is how', font=small, fill='#b9b4aa')
+d.text((66, 498), 'everything discovers itself?', font=small, fill='#b9b4aa')
+image.save(ROOT / 'assets/social.jpg', quality=88)
 print('assets/social.jpg')

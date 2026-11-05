@@ -18,20 +18,17 @@ from reportlab.platypus import Paragraph
 from xml.sax.saxutils import escape
 
 from common import ROOT, load, typo
-from figures import draw as draw_figure, labels_for, record
+import tempfile
+from pathlib import Path
+
+from figures import TONES, labels_for, render
 
 W, H = 14 * cm, 21 * cm
 MX, TOP, BOTTOM = 1.75 * cm, 1.9 * cm, 1.9 * cm
 TEXT_W = W - 2 * MX
-TONES = {
-    'paper': ('#eeece5', '#17171b', '#e03c1f'),
-    'dusk': ('#3c4256', '#f0ede4', '#ff6b4d'),
-    'night': ('#0b0c12', '#ece8dd', '#ff5a3a'),
-    'blank': ('#ffffff', '#111114', '#e03c1f'),
-}
 HYPHEN = {'fr': 'fr_FR', 'en': 'en_GB'}
 BODY = (10.7, 14.7)
-FIGURES, CROPS, PAGES = {}, {}, {}
+FIGURES, PAGES = {}, {}
 FILES = {'fr': 'la-source-fr.pdf', 'en': 'the-source-en.pdf'}
 FONTS = {'Thin': 'ExtraLight', 'ThinI': 'ExtraLightItalic', 'Light': 'Light', 'LightI': 'LightItalic', 'Reg': 'Regular', 'Ital': 'Italic'}
 
@@ -58,6 +55,11 @@ def flow(c, text, y, size=10.2, leading=14.2, font='Light', color=None, lang=Non
     return y - h - after
 
 
+def figure(c, key, x, top, size):
+    """A figure rendered on the same night as the page, so its edges disappear."""
+    c.drawImage(str(FIGURES[key]), x, top - size, size, size)
+
+
 def background(c, name):
     bg, ink, mark, faint = tone(name)
     c.setFillColor(bg)
@@ -81,7 +83,7 @@ def folio(c, ink, title=None):
 def cover(c, data, lang):
     ui = data['ui'][lang]
     ink, mark, faint = background(c, 'night')
-    draw_figure(c, FIGURES['fractal'], 0, H - 3.9 * cm, W, ink, mark, 'LightI', labels=False)
+    figure(c, ('source', 'night', True), -1 * cm, H - 2.6 * cm, W + 2 * cm)
     c.setFillColor(ink)
     c.setFont('Thin', 39)
     c.drawString(MX, H - 3.25 * cm, ui['name'])
@@ -166,8 +168,7 @@ def opener(c, chapter, i, data, lang):
     y = flow(c, ask, H - TOP - .75 * cm, size=size, leading=size * 1.06, font='Thin', color=ink, after=10)
     fig = min(W, y - 1.25 * cm)
     x, top = (W - fig) / 2, 1.2 * cm + fig
-    draw_figure(c, FIGURES[chapter['figure']], x, top, fig, ink, mark, 'LightI')
-    CROPS[chapter['id']] = (c.getPageNumber(), x, H - top, fig)
+    figure(c, (chapter['figure'], chapter['tone'], False), x, top, fig)
     folio(c, ink)
     c.showPage()
 
@@ -193,8 +194,7 @@ def text_page(c, chapter, data, lang):
             if y - size - 22 < BOTTOM:
                 y = new_page()
             x, top = (W - size) / 2, y - 8
-            draw_figure(c, FIGURES[name], x, top, size, state['ink'], state['mark'], 'LightI')
-            CROPS[f"{chapter['id']}-{name}"] = (c.getPageNumber(), x, H - top, size)
+            figure(c, (name, chapter['tone'], False), x, top, size)
             y = top - size - 18
             continue
         quote = item.startswith('> ')
@@ -225,7 +225,7 @@ def text_page(c, chapter, data, lang):
     if c.getPageNumber() % 2:  # keep each opener on a left-hand page: a plate of the figure at another moment
         ink, mark, faint = background(c, chapter['tone'])
         size = W - 2 * .9 * cm
-        draw_figure(c, FIGURES[chapter['figure'] + '~'], (W - size) / 2, H / 2 + size / 2 + .4 * cm, size, ink, mark, 'LightI', labels=False)
+        figure(c, (chapter['figure'], chapter['tone'], True), (W - size) / 2, H / 2 + size / 2 + .4 * cm, size)
         c.showPage()
 
 
@@ -295,8 +295,8 @@ def ending(c, data, lang):
     flow(c, typo(ui['last'], lang), H - TOP, size=9.8, leading=13, font='LightI', color=ink)
     size = 28 if lang == 'fr' else 30
     y = flow(c, typo(last, lang), H - TOP - 2.2 * cm, size=size, leading=size * 1.05, font='Thin', color=ink, after=30)
-    c.setFillColor(mark)
-    c.circle(MX + 5, y, 5, stroke=0, fill=1)
+    size = min(W, y - 1 * cm)
+    figure(c, ('why', 'blank', True), (W - size) / 2, y, size)
     c.showPage()
 
     if c.getPageNumber() % 2:  # the back cover falls on an even page
@@ -312,14 +312,30 @@ def ending(c, data, lang):
     c.showPage()
 
 
-def fallback_images(pdf, lang):
-    """Figures as images for the site when JavaScript is off."""
+def figures(data, lang, folder):
+    """Every figure the book needs, on its page's night; and the site's images for when JavaScript is off."""
+    labels = labels_for(data['ui'][lang], lang)
+    jobs = {('source', 'night', True): 1400, ('why', 'blank', True): 1000}
+    site = []
+    for ch in data['chapters']:
+        jobs[(ch['figure'], ch['tone'], False)] = 1000
+        jobs[(ch['figure'], ch['tone'], True)] = 1100
+        site.append(dict(scene=ch['figure'], tone=ch['tone'], size=720, file=ROOT / f'assets/figures/{lang}-{ch["id"]}.jpg'))
+        for item in ch[lang]['body']:
+            if item.startswith('@'):
+                jobs[(item[1:], ch['tone'], False)] = 900
+                site.append(dict(scene=item[1:], tone=ch['tone'], size=720, file=ROOT / f'assets/figures/{lang}-{ch["id"]}-{item[1:]}.jpg'))
+    FIGURES.clear()
+    todo = []
+    for (scene, tone, later), size in jobs.items():
+        FIGURES[(scene, tone, later)] = Path(folder) / f'{scene}-{tone}-{int(later)}.jpg'
+        todo.append(dict(scene=scene, tone=tone, later=later, size=size, file=FIGURES[(scene, tone, later)], labels=labels))
+    for job in site:
+        job['labels'] = labels
     out = ROOT / 'assets/figures'
-    out.mkdir(exist_ok=True)
-    scale = 150 / 72
-    for chapter, (page, x, y, size) in CROPS.items():
-        args = ['pdftoppm', '-r', '150', '-f', str(page), '-l', str(page), '-x', str(round(x * scale)), '-y', str(round(y * scale)), '-W', str(round(size * scale)), '-H', str(round(size * scale)), '-jpeg', '-jpegopt', 'quality=82', '-singlefile', str(pdf), str(out / f'{lang}-{chapter}')]
-        subprocess.run(args, check=True)
+    for old in out.glob(f'{lang}-*.jpg'):
+        old.unlink()
+    render(todo + site)
 
 
 def digest(chapters, ui, lang):
@@ -338,11 +354,10 @@ def main():
     (ROOT / 'books').mkdir(exist_ok=True)
     for lang, filename in FILES.items():
         path = ROOT / 'books' / filename
-        FIGURES.clear()
-        FIGURES.update(record(labels_for(data['ui'][lang], lang)))
+        folder = tempfile.TemporaryDirectory()
+        figures(data, lang, folder.name)
         PAGES.clear()
         for final in (False, True):  # the first pass only finds where each chapter starts
-            CROPS.clear()
             target = path if final else path.with_suffix('.draft.pdf')
             c = canvas.Canvas(str(target), pagesize=(W, H), invariant=1, pageCompression=1, lang=lang)
             c.setTitle(data['ui'][lang]['name'])
@@ -359,7 +374,7 @@ def main():
             c.save()
         path.with_suffix('.draft.pdf').unlink()
         print(path.relative_to(ROOT), f'{path.stat().st_size:,} bytes')
-        fallback_images(path, lang)
+        folder.cleanup()
         subprocess.run(['pdftoppm', '-f', '1', '-l', '1', '-scale-to-x', '560', '-scale-to-y', '840', '-jpeg', '-jpegopt', 'quality=84', '-singlefile', str(path), str(ROOT / f'assets/cover-{lang}')], check=True)
 
 

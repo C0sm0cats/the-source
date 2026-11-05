@@ -9,7 +9,8 @@ from common import ROOT, load, typo
 from figures import LABELS
 
 # Bumps the asset URLs whenever the code changes, so no browser mixes new pages with old scripts.
-VERSION = hashlib.sha256(b''.join((ROOT / f'assets/{f}').read_bytes() for f in ('app.mjs', 'scenes.mjs', 'style.css'))).hexdigest()[:10]
+CODE = ['assets/app.mjs', 'assets/scenes.mjs', 'assets/style.css', *sorted(str(p.relative_to(ROOT)) for p in (ROOT / 'assets/scenes').glob('*.mjs'))]
+VERSION = hashlib.sha256(b''.join((ROOT / f).read_bytes() for f in CODE)).hexdigest()[:10]
 
 BASE_URL = 'https://c0sm0cats.github.io/the-source/'
 FONTS = ['ExtraLight', 'ExtraLightItalic', 'Light', 'LightItalic', 'Regular', 'Italic']
@@ -53,7 +54,12 @@ def live(name, label, ui, lang):
     return f'<canvas data-scene="{name}" data-labels="{labels}" role="img" aria-label="{escape(label)}"></canvas>'
 
 
-def chapter(ch, i, lang, ui):
+def minutes(t):
+    words = sum(len(item.split()) for item in t['body'] if not item.startswith('@')) + len(t['thesis'].split())
+    return max(1, round(words / 220))
+
+
+def chapter(ch, i, lang, ui, chapters):
     t = ch[lang]
     title = typo(t['title'], lang)
     prefix = '' if lang == 'fr' else '../'
@@ -64,18 +70,39 @@ def chapter(ch, i, lang, ui):
     side = 'even' if i % 2 else 'odd'
     body = '\n        '.join(block(item, lang, ch, ui) for item in t['body'])
     part = ui['parts'][ch['part']]
+    nav = []
+    if i > 0:
+        p = chapters[i - 1]
+        nav.append(f'<a class="prev" href="#{p["id"]}" rel="prev"><small>{ui["previous"]}</small>{e(p[lang]["title"], lang)}</a>')
+    if i + 1 < len(chapters):
+        n = chapters[i + 1]
+        nav.append(f'<a class="next" href="#{n["id"]}" rel="next"><small>{ui["next"]}</small>{e(n[lang]["title"], lang)}</a>')
+    else:
+        nav.append(f'<a class="next" href="#open-title" rel="next"><small>{ui["next"]}</small>{e(ui["openTitle"], lang)}</a>')
     return f'''
-  <section class="chapter {side}{wide}" id="{ch['id']}" data-tone="{ch['tone']}" aria-labelledby="ask-{ch['id']}">
+  <section class="chapter {side}{wide}" id="{ch['id']}" data-tone="{ch['tone']}" data-part="{ch['part']}" aria-labelledby="ask-{ch['id']}">
     <header class="chapter-head">
-      <p class="count">{i + 1:02d}<span> · {e(part, lang)} · {e(t['title'], lang)}</span></p>
+      <p class="count"><a href="#{ch['id']}" class="anchor" title="{ui['copyLink']}">{i + 1:02d}</a><span> · {e(part, lang)} · {e(t['title'], lang)}</span><span class="time"> · {minutes(t)} min</span></p>
       <h2 class="ask" id="ask-{ch['id']}">{e(t['thesis'], lang)}</h2>
     </header>
-    <figure class="fig">{figure}{extra}</figure>
+    <figure class="fig"><div class="stage">{figure}<button type="button" class="expand" data-expand hidden aria-label="{ui['expand']}"><span aria-hidden="true">⤢</span></button></div>{extra}<figcaption class="hint" hidden>{ui['hint']}</figcaption></figure>
     <div class="text">
         {body}
       {f'<p class="caveat"><span>{ui["unknown"]}</span> {e(t["open"], lang)}</p>' if t['open'] else ''}
       {echoes(t, ui, lang)}
+      <nav class="turn" aria-label="{ui['contents']}">{''.join(nav)}</nav>
     </div>
+  </section>'''
+
+
+def interlude(key, items, lang, ui):
+    names = ''.join(f'<li><a href="#{c["id"]}"><span>{i + 1:02d}</span>{e(c[lang]["title"], lang)}</a></li>' for i, c in items)
+    return f'''
+  <section class="interlude" id="part-{key}" data-tone="blank" aria-label="{e(ui['parts'][key], lang)}">
+    <p class="numeral" aria-hidden="true">{key}</p>
+    <h2>{e(ui['parts'][key], lang)}</h2>
+    <p class="part-line">{e(ui['partLines'][key], lang)}</p>
+    <ol>{names}</ol>
   </section>'''
 
 
@@ -87,15 +114,18 @@ def page(data, lang):
     other_lang = 'en' if lang == 'fr' else 'fr'
     first = chapters[0]['id']
     thread = '\n'.join(
-        f'<li><a href="#{c["id"]}"><span>{i + 1:02d}</span>{e(c[lang]["title"], lang)}</a></li>'
+        (f'<li class="thread-part">{c["part"]} · {e(ui["parts"][c["part"]], lang)}</li>' if i == 0 or chapters[i - 1]['part'] != c['part'] else '')
+        + f'<li><a href="#{c["id"]}"><span>{i + 1:02d}</span>{e(c[lang]["title"], lang)}<em>{e(c[lang]["thesis"], lang)}</em></a></li>'
         for i, c in enumerate(chapters)
     )
-    body = ''.join(chapter(c, i, lang, ui) for i, c in enumerate(chapters))
     firsts = {}
     for i, c in enumerate(chapters):
         firsts.setdefault(c['part'], []).append((i, c))
+    body = ''.join((interlude(c['part'], firsts[c['part']], lang, ui) if firsts[c['part']][0][0] == i else '') + chapter(c, i, lang, ui, chapters)
+                   for i, c in enumerate(chapters))
+    rail = ''.join(('<span class="gap"></span>' if i and chapters[i - 1]['part'] != c['part'] else '') + f'<a href="#{c["id"]}" data-part="{c["part"]}" title="{i + 1:02d} · {escape(typo(c[lang]["title"], lang))}"><i></i></a>' for i, c in enumerate(chapters))
     parts = ''.join(
-        f'<li><a href="#{items[0][1]["id"]}"><span>{key}</span>{e(ui["parts"][key], lang)}'
+        f'<li><a href="#part-{key}"><span>{key}</span>{e(ui["parts"][key], lang)}'
         f'<small>{items[0][0] + 1:02d}{"–" + format(items[-1][0] + 1, "02d") if len(items) > 1 else ""}</small></a></li>'
         for key, items in firsts.items()
     )
@@ -111,7 +141,7 @@ def page(data, lang):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{ui['name']} · {e(ui['subtitle'], lang)}</title>
 <meta name="description" content="{description}">
-<meta name="theme-color" content="#eeece5">
+<meta name="theme-color" content="#07080c">
 <link rel="canonical" href="{canonical}">
 <link rel="alternate" hreflang="fr" href="{BASE_URL}">
 <link rel="alternate" hreflang="en" href="{BASE_URL}en/">
@@ -129,7 +159,7 @@ def page(data, lang):
 <script type="module" src="{prefix}assets/app.mjs?v={VERSION}"></script>
 <noscript><style>.fig canvas {{ display: none; }}</style></noscript>
 </head>
-<body data-tone="paper">
+<body data-tone="night">
 <a class="skip" href="#{first}">{ui['skip']}</a>
 <header class="bar">
   <a class="wordmark" href="#top">{ui['name']}</a>
@@ -144,14 +174,16 @@ def page(data, lang):
     <a href="{other_href}" lang="{other_lang}" hreflang="{other_lang}" aria-label="{ui['otherName']}">{ui['other']}</a>
   </nav>
 </header>
-<div class="progress" aria-hidden="true"><i></i></div>
+<nav class="rail" aria-hidden="true">{rail}</nav>
+<div class="sky" aria-hidden="true"></div>
 <main id="top">
-  <section class="opening" data-tone="paper">
+  <section class="opening" data-tone="night">
     <h1 class="sr">{ui['name']}</h1>
     <p class="opening-ask">{escape(opening, quote=False)}</p>
     <div class="opening-grid fig">{live('source', ui['name'], ui, lang)}</div>
     <ol class="parts">{parts}</ol>
-    <div class="opening-foot"><p>{e(ui['intro'], lang)}</p><a href="#{first}">{ui['read']} <span aria-hidden="true">↓</span></a></div>
+    <div class="opening-foot"><p>{e(ui['intro'], lang)}</p><a class="enter" href="#part-I">{ui['read']} <span aria-hidden="true">↓</span></a></div>
+    <p class="keys" hidden>{ui['keys']}</p>
   </section>
 {body}
   <section class="ending" data-tone="blank" aria-labelledby="open-title">
@@ -159,9 +191,9 @@ def page(data, lang):
     <ol>{opens}</ol>
     <p class="last-note">{e(ui['last'], lang)}</p>
     <p class="last">{e(ui['question'], lang)}</p>
-    <i class="point" aria-hidden="true"></i>
+    <div class="ending-fig fig">{live('source', ui['name'], ui, lang)}</div>
   </section>
-  <section class="lexicon" id="lexique" data-tone="paper" aria-labelledby="lexicon-title">
+  <section class="lexicon" id="lexique" data-tone="dusk" aria-labelledby="lexicon-title">
     <div class="lexicon-head"><h2 id="lexicon-title">{ui['lexiconTitle']}</h2><p>{e(ui['lexiconNote'], lang)}</p></div>
     <dl>{terms}</dl>
     <p class="lexicon-note">{e(ui['echoesNote'], lang)}</p>
