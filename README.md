@@ -6,7 +6,7 @@
 
 > *What if existing is how everything discovers itself?*
 
-One shared origin, two infinities, countless lives, a return. **The Source** is a vision of consciousness and the meaning of existence, in thirty-six ideas. Each one fits in a sentence, unfolds over a few pages, comes with a living figure and ends with what it leaves open. Metaphysics to explore and to challenge, not a scientific theory.
+One shared origin, two infinities, countless lives, a return. **The Source** is a vision of consciousness and the meaning of existence, told one idea at a time. Each idea fits in a sentence, unfolds over a few pages, comes with a living figure and ends with what it leaves open. Metaphysics to explore and to challenge, not a scientific theory.
 
 ## From the origin to the question
 
@@ -30,6 +30,6 @@ One shared origin, two infinities, countless lives, a return. **The Source** is 
 ## What's inside
 
 - **The site**: one long reading thread through five parts, under four nights. Every idea has a living figure made of light: hover it, touch it, open it full screen, freeze it, change the number of lives. Echoes from thinkers who asked the same questions, and a glossary. Arrow keys turn the chapters.
-- **The books**: [The Source](books/the-source-en.pdf) · [La Source](books/la-source-fr.pdf). 148 pages, 14 × 21 cm. Each chapter opens on its thesis and figure, then unfolds over a few pages, with further figures and full-page plates.
+- **The books**: [The Source](books/the-source-en.pdf) · [La Source](books/la-source-fr.pdf). 14 × 21 cm. Each chapter opens on its thesis and figure, then unfolds over a few pages, with further figures and full-page plates.
 
 © C0sm0cats. Text, figures, books and code: [CC BY-NC-ND 4.0](LICENSE). Spectral: SIL Open Font License (`scripts/fonts/OFL-Spectral.txt`).
