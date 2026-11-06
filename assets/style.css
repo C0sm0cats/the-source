@@ -201,7 +201,7 @@ a:hover { color: var(--mark); text-decoration-color: currentColor; }
 }
 .stage:hover .expand, .expand:focus-visible { opacity: .85; }
 .expand:hover { border-color: var(--mark); color: var(--mark); }
-.hint { margin-top: .6rem; text-align: center; font-size: .8rem; font-style: italic; color: var(--soft); opacity: 0; transition: opacity 1s; }
+.hint { margin-top: .6rem; text-align: center; font-size: .82rem; font-style: italic; color: var(--soft); opacity: .55; transition: opacity 1s; }
 .fig:hover .hint, .fig.fresh .hint { opacity: 1; }
 .stage:fullscreen { background: #030305; display: grid; place-items: center; }
 .stage:fullscreen canvas { width: min(100vw, 100vh); height: auto; }

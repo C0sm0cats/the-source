@@ -60,8 +60,9 @@ export default (K) => {
 
   return {
   // A river followed back to its source. A delta of light opens downstream; a wave of light runs down it (what unfolds),
-  // and every channel carries sparks back up to the one hot point (what returns). Hover: the way back from that place
-  // lights up. Click: every mouth sends its light home at once.
+  // and every channel carries sparks back up to the one hot point (what returns). Hover: the channel nearest the pointer
+  // lights up all the way back to the source, and sparks climb it from where you rest. Click: a light follows the river
+  // back from that point to its source, which flares and sends a wave of light down every channel (unfold, return).
   river() {
     const r = rng(41), D = 7, NL = 1 << D, SX = 300, SY = 62, BOT = 540, P = 120;
     const leafX = Array.from({ length: NL }, (_, i) => 30 + (540 * (i + .5 + (r() - .5) * .8)) / NL);
@@ -112,32 +113,54 @@ export default (K) => {
     const riders = Array.from({ length: NL * 4 }, (_, i) => [i % NL, .028 + r() * .03, r()]);
     const tipPh = Array.from({ length: NL }, () => r() * TAU);
     const stars = sky(r, 150, (x, y) => y < 200 || x < 40 || x > 560);
-    const hl = new Float32Array(NL), clk = {};
-    let px = 300, py = 300, seen = 0;
+    const hl = new Float32Array(NL), clk = {}, falls = [];
+    let px = 300, py = 300, seen = 0, hq = 0;
+    // the channel and the place along it nearest to a point
+    const nearest = (x, y) => {
+      let bd = 1e9, bi = 0, bq = 0;
+      for (let i = 0; i < NL; i++) { const p = paths[i]; for (let q = 6; q < P; q += 3) { const d = (p[2 * q] - x) ** 2 + (p[2 * q + 1] - y) ** 2; if (d < bd) { bd = d; bi = i; bq = q; } } }
+      return [bi, bq / (P - 1)];
+    };
     return (g, c, t, s) => {
-      clicked(clk, s, t);
-      if (s.x != null) { px = ease(s, px, s.x, .2); py = ease(s, py, s.y, .2); }
-      seen = ease(s, seen, s.x == null ? 0 : 1, .06);
+      if (clicked(clk, s, t)) { const [i, u] = nearest(clk.x, clk.y); falls.push({ at: t, i, u }); if (falls.length > 4) falls.shift(); }
+      if (s.x != null) { px = ease(s, px, s.x, .3); py = ease(s, py, s.y, .3); }
+      seen = ease(s, seen, s.x == null ? 0 : 1, .15);
       let best = -1;
-      if (s.x != null) {
-        let bd = 1e9;
-        for (let i = 0; i < NL; i++) { const p = paths[i]; for (let q = 30; q < P; q += 3) { const d = (p[2 * q] - px) ** 2 + (p[2 * q + 1] - py) ** 2; if (d < bd) { bd = d; best = i; } } }
-        if (bd > 70 * 70) best = -1;
-      }
-      for (let i = 0; i < NL; i++) hl[i] = ease(s, hl[i], i === best ? 1 : 0, .07);
+      if (s.x != null) { const [i, u] = nearest(px, py); best = i; hq = u; }
+      for (let i = 0; i < NL; i++) hl[i] = ease(s, hl[i], i === best ? 1 : 0, .16);
+      for (let k = falls.length - 1; k >= 0; k--) if (t - falls[k].at > 4.2 || t < falls[k].at) falls.splice(k, 1);
+      // a click: the light climbs home for 1 s, then the source unfolds it down every level
+      let flare = 0, down = [];
+      for (const f of falls) { const a = t - f.at; flare += Math.exp(-(((a - 1) / .3) ** 2)); if (a > .9) down.push(smooth(1, 3.4, a) * 1.08, 1 - smooth(3.2, 4.2, a)); }
       g.lineCap = g.lineJoin = 'round';
       twinkle(g, c, stars, t, .38);
       light(g);
       glow(g, SX, SY + 40, 260, c.heat(.3), .35);
       // the channels; a slow wave of light runs down the levels
       for (const { level, hb, list } of groups.values()) {
-        const wave = .7 + .3 * Math.sin((t * TAU) / 9 - level * .75);
-        fibre(g, list, colourOf(level, hb, c), .45 + 3 * .7 ** level, (.3 + .5 * (1 - level / D)) * wave, 5);
+        let wave = .7 + .3 * Math.sin((t * TAU) / 9 - level * .75);
+        const lu = ((level + 1) / (D + 1)) ** .8;
+        for (let k = 0; k < down.length; k += 2) wave += 1.6 * down[k + 1] * Math.exp(-(((lu - down[k]) / .13) ** 2));
+        fibre(g, list, colourOf(level, hb, c), .45 + 3 * .7 ** level, Math.min(1, (.3 + .5 * (1 - level / D)) * wave), 5);
       }
       // the way back from where the pointer rests
-      for (let i = 0; i < NL; i++) if (hl[i] > .02) {
-        const p = paths[i], list = Array.from(p);
-        fibre(g, list, c.heat(.85), 1.3, .75 * hl[i], 6);
+      for (let i = 0; i < NL; i++) if (hl[i] > .04) fibre(g, Array.from(paths[i]), c.heat(.85), 1.4, .95 * hl[i], 6);
+      // the way back from a click: the stretch already climbed glows behind the light
+      for (const f of falls) {
+        const a = t - f.at, u = f.u * (1 - smooth(0, 1, a) ** 1.3), fade = 1 - smooth(1, 2.2, a);
+        if (fade <= 0) continue;
+        const p = paths[f.i], q0 = Math.floor(u * (P - 1)), q1 = Math.ceil(f.u * (P - 1)), list = [];
+        for (let q = q0; q <= q1; q++) list.push(p[2 * q], p[2 * q + 1]);
+        fibre(g, list, c.heat(.9), 1.8, .9 * fade, 6);
+        const [x, y] = at(p, u);
+        if (a < 1.05) spark(g, x, y, 2.6, c.heat(.8), 1);
+        glow(g, p[2 * q1], p[2 * q1 + 1], 60, c.hue(hueOf(nodes[NL + f.i].hue)), .6 * fade);
+      }
+      // a finger resting on the water: light gathers there
+      if (best >= 0 && seen > .02) {
+        const [x, y] = at(paths[best], hq);
+        glow(g, x, y, 130, c.hue(hueOf(nodes[NL + best].hue)), .75 * seen);
+        spark(g, x, y, 1.8, c.heat(.85), .9 * seen);
       }
       // the mouths: out-of-focus lights that breathe
       const tips = Array.from({ length: HB }, () => []);
@@ -159,11 +182,15 @@ export default (K) => {
         up[b].push(x, y, (.7 + 1.1 * (1 - u)) * (1 + hl[i]));
         const [x2, y2] = at(paths[i], u + .012); up[b].push(x2, y2, .5 + .6 * (1 - u));
       }
-      // a touch: every mouth sends its light home at once
-      const age = t - (clk.at ?? -99);
-      if (age >= 0 && age < 3.2) {
-        const u = 1 - smooth(0, 2.6, age) ** 1.4;
-        for (let i = 0; i < NL; i++) { const [x, y] = at(paths[i], u); up[HB + 2].push(x, y, 1 + 1.1 * (1 - u)); }
+      // from where the pointer rests, sparks climb home
+      if (best >= 0 && seen > .02) for (let m = 0; m < 7; m++) {
+        const u = hq * (1 - frac(t * .55 + m / 7)), [x, y] = at(paths[best], u);
+        up[u < .12 ? HB + 2 : u < .3 ? HB + 1 : HB].push(x, y, (1.3 + 1.2 * (1 - u)) * seen);
+      }
+      // the unfolding: a front of light runs down every channel to every mouth
+      for (let k = 0; k < down.length; k += 2) if (down[k] > .02 && down[k] < 1) {
+        const u = down[k] / 1.08;
+        for (let i = 0; i < NL; i++) { const [x, y] = at(paths[i], u), hb = Math.min(HB - 1, Math.floor(nodes[NL + i].hue * HB)); up[u < .2 ? HB + 2 : hb].push(x, y, (1.6 - .6 * u) * down[k + 1]); }
       }
       up.forEach((list, b) => {
         if (!list.length) return;
@@ -171,9 +198,9 @@ export default (K) => {
         g.globalAlpha = .18; discs(g, list, 3, 3.2);
         g.globalAlpha = .85; discs(g, list);
       });
-      const flare = Math.exp(-(((age - 2.6) / .45) ** 2));
+      flare = Math.min(1.5, flare);
       glow(g, SX, SY, 180 * (1 + flare), c.mark, .25 + .5 * flare);
-      ember(g, c, SX, SY, 1 + .5 * flare, heartbeat(t));
+      ember(g, c, SX, SY, 1 + .5 * flare + .12 * seen, heartbeat(t));
       end(g);
     };
   },
@@ -183,7 +210,9 @@ export default (K) => {
   // then a foam of particles). Everything flows outward and grows as it goes, so the figure zooms forever both ways.
   // And it is a fractal: every galaxy, every cell is drawn as a copy of the whole figure. Both arms leave the ember in
   // the same red and part in the spectrum: cold for the large, warm and green for the small.
-  // Hover: the level under the pointer opens. Click: a wave of light runs out along both arms at once.
+  // Hover: the level nearest the pointer opens, and so does its twin at the same depth on the other arm (a galaxy and a
+  // cell are one step from the same point); light runs back from both to the ember. Click: the ember flares, a wave
+  // runs out along both arms and the whole figure zooms one level further, both ways at once.
   fractal(labels) {
     const r = rng(36), B = Math.log(4.2) / TAU, R0 = 7, REND = 256, TH = Math.log(REND / R0) / B;
     const ROT = [-Math.PI / 2 - TH, Math.PI / 2 - TH];
@@ -204,12 +233,17 @@ export default (K) => {
     for (let i = 6; i < 88; i += 7) members.push(i * 3);
     const tiny = []; for (let i = 0; i < tpl.length; i += 12) tiny.push(i);
     const stars = sky(r, 260);
-    const clk = {};
+    const clk = {}, zooms = [], hj = new Float32Array(N);
+    let zoomed = 0, hu = .5, here = 0;
     const point = (arm, th) => { const q = R0 * Math.exp(B * th), a = ROT[arm] + th; return [300 + q * Math.cos(a), 300 + q * Math.sin(a), q]; };
     return (g, c, t, s) => {
-      clicked(clk, s, t);
+      if (clicked(clk, s, t)) { zooms.push(t); if (zooms.length > 4) zoomed += 4.6 * smooth(0, 2.2, t - zooms.shift()); }
+      // a click zooms one level: the flow is pushed forward by one level's time, eased
+      while (zooms.length && (t - zooms[0] > 2.2 || t < zooms[0])) { if (t >= zooms[0]) zoomed += 4.6; zooms.shift(); }
+      let tf = t + zoomed; for (const z of zooms) tf += 4.6 * smooth(0, 2.2, t - z);
       const wave = (t - (clk.at ?? -99)) / 2.4;
-      const lit = (u) => 1 + .35 * Math.exp(-(((u - frac(t / 16) * 1.3 + .15) * 5) ** 2)) + (wave < 1.4 ? 1.6 * Math.exp(-(((u - wave) * 7) ** 2)) : 0);
+      here = ease(s, here, s.x == null ? 0 : 1, .15);
+      const lit = (u) => 1 + .35 * Math.exp(-(((u - frac(t / 16) * 1.3 + .15) * 5) ** 2)) + (wave < 1.4 ? 1.6 * Math.exp(-(((u - wave) * 7) ** 2)) : 0) + (here > .01 ? .8 * here * Math.exp(-(((u - hu) * 9) ** 2)) : 0);
       g.lineCap = g.lineJoin = 'round';
       twinkle(g, c, stars, t, .5, c.cool(.85));
       light(g);
@@ -233,7 +267,7 @@ export default (K) => {
           lists[prev].push(NaN, NaN);
           // light running out along each strand, faster as it goes: the zoom
           for (let m = 0; m < 2; m++) {
-            const th = TH * frac(t / 7 + st.run + m / 2) ** 1.4, u = th / TH, q = R0 * Math.exp(B * th);
+            const th = TH * frac(tf / 7 + st.run + m / 2) ** 1.4, u = th / TH, q = R0 * Math.exp(B * th);
             const off = st.o * q * .1 * (.25 + .75 * smooth(0, .2, u)) * (.75 + .25 * Math.sin(th * st.f + st.ph + t * .35)) + q * .035 * Math.sin(th * 1.7 + st.ph - t * .5);
             const a = ROT[arm] + th;
             runs[Math.min(HB - 1, Math.floor(u * HB))].push(300 + (q + off) * Math.cos(a), 300 + (q + off) * Math.sin(a), (.7 + 1.3 * u) * st.a);
@@ -259,16 +293,26 @@ export default (K) => {
       let near = null, nd = 1e9;
       const items = [];
       for (let arm = 0; arm < 2; arm++) for (let j = 0; j < N; j++) {
-        const th = TH * frac((j + t / FLOW) / N), u = th / TH, [x, y, q] = point(arm, th), R = q * .3;
+        const th = TH * frac((j + tf / FLOW) / N), u = th / TH, [x, y, q] = point(arm, th), R0 = q * .3;
         const vis = smooth(.1, .24, u) * (1 - smooth(.86, 1, u));
         if (vis <= .01) continue;
-        const it = { arm, j, u, x, y, R, vis, hue: Math.round(HUE[arm](u) * 24) / 24, open: 0 };
+        const it = { arm, j, u, x, y, R: R0, th, vis, hue: Math.round(HUE[arm](u) * 24) / 24, open: 0 };
         items.push(it);
-        if (s.x != null) { const d = Math.hypot(s.x - x, s.y - y) / Math.max(R * 1.3, 24); if (d < 1 && d < nd) { nd = d; near = it; } }
+        if (s.x != null) { const d = Math.max(0, Math.hypot(s.x - x, s.y - y) - R0 * .8) * (1.4 - vis * .4); if (d < nd) { nd = d; near = it; } }
       }
-      if (near) near.open = 1 - nd * nd;
+      // the level under the pointer, and its twin on the other arm, open together
+      for (let j = 0; j < N; j++) hj[j] = ease(s, hj[j], near && near.j === j ? 1 : 0, .14);
+      if (near) hu = ease(s, hu, near.u, .2);
       for (const it of items) {
-        const { arm, j, u, x, y, R, hue } = it, L = lit(u), k = it.vis * Math.min(1.8, L) * (1 + .8 * it.open);
+        it.open = hj[it.j] * here; it.R *= 1 + .35 * it.open;
+        if (it.open > .02) {
+          glows.push(it.x, it.y, it.R * 2.6, it.hue, .3 * it.open);
+          // light running home from the opened level
+          for (let m = 0; m < 6; m++) { const [bx, by] = point(it.arm, it.th * (1 - frac(t * .45 + m / 6)) ** 1.2); add(1, bx, by, 1.7 * it.open); }
+        }
+      }
+      for (const it of items) {
+        const { arm, j, u, x, y, R, hue } = it, L = lit(u), k = it.vis * Math.min(1.8, L) * (1 + .7 * it.open);
         const spin = j * 1.7 + t * (arm ? -.11 : .06);
         const cs = Math.cos(spin), sn = Math.sin(spin);
         if (arm === 0) {
@@ -323,7 +367,7 @@ export default (K) => {
       for (const [key, l] of arms) fibre(g, l.pts, c.hue(key), .7, Math.min(1, l.a / l.n), 5);
       const db = new Map();
       for (const [arm, th0, o, size, ph] of dust) {
-        const th = TH * frac(th0 + t / (FLOW * N)), u = th / TH, q = R0 * Math.exp(B * th), a = ROT[arm] + th, rr = q * (1 + o * .55);
+        const th = TH * frac(th0 + tf / (FLOW * N)), u = th / TH, q = R0 * Math.exp(B * th), a = ROT[arm] + th, rr = q * (1 + o * .55);
         const vis = smooth(.05, .25, u) * (1 - smooth(.88, 1, u)) * (.55 + .45 * Math.sin(t * 1.3 + ph));
         if (vis < .05) continue;
         const key = Math.round(HUE[arm](u) * 16) / 16; let l = db.get(key); if (!l) db.set(key, (l = []));
@@ -344,8 +388,9 @@ export default (K) => {
         g.globalAlpha = key === 1 ? .85 : .75; discs(g, list);
       }
       // the junction: where both begin
-      glow(g, 300, 300, 150 * (1 + .7 * Math.exp(-((wave * 4) ** 2))), c.mark, .35);
-      ember(g, c, 300, 300, 1.05, heartbeat(t));
+      const fl = wave >= 0 ? Math.exp(-((wave * 4) ** 2)) : 0;
+      glow(g, 300, 300, 150 * (1 + 1.2 * fl), c.mark, .35 + .4 * fl);
+      ember(g, c, 300, 300, 1.05 * (1 + .5 * fl), heartbeat(t));
       end(g);
       label(g, c, labels.large, 300, 22, 'center', 17);
       label(g, c, labels.small, 300, 590, 'center', 17);
@@ -355,19 +400,23 @@ export default (K) => {
 
   // Everything and nothing. One disc of seeds: on one side every seed is lit in the full spectrum, on the other each one
   // only flickers, a reserve of possible lights. Between them a bright seam winds through the ember and keeps turning.
-  // Hover: the seam turns toward the pointer. Click: a wave crosses the nothing and, for a moment, shows all it could be.
+  // Hover: the seam turns toward the pointer, and the nothing wakes under it: its seeds light up in colour where it rests.
+  // Click: a ring of light leaves the click and crosses the disc; behind it the nothing shows, for a moment, all it could
+  // be, then goes back to flickering.
   void(labels) {
     const golden = Math.PI * (3 - Math.sqrt(5)), N = 5200, RD = 236, r = rng(3);
     const items = Array.from({ length: N }, (_, i) => { const q = RD * Math.sqrt((i + .5) / N), a = i * golden; return [q * Math.cos(a), q * Math.sin(a), r() * .7 + .5, r(), 2 + r() * 7, q]; });
     const HB = 14, AB = 4;
-    let angle = 0.5;
-    const clk = {};
+    let angle = 0.5, here = 0, px = 300, py = 300;
+    const clk = {}, waves = [];
     return (g, c, t, s) => {
-      clicked(clk, s, t);
+      if (clicked(clk, s, t)) { waves.push([t, clk.x - 300, clk.y - 300]); if (waves.length > 3) waves.shift(); }
+      for (let k = waves.length - 1; k >= 0; k--) if (t - waves[k][0] > 4.5 || t < waves[k][0]) waves.splice(k, 1);
+      here = ease(s, here, s.x == null ? 0 : 1, .15);
+      if (s.x != null) { px = ease(s, px, s.x - 300, .3); py = ease(s, py, s.y - 300, .3); }
       const target = s.x == null ? .5 + t * .11 : Math.atan2(s.y - 300, s.x - 300);
       angle = s.snap ? target : angle + Math.atan2(Math.sin(target - angle), Math.cos(target - angle)) * .05;
-      const nx = Math.cos(angle), ny = Math.sin(angle), wave = (t - (clk.at ?? -99)) * 190;
-      const cx = (clk.x ?? 300) - 300, cy = (clk.y ?? 300) - 300;
+      const nx = Math.cos(angle), ny = Math.sin(angle), WV = 210;
       const buckets = Array.from({ length: HB * AB }, () => []), seam = [], spark0 = [];
       for (const [x, y, size, jit, per, q] of items) {
         const u = x * ny - y * nx, v = x * nx + y * ny;
@@ -377,7 +426,12 @@ export default (K) => {
         if (a < .3) {
           const f = frac(t / per + jit * 7);
           a = Math.max(a, .55 * Math.exp(-(((f - .5) * 9) ** 2)) * (.4 + .6 * jit));
-          if (wave < 600) { const d = Math.hypot(x - cx, y - cy) - wave; a = Math.max(a, Math.exp(-((d / 28) ** 2)) * (1 - wave / 600)); }
+          if (here > .01) a = Math.max(a, .85 * here * Math.exp(-((x - px) ** 2 + (y - py) ** 2) / 3600));
+        }
+        // the waves of a click: a bright front, and behind it everything the nothing could be, fading
+        if (waves.length) for (const [w0, cx, cy] of waves) {
+          const age = t - w0, tp = age - Math.hypot(x - cx, y - cy) / WV;
+          if (tp > -.2) { const k = tp < 0 ? Math.exp(-((tp / .09) ** 2)) * 1.3 : Math.exp(-tp / 1.3) * (tp < .12 ? 1.3 - 2.5 * tp : 1); a = Math.max(a, Math.min(1, k)); if (tp > -.1 && tp < .1) sz *= 1 + 1.2 * (1 - Math.abs(tp) * 10); }
         }
         if (Math.abs(edge) < 10) seam.push(300 + x, 300 + y, (1 - Math.abs(edge) / 10) * 1.6);
         if (a < .04) continue;
@@ -400,9 +454,19 @@ export default (K) => {
       for (let k = 0; k <= 80; k++) { const u = -RD + (2 * RD * k) / 80, v = 62 * Math.sin((u / RD) * Math.PI); curve.push(300 + u * ny + v * nx, 300 - u * nx + v * ny); }
       fibre(g, curve, c.heat(.8), 1.1, .5, 7);
       for (let k = 0; k < 6; k++) { const u = (frac(t / 14 + k / 6) * 2 - 1) * RD, v = 62 * Math.sin((u / RD) * Math.PI); spark(g, 300 + u * ny + v * nx, 300 - u * nx + v * ny, 1.4, c.heat(.7), .8 * Math.sin(Math.PI * frac(t / 14 + k / 6))); }
+      // the front of each wave, inside the disc
+      for (const [w0, cx, cy] of waves) {
+        const R = (t - w0) * WV, f = 1 - smooth(1.5, 3.2, t - w0), pts = [];
+        if (f <= 0 || R < 2) continue;
+        let open = false;
+        for (let k = 0; k <= 120; k++) { const a = (k / 120) * TAU, x = cx + R * Math.cos(a), y = cy + R * Math.sin(a); if (x * x + y * y < RD * RD) { pts.push(300 + x, 300 + y); open = true; } else if (open) { pts.push(NaN, NaN); open = false; } }
+        fibre(g, pts, c.heat(.85), 1.2, .6 * f, 7);
+      }
+      if (here > .01) glow(g, 300 + px, 300 + py, 80, c.hue(frac(Math.atan2(py, px) / TAU - t / 50)), .35 * here);
       g.strokeStyle = c.ink; g.lineWidth = .7; g.globalAlpha = .22;
       g.beginPath(); g.arc(300, 300, RD + 8, 0, TAU); g.stroke();
-      ember(g, c, 300, 300, 1, heartbeat(t));
+      let cry = 0; for (const [w0, cx, cy] of waves) cry += Math.exp(-(((t - w0 - Math.hypot(cx, cy) / WV) / .15) ** 2));
+      ember(g, c, 300, 300, 1 + .4 * Math.min(1, cry), heartbeat(t));
       end(g);
       label(g, c, labels.everything, 300 + nx * 272, 306 + ny * 272, 'center', 18);
       label(g, c, labels.nothing, 300 - nx * 272, 306 - ny * 272, 'center', 18);
@@ -411,7 +475,9 @@ export default (K) => {
   },
 
   // Out of a formless haze, motes of light gather into a flower of six rings around a kindling ember, then let go.
-  // Hover: where the pointer rests, the haze takes form ahead of time. Click: a breath of form crosses everything.
+  // Hover: where the pointer rests, form comes: the haze there gathers into a small flower of its own turning under the
+  // hand, the motes of the rings nearby take their places, and the nearest ring lights up. Click: a breath of form leaves
+  // the click; as it passes, every mote is pushed into its place and flares, the rings flash, the ember kindles.
   emerge() {
     const r = rng(17), N = 2600, FORMED = 1800, CURVES = 6, PERIOD = 36;
     const per = Math.ceil(FORMED / CURVES);
@@ -424,35 +490,62 @@ export default (K) => {
       }
       return item;
     });
-    const HB = 8, clk = {};
+    const HB = 8, clk = {}, breaths = [], ringH = new Float32Array(CURVES), BV = 260;
     let px = 300, py = 300, here = 0;
     return (g, c, t, s) => {
-      clicked(clk, s, t);
-      if (s.x != null) { px = ease(s, px, s.x, .08); py = ease(s, py, s.y, .08); }
-      here = ease(s, here, s.x == null ? 0 : 1, .04);
-      const u = (t % PERIOD) / PERIOD, surge = Math.exp(-(t - (clk.at ?? -99)) / 3) * ((t - (clk.at ?? -99)) > 0);
-      const haze = Array.from({ length: HB }, () => []), formed = Array.from({ length: CURVES * 3 }, () => []);
+      if (clicked(clk, s, t)) { breaths.push([t, clk.x, clk.y]); if (breaths.length > 3) breaths.shift(); }
+      for (let k = breaths.length - 1; k >= 0; k--) if (t - breaths[k][0] > 5 || t < breaths[k][0]) breaths.splice(k, 1);
+      if (s.x != null) { px = ease(s, px, s.x, .2); py = ease(s, py, s.y, .2); }
+      here = ease(s, here, s.x == null ? 0 : 1, .12);
+      let surge = 0; for (const [b0] of breaths) surge = Math.max(surge, Math.exp(-(t - b0) / 2.2));
+      // the ring nearest the pointer
+      const pj = clamp(Math.round((Math.hypot(px - 300, py - 300) - 38) / 40), 0, CURVES - 1);
+      for (let j = 0; j < CURVES; j++) ringH[j] = ease(s, ringH[j], j === pj && s.x != null ? 1 : 0, .12);
+      const u = (t % PERIOD) / PERIOD, spin = t * .5;
+      const haze = Array.from({ length: HB }, () => []), formed = Array.from({ length: CURVES * 3 }, () => []), hand = [];
       const ringF = new Float32Array(CURVES);
       for (const it of items) {
         let x = it.x + 7 * Math.sin(t * it.v + it.w) + 4 * Math.sin(t * .05 + it.y * .01), y = it.y + 7 * Math.cos(t * it.v * .8 + it.w) + 4 * Math.cos(t * .04 + it.x * .01);
-        if (it.tx === undefined) { haze[Math.floor(it.hue * HB) % HB].push(x, y, .7); continue; }
+        // a breath: the front pushes every mote outward and makes it flare
+        let flash = 0;
+        for (const [b0, bx, by] of breaths) {
+          const dx = x - bx, dy = y - by, d = Math.hypot(dx, dy) || 1, k = Math.exp(-(((d - (t - b0) * BV) / 34) ** 2)) * Math.exp(-(t - b0) / 2.4);
+          if (k > .01) { x += (dx / d) * 16 * k; y += (dy / d) * 16 * k; flash = Math.max(flash, k); }
+        }
+        if (it.tx === undefined) {
+          // the haze under the hand gathers into a small flower of its own
+          if (here > .01) {
+            const dx = x - px, dy = y - py, d2 = dx * dx + dy * dy, k = here * Math.exp(-d2 / 14000);
+            if (k > .04) {
+              const a = Math.atan2(dy, dx), q = 8 + 44 * Math.abs(Math.cos(3 * (a - spin))) * (.85 + .15 * frac(it.w));
+              x += (px + q * Math.cos(a) - x) * k; y += (py + q * Math.sin(a) - y) * k;
+              if (k > .3) { hand.push(x, y, .7 + .9 * k); continue; }
+            }
+          }
+          if (flash > .3) { hand.push(x, y, .8 + flash); continue; }
+          haze[Math.floor(it.hue * HB) % HB].push(x, y, .7 + flash);
+          continue;
+        }
         let f = smooth(it.start, it.start + .3, u) * (1 - smooth(.8 + .06 * it.lag, .97, u));
-        if (here > .01) f = Math.max(f, here * Math.exp(-((it.tx - px) ** 2 + (it.ty - py) ** 2) / 7000));
-        f = Math.max(f, surge * (.5 + .5 * it.lag));
+        if (here > .01) f = Math.max(f, here * Math.exp(-((it.tx - px) ** 2 + (it.ty - py) ** 2) / 9000));
+        if (surge > .01) { const b = breaths[breaths.length - 1], dd = Math.hypot(it.tx - b[1], it.ty - b[2]), tp = t - b[0] - dd / BV; if (tp > 0) f = Math.max(f, Math.exp(-tp / 2.4) * (.6 + .4 * it.lag)); }
         x += (it.tx - x) * f; y += (it.ty - y) * f;
         ringF[it.j] += f / per;
-        if (f < .25) haze[Math.floor(it.hue * HB) % HB].push(x, y, .7 + f);
-        else formed[it.j * 3 + Math.min(2, Math.floor((f - .25) / .25))].push(x, y, .7 + .9 * f);
+        const v = Math.min(1, f + flash * .8);
+        if (v < .25) haze[Math.floor(it.hue * HB) % HB].push(x, y, .7 + v);
+        else formed[it.j * 3 + Math.min(2, Math.floor((v - .25) / .25))].push(x, y, .7 + .9 * v + .8 * flash);
       }
       light(g);
       haze.forEach((list, b) => { g.fillStyle = c.cool(.45 + .4 * b / HB); g.globalAlpha = .22; discs(g, list, 3, 3); g.globalAlpha = .6; discs(g, list, 3, 1.15); });
       // the rings themselves, as the motes reach them
       g.lineCap = g.lineJoin = 'round';
       for (let j = 0; j < CURVES; j++) {
-        const f = ringF[j];
-        if (f < .03) continue;
+        let fl = 0;
+        for (const [b0, bx, by] of breaths) { const rj = 38 + 40 * j, d = Math.hypot(bx - 300, by - 300), tp = t - b0 - Math.max(0, Math.abs(d - rj) - 10) / BV; fl = Math.max(fl, tp > 0 ? Math.exp(-tp / .9) : 0); }
+        const f = ringF[j], a = .28 * f * f + .55 * ringH[j] * here + .6 * fl;
+        if (a < .01) continue;
         const pts = []; for (let k = 0; k <= 180; k++) pts.push(...ringAt(j, (k / 180) * TAU + .002 * Math.sin(t)));
-        fibre(g, pts, c.hue(.02 + j * .16), .9, .28 * f * f, 8);
+        fibre(g, pts, c.hue(.02 + j * .16), .9 + .6 * ringH[j] * here, Math.min(1, a), 8);
       }
       formed.forEach((list, b) => {
         if (!list.length) return;
@@ -461,8 +554,20 @@ export default (K) => {
         g.globalAlpha = .1 + .05 * k; discs(g, list, 3, 3.2);
         g.globalAlpha = .55 + .2 * k; discs(g, list);
       });
+      for (const [b0, bx, by] of breaths) {
+        const R = (t - b0) * BV, f = Math.exp(-(t - b0) / 1.4), pts = [];
+        if (R < 4 || f < .03) continue;
+        for (let k = 0; k <= 90; k++) pts.push(bx + R * Math.cos((k / 90) * TAU), by + R * Math.sin((k / 90) * TAU));
+        fibre(g, pts, c.heat(.75), 1, .45 * f, 8);
+      }
+      if (hand.length) { g.fillStyle = c.heat(.8); g.globalAlpha = .14; discs(g, hand, 3, 3.2); g.globalAlpha = .8; discs(g, hand); }
+      if (here > .01) {
+        glow(g, px, py, 70, c.hue(.02 + pj * .16), .3 * here);
+        const rose = []; for (let k = 0; k <= 120; k++) { const a = (k / 120) * TAU, q = 8 + 40 * Math.abs(Math.cos(3 * (a - spin))); rose.push(px + q * Math.cos(a), py + q * Math.sin(a)); }
+        fibre(g, rose, c.heat(.75), .9, .55 * here, 6);
+      }
       const form = smooth(0, .25, u) * (1 - smooth(.8, 1, u));
-      const k = Math.max(form, surge, here * .3);
+      const k = Math.max(form, Math.min(1.3, surge * 1.3), here * .3);
       if (k > .01) ember(g, c, 300, 300, .25 + .85 * k, heartbeat(t));
       else spark(g, 300, 300, 1.2, c.mark, .5);
       end(g);
@@ -470,8 +575,9 @@ export default (K) => {
   },
 
   // A part of the whole comes loose. The whole is a slow galaxy of light; one ember tightens out of it and, little by
-  // little, draws a shape of its own, still tied to the sea it rose from by a thread. Hover: the whole lights up where you
-  // look, the same light as the part. Click: a first cry, a ring that crosses the whole.
+  // little, draws a shape of its own, still tied to the sea it rose from by a thread. Hover: wherever the pointer rests,
+  // the whole leans and lights toward it, a thread reaches out to that place and a seed of light kindles there: a place
+  // to be born. Click: a first cry there, rings in the colours of light that cross the whole and make it ripple.
   birth() {
     const r = rng(5), golden = Math.PI * (3 - Math.sqrt(5)), N = 1700, MX = 200, MY = 300, R = 118, PERIOD = 30, PTS = 460;
     const mass = Array.from({ length: N }, (_, i) => { const q = R * ((i + .5) / N) ** .5 * (1 + (r() - .5) * .1), a = i * golden + (r() - .5) * .25; return [q, a, r() * .7 + .6, r() * TAU, r()]; });
@@ -486,18 +592,19 @@ export default (K) => {
       return [MX + (L.ox - MX) * go + k * Math.cos(a), MY + (L.oy - MY) * go + k * Math.sin(a)];
     };
     const trace = (L, s0, s1, n) => { const out = []; for (let i = 0; i <= n; i++) out.push(...at(L, s0 + ((s1 - s0) * i) / n)); return out; };
-    const HB = 10, clk = {};
-    let px = 0, py = 0, here = 0;
+    const HB = 10, clk = {}, cries = [], CV = 170;
+    let px = 0, py = 0, here = 0, kindle = 0;
     return (g, c, t, s) => {
-      clicked(clk, s, t);
-      if (s.x != null) { px = ease(s, px, s.x, .1); py = ease(s, py, s.y, .1); }
-      here = ease(s, here, s.x == null ? 0 : 1, .05);
+      if (clicked(clk, s, t)) { cries.push([t, clk.x, clk.y]); if (cries.length > 3) cries.shift(); }
+      for (let k = cries.length - 1; k >= 0; k--) if (t - cries[k][0] > 3.6 || t < cries[k][0]) cries.splice(k, 1);
+      if (s.x != null) { px = here < .01 ? s.x : ease(s, px, s.x, .25); py = here < .01 ? s.y : ease(s, py, s.y, .25); }
+      here = ease(s, here, s.x == null ? 0 : 1, .14);
+      kindle = ease(s, kindle, s.x == null ? 0 : 1, .03);
+      const pdx = px - MX, pdy = py - MY, pd = Math.hypot(pdx, pdy) || 1;
       const k = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD, L = life(k);
       const [ex, ey] = at(L, u);
       const breath = 1 + .03 * Math.sin((t * TAU) / 12), pull = 1 - smooth(.1, .5, u);
-      const cry = t - (clk.at ?? -99), cx = clk.cx ?? ex, cy = clk.cy ?? ey;
-      if (cry < .02 && cry >= 0) { clk.cx = ex; clk.cy = ey; }
-      const ringR = cry * 160;
+      const cry = t - (clk.at ?? -99);
       // the whole: a galaxy turning slowly, faster near its heart, leaning toward the part that leaves
       const buckets = Array.from({ length: HB * 2 }, () => []);
       for (const [q, a0, size, w, h] of mass) {
@@ -506,8 +613,16 @@ export default (K) => {
         const ex2 = ex - x, ey2 = ey - y, d2 = ex2 * ex2 + ey2 * ey2, f = 24 * pull * Math.exp(-d2 / 2600);
         if (f > .05) { const d = Math.sqrt(d2) || 1; x += (ex2 / d) * f; y += (ey2 / d) * f; }
         let b = .3 + .25 * Math.sin(t * .4 + w);
-        if (here > .01) b += here * Math.exp(-((x - px) ** 2 + (y - py) ** 2) / 2500);
-        if (ringR < 520) b += Math.exp(-(((Math.hypot(x - cx, y - cy) - ringR) / 14) ** 2)) * (1 - ringR / 520) * 1.2;
+        if (here > .01) {
+          // the whole leans toward the place the pointer offers
+          const lean = here * Math.exp(-((x - MX - (pdx / pd) * Math.min(pd, R)) ** 2 + (y - MY - (pdy / pd) * Math.min(pd, R)) ** 2) / 5000);
+          if (lean > .02) { x += (pdx / pd) * 16 * lean; y += (pdy / pd) * 16 * lean; b += .8 * lean; }
+          b += 1.2 * here * Math.exp(-((x - px) ** 2 + (y - py) ** 2) / 4000);
+        }
+        for (const [c0, cx, cy] of cries) {
+          const a = t - c0, dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy) || 1, fade = 1 - a / 3.6;
+          for (let j = 0; j < 3; j++) { const k = Math.exp(-(((d - (a * CV - j * 26)) / 14) ** 2)) * fade * (1 - j * .25); if (k > .02) { b += 1.3 * k; x += (dx / d) * 6 * k; y += (dy / d) * 6 * k; } }
+        }
         const hue = frac(.5 + .4 * h + a / TAU * .25);
         buckets[(b > .6 ? HB : 0) + Math.floor(hue * HB) % HB].push(x, y, size * (.7 + .4 * Math.min(1.5, b)));
       }
@@ -540,9 +655,30 @@ export default (K) => {
         const kk = b / (B - 1), s0 = (u * b) / B, s1 = (u * (b + 1)) / B;
         fibre(g, trace(L, s0, s1, Math.ceil(n / B)), kk > .8 ? c.heat(.45 + (kk - .8) * 1.75) : c.hue(frac(L.hue + .5 * kk)), .6 + 1.2 * kk * kk, (.3 + .65 * kk) * fade, 5);
       }
-      if (ringR < 520) {
-        g.strokeStyle = c.heat(.8); g.lineWidth = 1.2; g.globalAlpha = .5 * (1 - ringR / 520);
-        g.beginPath(); g.arc(cx, cy, Math.max(1, ringR), 0, TAU); g.stroke();
+      // a place offered: a thread from the whole to the pointer, carrying light out, and a seed kindling there
+      if (here > .01) {
+        const sx = MX + (pdx / pd) * Math.min(pd, R * .75), sy = MY + (pdy / pd) * Math.min(pd, R * .75), len = Math.hypot(px - sx, py - sy);
+        if (len > 6) {
+          const pts = []; for (let i = 0; i <= 30; i++) { const v = i / 30, bow = 14 * Math.sin(Math.PI * v) * Math.sin(t * .7); pts.push(sx + (px - sx) * v - (pdy / pd) * bow, sy + (py - sy) * v + (pdx / pd) * bow); }
+          fibre(g, pts, c.cool(.8), .7, .5 * here, 6);
+          g.fillStyle = c.cool(.92); g.globalAlpha = .9 * here; const bs = [];
+          for (let m = 0; m < 4; m++) { const v = frac(t * .5 + m / 4), q = Math.round(v * 30) * 2; bs.push(pts[q], pts[q + 1], 1.4); }
+          discs(g, bs);
+        }
+        glow(g, px, py, 70 + 50 * kindle, c.hue(frac(L.hue + .5)), .5 * here);
+        glow(g, px, py, 26 + 14 * kindle, c.heat(.7), .6 * here * kindle);
+        spark(g, px, py, (1.4 + 1.8 * kindle) * (1 + .12 * Math.sin(t * 5)), c.hue(frac(L.hue + .5)), .9 * here);
+      }
+      // the cries: rings in the colours of light, a burst of sparks at the start
+      for (const [c0, cx, cy] of cries) {
+        const a = t - c0, fade = 1 - a / 3.6;
+        for (let j = 0; j < 3; j++) {
+          const RR = a * CV - j * 26; if (RR < 2) continue;
+          g.strokeStyle = c.hue(frac(L.hue + j * .18)); g.lineWidth = 1.4; g.globalAlpha = .6 * fade * (1 - j * .25);
+          g.beginPath(); g.arc(cx, cy, RR, 0, TAU); g.stroke();
+        }
+        if (a < .9) { const sp = []; for (let i = 0; i < 18; i++) { const an = (i / 18) * TAU + c0, v = 60 + (i % 3) * 30; sp.push(cx + Math.cos(an) * v * a, cy + Math.sin(an) * v * a, 1.5); } g.fillStyle = c.heat(.85); g.globalAlpha = 1 - a / .9; discs(g, sp); g.globalAlpha *= .2; discs(g, sp, 3, 4); }
+        glow(g, cx, cy, 120 * Math.exp(-a * 1.5), c.mark, .7 * Math.exp(-a * 2));
       }
       ember(g, c, ex, ey, (.35 + .75 * smooth(0, .06, u)) * (1 - .5 * smooth(.92, 1, u)) * (1 + .5 * Math.exp(-cry * 3) * (cry > 0)), heartbeat(t));
       end(g);
@@ -552,8 +688,10 @@ export default (K) => {
   // A body after Leonardo: a man of light in the circle and the square, both of his poses kept as faint traces like in the
   // drawing, the living one moving slowly between them as it breathes. Inside, nerves and vessels of light leave the heart
   // for the head, the fingers and the toes; each beat runs out along them and makes the skin flare. Contours inside the
-  // skin swell with every beat. Hover on the body: it feels, and the signal runs back to the heart. Click: a touch; the
-  // sensation travels in and the heart answers with a stronger beat.
+  // skin swell with every beat. Hover: wherever the pointer is, the nearest place on the skin feels it: the skin lights
+  // there, the signal runs back along the nearest nerves to the heart, and the heart quickens. Click: a touch; a shiver
+  // spreads over the skin from that place, the sensation travels in, and the heart answers with a strong beat that runs
+  // out to every end and makes the whole skin flare.
   body() {
     const NAV = [300, 287], RC = 243, SQ = [100, 130, 400], BREATH = 14, BEAT = 1.1;
     const X0 = 70, Y0 = 108, ST = 3, NX = Math.ceil(460 / ST) + 1, NY = Math.ceil(450 / ST) + 1;
@@ -678,20 +816,42 @@ export default (K) => {
     };
     const r = rng(9), stars = sky(r, 150, (x, y) => Math.hypot(x - NAV[0], y - NAV[1]) > RC + 8);
     const beat = (x) => Math.exp(-((x / .07) ** 2)) + .55 * Math.exp(-(((x - .27) / .07) ** 2));
-    const HB = 14, clk = {};
-    let px = null, py = null, feel = 0;
+    const HB = 14, clk = {}, touches = [];
+    let px = null, py = null, feel = 0, tx = 300, ty = 300, quick = 0, lastT = null;
     return (g, c, t, s) => {
-      clicked(clk, s, t);
-      if (s.x != null) { px = px == null ? s.x : ease(s, px, s.x, .25); py = py == null ? s.y : ease(s, py, s.y, .25); }
+      const fresh = clicked(clk, s, t);
+      if (s.x != null) { px = px == null ? s.x : ease(s, px, s.x, .35); py = py == null ? s.y : ease(s, py, s.y, .35); }
+      // the heart quickens while it is touched: extra phase, zero when nothing touches it
+      const dt = lastT == null ? 0 : clamp(t - lastT, 0, .1); lastT = t;
+      quick += dt * .6 * feel;
       const p = .5 - .5 * Math.cos((t * TAU) / BREATH), breath = 1 + .03 * Math.sin((t * TAU) / BREATH);
       const body = pose(p, AL, BE);
       body.parts[3][4] *= breath; body.parts[4][4] *= breath;
       sample(body.parts);
       const at = (x, y) => { const i = Math.round((x - X0) / ST), j = Math.round((y - Y0) / ST); return i < 0 || j < 0 || i >= NX || j >= NY ? 60 : grid[j * NX + i]; };
-      const inside = px != null && at(px, py) < 14;
-      feel = ease(s, feel, inside ? 1 : 0, .08);
-      const touch = t - (clk.at ?? -99), arrive = Math.exp(-(((touch - 1) / .15) ** 2));
-      const age = t % BEAT, [hx, hy] = body.heart;
+      // the skin, found first: where the pointer and the clicks land on it
+      const skin = Array.from({ length: HB }, () => []), mids = [];
+      contour(0, (a, b, c2, e) => {
+        const mx = (a + c2) / 2, my = (b + e) / 2, h = frac(Math.atan2(my - NAV[1], mx - NAV[0]) / TAU + .25);
+        skin[Math.floor(h * HB) % HB].push(a, b, c2, e);
+        mids.push(mx, my);
+      });
+      const onSkin = (x, y) => { let bd = 1e9, bx = x, by = y; for (let i = 0; i < mids.length; i += 2) { const d = (mids[i] - x) ** 2 + (mids[i + 1] - y) ** 2; if (d < bd) { bd = d; bx = mids[i]; by = mids[i + 1]; } } return [bx, by, Math.sqrt(bd)]; };
+      let reach = 0;
+      if (px != null && s.x != null) {
+        const inside = at(px, py) < 0, [bx, by, bd] = onSkin(px, py);
+        // inside the body, the touch is where the pointer is; outside, the nearest skin feels it, less the farther away
+        const gx = inside ? px : bx, gy = inside ? py : by;
+        tx = feel < .02 ? gx : ease(s, tx, gx, .35); ty = feel < .02 ? gy : ease(s, ty, gy, .35);
+        reach = inside ? 1 : 1 - .5 * smooth(10, 220, bd);
+      }
+      feel = ease(s, feel, reach, .15);
+      if (fresh) { const [bx, by] = at(clk.x, clk.y) < 0 ? [clk.x, clk.y] : onSkin(clk.x, clk.y); touches.push([t, bx, by]); if (touches.length > 3) touches.shift(); }
+      for (let k = touches.length - 1; k >= 0; k--) if (t - touches[k][0] > 3.2 || t < touches[k][0]) touches.splice(k, 1);
+      let arrive = 0, answer = -1;
+      for (const [t0] of touches) { const a = t - t0; arrive += Math.exp(-(((a - 1) / .15) ** 2)); if (a > 1 && a < 1.8) answer = Math.max(answer, (a - 1) / .7); }
+      arrive = Math.min(1.4, arrive);
+      const age = (t + quick) % BEAT, [hx, hy] = body.heart;
       g.lineCap = g.lineJoin = 'round';
       twinkle(g, c, stars, t, .32);
       light(g);
@@ -712,15 +872,22 @@ export default (K) => {
       // the two poses of the drawing, as faint traces
       traces.forEach((tr, i) => { g.strokeStyle = i ? c.heat(.6) : c.cool(.7); g.lineWidth = .8; g.globalAlpha = .1 + .12 * (i ? p : 1 - p); segs(g, tr); });
       // nerves and vessels: from the heart to every end
-      const nerves = Array.from({ length: HB }, () => []), runs = Array.from({ length: HB + 2 }, () => []);
+      const nerves = Array.from({ length: HB }, () => []), runs = Array.from({ length: HB + 3 }, () => []);
       body.paths.forEach((path, n) => {
         const b = Math.floor((n / body.paths.length) * HB), list = nerves[b];
         for (let k = 0; k <= 24; k++) { const [x, y] = along(path, k / 24); list.push(x, y); }
         list.push(NaN, NaN);
         const f = (age - .05) / .65;
         if (f > 0 && f < 1) { const [x, y] = along(path, f); runs[b].push(x, y, 1 + .9 * (1 - f)); }
-        if (feel > .05) { const end = path[path.length - 1], dd = Math.hypot(end[0] - px, end[1] - py); if (dd < 90) for (let m = 0; m < 2; m++) { const [x, y] = along(path, 1 - frac(t / 1.5 + m / 2 + n * .07)); runs[HB].push(x, y, 1.7 * feel * Math.exp(-((dd / 60) ** 2))); } }
-        if (touch > 0 && touch < 1.05) { const end = path[path.length - 1], dd = Math.hypot(end[0] - clk.x, end[1] - clk.y); if (dd < 110) { const [x, y] = along(path, 1 - touch); runs[HB + 1].push(x, y, 2.2 * Math.exp(-((dd / 70) ** 2))); } }
+        // the place along this nerve nearest to a point, as [fraction, distance]
+        const near = (x0, y0) => { let bd = 1e9, bk = 0; for (let k = 0; k <= 24; k++) { const d = (list[list.length - 52 + 2 * k] - x0) ** 2 + (list[list.length - 51 + 2 * k] - y0) ** 2; if (d < bd) { bd = d; bk = k; } } return [bk / 24, Math.sqrt(bd)]; };
+        if (feel > .05) { const [f0, dd] = near(tx, ty); if (dd < 90) for (let m = 0; m < 3; m++) { const [x, y] = along(path, f0 * (1 - frac(t / 1.2 + m / 3 + n * .07))); runs[HB].push(x, y, 1.8 * feel * Math.exp(-((dd / 50) ** 2))); } }
+        for (const [t0, cx, cy] of touches) {
+          const a = t - t0;
+          if (a > 0 && a < 1.05) { const [f0, dd] = near(cx, cy); if (dd < 110) { const [x, y] = along(path, f0 * (1 - a)); runs[HB + 1].push(x, y, 2.4 * Math.exp(-((dd / 70) ** 2))); } }
+        }
+        // the heart's answer runs out to every end
+        if (answer >= 0 && answer < 1) for (let m = 0; m < 3; m++) { const [x, y] = along(path, Math.max(0, answer - m * .035)); runs[HB + 2].push(x, y, (2.4 - answer) * (1 - m * .3)); }
       });
       nerves.forEach((list, b) => fibre(g, list, c.hue((b + .5) / HB), .6, .3 + .25 * beat(age - .3), 5));
       // the drawing inside: two faint contours for volume, and the pen lines of the anatomy, warmed by each beat
@@ -730,33 +897,42 @@ export default (K) => {
       });
       fibre(g, body.lines, c.heat(.72), .75, .42 + .2 * beat(age - .4), 4);
       // the skin, coloured around the navel, flaring with the beat and where it is felt
-      const skin = Array.from({ length: HB }, () => []), hot = [];
-      const arrival = beat(age - .7) + beat(age + BEAT - .7);
-      contour(0, (a, b, c2, e) => {
-        const mx = (a + c2) / 2, my = (b + e) / 2, h = frac(Math.atan2(my - NAV[1], mx - NAV[0]) / TAU + .25);
-        skin[Math.floor(h * HB) % HB].push(a, b, c2, e);
-        if (feel > .05 && Math.hypot(mx - px, my - py) < 46) hot.push(a, b, c2, e);
-      });
+      let arrival = beat(age - .7) + beat(age + BEAT - .7);
+      for (const [t0] of touches) arrival += 2.4 * Math.exp(-(((t - t0 - 1.75) / .25) ** 2));
       skin.forEach((list, b) => {
         g.strokeStyle = c.hue((b + .5) / HB);
-        g.lineWidth = 6; g.globalAlpha = .08 + .08 * arrival; segs(g, list);
-        g.lineWidth = 1.2; g.globalAlpha = .7 + .3 * arrival; segs(g, list);
+        g.lineWidth = 6; g.globalAlpha = Math.min(1, .08 + .08 * arrival); segs(g, list);
+        g.lineWidth = 1.2; g.globalAlpha = Math.min(1, .7 + .3 * arrival); segs(g, list);
       });
-      if (hot.length) { g.strokeStyle = c.cool(.85); g.lineWidth = 7; g.globalAlpha = .2 * feel; segs(g, hot); g.lineWidth = 1.6; g.globalAlpha = .9 * feel; segs(g, hot); }
+      // where it is felt: the skin warms around the touch, brighter nearer; a shiver spreads from each click
+      const hot = [[], [], []], shiver = [];
+      if (feel > .05 || touches.length) {
+        skin.forEach((list) => { for (let i = 0; i < list.length; i += 4) {
+          const mx = (list[i] + list[i + 2]) / 2, my = (list[i + 1] + list[i + 3]) / 2;
+          if (feel > .05) { const d = Math.hypot(mx - tx, my - ty); if (d < 100) hot[d < 30 ? 2 : d < 60 ? 1 : 0].push(list[i], list[i + 1], list[i + 2], list[i + 3]); }
+          for (const [t0, cx, cy] of touches) { const a = t - t0, d = Math.hypot(mx - cx, my - cy) - a * 260; if (a < 1.6 && d > -40 && d < 6) { shiver.push(list[i], list[i + 1], list[i + 2], list[i + 3]); break; } }
+        } });
+      }
+      hot.forEach((list, k) => { if (!list.length) return; g.strokeStyle = c.cool(.75 + .1 * k); g.lineWidth = 7; g.globalAlpha = (.1 + .1 * k) * feel; segs(g, list); g.lineWidth = 1.3 + .4 * k; g.globalAlpha = (.4 + .3 * k) * feel; segs(g, list); });
+      if (shiver.length) { g.strokeStyle = c.cool(.95); g.lineWidth = 8; g.globalAlpha = .3; segs(g, shiver); g.lineWidth = 2; g.globalAlpha = 1; segs(g, shiver); }
+      if (feel > .02) { glow(g, tx, ty, 80, c.cool(.7), .5 * feel); spark(g, tx, ty, 1.6, c.cool(.85), .8 * feel); }
+      for (const [t0, cx, cy] of touches) { const a = t - t0; glow(g, cx, cy, 130, c.cool(.85), .9 * Math.exp(-a * 2)); }
+      if (arrive > .01) glow(g, hx, hy, 220, c.mark, .55 * arrive);
       runs.forEach((list, b) => {
         if (!list.length) return;
-        g.fillStyle = b < HB ? c.hue((b + .5) / HB) : c.cool(b === HB ? .75 : .9);
+        g.fillStyle = b < HB ? c.hue((b + .5) / HB) : b === HB + 2 ? c.heat(.85) : c.cool(b === HB ? .75 : .9);
         g.globalAlpha = .2; discs(g, list, 3, 3);
         g.globalAlpha = .95; discs(g, list);
       });
-      ember(g, c, hx, hy, .9, 1 + .35 * beat(age) + .8 * arrive);
+      ember(g, c, hx, hy, .9 * (1 + .1 * feel), 1 + .35 * beat(age) + .8 * arrive);
       end(g);
     };
   },
 
   // A puddle at night: the sky trembles in it, stars and a moon in the water. Pebbles fall like embers, and their circles
-  // widen in the colours of light, cross, touch the edge. A leaf rides them. Hover over the water: a finger stirs it.
-  // Click: the child throws a pebble.
+  // widen in the colours of light, cross, touch the edge. A leaf rides them. Hover: a finger rests in the water (at the
+  // nearest shore when outside it), a light under it, and it keeps stirring small circles. Click: the child throws a
+  // pebble there; it falls as an ember and its circles cross everything.
   play() {
     const CX = 300, CY = 318, W = 240, H = 160, SQ = .5, PERIOD = 4.4, LIFE = 13;
     const shore = (a) => 1 + .05 * Math.sin(3 * a + 1) + .035 * Math.sin(5 * a + 2.2) + .02 * Math.sin(9 * a + .4) + .015 * Math.sin(14 * a) + .02 * Math.cos(2 * a);
@@ -780,29 +956,32 @@ export default (K) => {
     const clouds = Array.from({ length: 8 }, () => [r() * 900, CY - H * .9 + r() * H * 1.8, 60 + r() * 80, 14 + r() * 14, r()]);
     const auto = (j) => { const m = rng(j * 71 + 9); m(); let x, y; do { x = CX + (m() - .5) * W * 1.3; y = CY + (m() - .5) * H * 1.2; } while (!inside(x, y, .8)); return { x, y, at: j * PERIOD + 1.2, amp: 1, hue: m() }; };
     const clicks = [], stirs = [];
-    let lastClick = null, lastStir = -1;
+    let lastClick = null, lastStir = -1, fx = CX, fy = CY, wet = 0;
+    // a point pulled into the water
+    const inWater = (x, y) => { for (let k = 0; k < 40 && !inside(x, y, .9); k++) { x += (CX - x) * .08; y += (CY - y) * .08; } return [x, y]; };
     const RINGHUES = [0, .14, .28, .5, .66, .84];
     return (g, c, t, s) => {
       if (s.click && s.click !== lastClick) {
         lastClick = s.click;
         if (!s.snap) {
-          let [x, y] = s.click;
-          for (let k = 0; k < 40 && !inside(x, y, .9); k++) { x += (CX - x) * .08; y += (CY - y) * .08; }
-          clicks.push({ x, y, at: t + .45, amp: 1.2, hue: frac(t * .37) });
+          const [x, y] = inWater(...s.click);
+          clicks.push({ x, y, at: t + .45, amp: 1.6, hue: frac(t * .37) });
           if (clicks.length > 3) clicks.shift();
         }
       }
       // a finger in the water
-      if (s.x != null && !s.snap && inside(s.x, s.y, .95) && Math.floor(t / 1.3) !== lastStir) {
-        lastStir = Math.floor(t / 1.3);
-        stirs.push({ x: s.x, y: s.y, at: t, amp: .35, hue: .55, soft: true });
-        if (stirs.length > 6) stirs.shift();
+      wet = ease(s, wet, s.x == null ? 0 : 1, .15);
+      if (s.x != null) { const [x, y] = inWater(s.x, s.y); fx = wet < .02 ? x : ease(s, fx, x, .3); fy = wet < .02 ? y : ease(s, fy, y, .3); }
+      if (s.x != null && !s.snap && Math.floor(t / .6) !== lastStir) {
+        lastStir = Math.floor(t / .6);
+        stirs.push({ x: fx, y: fy, at: t, amp: .45, hue: frac(.5 + t * .05), soft: true });
+        if (stirs.length > 8) stirs.shift();
       }
       for (const list of [clicks, stirs]) for (let i = list.length - 1; i >= 0; i--) if (t < list[i].at - 1 || t - list[i].at > LIFE) list.splice(i, 1);
       const k = Math.floor(t / PERIOD), drops = [];
       for (let j = k - 2; j <= k; j++) drops.push(auto(j));
       drops.push(...clicks);
-      const live = drops.filter((d) => t > d.at && t - d.at < LIFE).concat(stirs.filter((d) => t > d.at && t - d.at < 7));
+      const live = drops.filter((d) => t > d.at && t - d.at < LIFE).concat(stirs.filter((d) => t > d.at && t - d.at < 4.5));
       let slope = 0;
       const n = live.length, DX = live.map((d) => d.x), DY = live.map((d) => d.y), FRONT = live.map((d) => (t - d.at) * 46), DAMP = live.map((d) => d.amp * Math.exp(-(t - d.at) / 6));
       const wave = (x, y) => {
@@ -903,6 +1082,8 @@ export default (K) => {
       leafPts.push(ax - 5 * ca, ay - 5 * sa * .7, bx, by, NaN, NaN);
       for (let i = 1; i < 6; i++) for (const side of [-1, 1]) { const [x0, y0] = leaf(i / 6, 0), [x1, y1] = leaf(i / 6 + .1, side * .75); leafPts.push(x0, y0, x1, y1, NaN, NaN); }
       fibre(g, leafPts, c.heat(.7), .8, .75, 5);
+      // the finger: a light resting in the water
+      if (wet > .02) { const h = wave(fx, fy); glow(g, fx + h * 2, fy + h * 2, 60, c.cool(.75), .45 * wet); spark(g, fx + h * 2, fy + h * 2, 1.6, c.cool(.9), .8 * wet); }
       // the last pebble: a falling ember, then a glow resting under the water
       let last = null;
       for (const d of drops) if (t > d.at - .6 && (!last || d.at > last.at)) last = d;
@@ -946,8 +1127,8 @@ export default (K) => {
     let lx = 300, ly = 300;
     return (g, c, t, s) => {
       clicked(clk, s, t);
-      lx = ease(s, lx, s.x == null ? 300 + 26 * Math.sin((t * TAU) / 38) : 300 + clamp((s.x - 300) * .45, -110, 110), .03);
-      ly = ease(s, ly, s.y == null ? 300 + 14 * Math.sin((t * TAU) / 29) : 300 + clamp((s.y - 300) * .45, -110, 110), .03);
+      lx = ease(s, lx, s.x == null ? 300 + 26 * Math.sin((t * TAU) / 38) : 300 + clamp((s.x - 300) * .45, -110, 110), s.x == null ? .03 : .07);
+      ly = ease(s, ly, s.y == null ? 300 + 14 * Math.sin((t * TAU) / 29) : 300 + clamp((s.y - 300) * .45, -110, 110), s.y == null ? .03 : .07);
       const tau = t - (clk.at ?? -99), d = tau < 0 ? 0 : smooth(0, 1.6, tau) * (1 - smooth(4.2, 7.5, tau));
       const E = R * (1 - d), cr = -1 / S, sr = 0, inner = R * (1 - .5 * d), seen = 1 - smooth(0, .55, d);
       const ph1 = (t * TAU) / 34, ph2 = (t * TAU) / 19;

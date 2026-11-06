@@ -12,7 +12,7 @@ chapters = data['chapters']
 ui = data['ui']
 assert len({c['id'] for c in chapters}) == len(chapters) >= 14
 assert set(ui['fr']) == set(ui['en'])
-required = {'title', 'thesis', 'body', 'open', 'echoes'}
+required = {'title', 'thesis', 'body', 'open', 'echoes', 'hint'}
 for chapter in chapters:
     fr, en = chapter['fr'], chapter['en']
     assert set(fr) == set(en) == required, chapter['id']

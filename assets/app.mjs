@@ -157,9 +157,19 @@ document.querySelectorAll('canvas[data-scene]').forEach((canvas) => {
     const box = canvas.getBoundingClientRect();
     return [((event.clientX - box.left) / box.width) * 600, ((event.clientY - box.top) / box.height) * 600];
   };
-  canvas.addEventListener('pointermove', (event) => { if (event.pointerType === 'mouse') [state.x, state.y] = locate(event); });
-  canvas.addEventListener('pointerleave', () => { state.x = state.y = null; });
-  canvas.addEventListener('pointerdown', (event) => { state.click = locate(event); if (paused) paint(item); });
+  // a mouse hovers; a finger rests where it touched for a moment, then lifts
+  let lift = 0;
+  const rest = () => { clearTimeout(lift); lift = setTimeout(() => { state.x = state.y = null; }, 2500); };
+  canvas.addEventListener('pointermove', (event) => {
+    if (event.pointerType === 'mouse' || event.buttons) [state.x, state.y] = locate(event);
+    if (event.pointerType !== 'mouse' && event.buttons) rest();
+  });
+  canvas.addEventListener('pointerleave', (event) => { if (event.pointerType === 'mouse') state.x = state.y = null; });
+  canvas.addEventListener('pointerdown', (event) => {
+    state.click = locate(event);
+    if (event.pointerType !== 'mouse') { [state.x, state.y] = state.click; rest(); }
+    if (paused) paint(item);
+  });
   new IntersectionObserver(([entry]) => {
     item.visible = entry.isIntersecting;
     if (item.visible) { paint(item); wake(); }

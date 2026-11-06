@@ -182,7 +182,8 @@ export default (K) => {
   },
 
   // A fabric of lives, almost invisible at rest. A pain at one point (an ember flaring) sends a front through all of it:
-  // every point flinches and lights up, and the threads between them appear. Hover reveals the threads around you; a touch hurts.
+  // every point flinches and lights up, and the threads between them appear. A hand resting on it presses a dimple: the threads
+  // around it light up, and what it feels goes out in soft rings that the far points still feel. A touch hurts.
   field() {
     const r = rng(23), SP = 11, R = 284, pts = [], at = new Map(), links = [];
     for (let row = -30; row <= 30; row++) for (let col = -30; col <= 30; col++) {
@@ -200,26 +201,33 @@ export default (K) => {
     const N = pts.length, PERIOD = 6.5, stars = sky(29, 90, (x, y) => Math.hypot(x - 300, y - 300) > R);
     const X = new Float32Array(N), Y = new Float32Array(N), E = new Float32Array(N), H = new Float32Array(N);
     const seedAt = (k) => { const q = rng(k * 97 + 5); q(); const rad = 60 + q() * 170, a = q() * TAU; return [300 + rad * Math.cos(a), 300 + rad * Math.sin(a)]; };
-    const click = clicked(), hurts = [];
-    let hx = 300, hy = 300, hov = 0;
+    const click = clicked(), hurts = [], felt = [];
+    let hx = 300, hy = 300, hov = 0, lastFelt = -99;
     return (g, c, t, s) => {
       const k0 = click(s);
-      if (k0) { hurts.push({ x: k0[0], y: k0[1], at: t }); if (hurts.length > 3) hurts.shift(); }
-      if (s.x != null) { hx = ease(s, hx, s.x, .12); hy = ease(s, hy, s.y, .12); }
-      hov = ease(s, hov, s.x == null ? 0 : 1, .05);
+      if (k0) { hurts.push({ x: k0[0], y: k0[1], at: t, k: 1 }); if (hurts.length > 3) hurts.shift(); }
+      if (s.x != null) { hx = ease(s, hx, s.x, .25); hy = ease(s, hy, s.y, .25); }
+      hov = ease(s, hov, s.x == null ? 0 : 1, .12);
+      // a hand resting on the fabric: what it feels goes out, softly, to the others
+      if (s.x != null && hov > .4 && (t - lastFelt > 2 || t < lastFelt)) { lastFelt = t; felt.push({ x: hx, y: hy, at: t, k: .35 }); if (felt.length > 2) felt.shift(); }
       const k = Math.floor(t / PERIOD), pulses = hurts.filter((p) => t >= p.at && t - p.at < 20);
-      for (let j = k - 2; j <= k; j++) { const [x, y] = seedAt(j); pulses.push({ x, y, at: j * PERIOD }); }
+      for (const p of felt) if (t >= p.at && t - p.at < 4) pulses.push(p);
+      for (let j = k - 2; j <= k; j++) { const [x, y] = seedAt(j); pulses.push({ x, y, at: j * PERIOD, k: 1 }); }
       for (let i = 0; i < N; i++) {
         const p = pts[i];
         let x = p.x + 1.3 * Math.sin((t * TAU) / 11 + p.ph), y = p.y + 1.3 * Math.cos((t * TAU) / 13 + p.ph), e = 0;
         for (const q of pulses) {
           const age = t - q.at, dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy) || 1, front = age * 82, z = (d - front) / 36;
           if (z > 4 || z < -6) continue;
-          const w = Math.exp(-z * z) * Math.exp(-age / 7.5), push = Math.sin((d - front) / 11) * w * 11;
+          const w = Math.exp(-z * z) * Math.exp(-age / 7.5) * q.k, push = Math.sin((d - front) / 11) * w * 11;
           x += (dx / d) * push; y += (dy / d) * push; e += w;
         }
-        X[i] = x; Y[i] = y; E[i] = Math.min(1, e);
-        H[i] = hov * Math.exp(-(((p.x - hx) ** 2 + (p.y - hy) ** 2) / 5200));
+        let h = 0;
+        if (hov > .01) {
+          const dx = p.x - hx, dy = p.y - hy, d2 = dx * dx + dy * dy;
+          if (d2 < 40000) { const d = Math.sqrt(d2) || 1, dent = hov * Math.exp(-d2 / 2600); h = hov * Math.exp(-d2 / 9000); x += (dx / d) * 9 * dent; y += (dy / d) * 9 * dent; }
+        }
+        X[i] = x; Y[i] = y; E[i] = Math.min(1, e); H[i] = h;
       }
       night(g, c, t, stars, .7);
       light(g);
@@ -233,12 +241,13 @@ export default (K) => {
       }
       g.lineCap = 'round';
       lb.forEach((a, i) => { g.strokeStyle = c.heat(.35 + .1 * i); g.lineWidth = .4 + .14 * i; g.globalAlpha = .06 + .055 * i; segs(g, a); });
-      hb.forEach((a, i) => { g.strokeStyle = c.cool(.55 + .12 * i); g.lineWidth = .6; g.globalAlpha = .14 + .14 * i; segs(g, a); });
+      hb.forEach((a, i) => { g.strokeStyle = c.cool(.6 + .14 * i); g.lineWidth = .6 + .25 * i; g.globalAlpha = .2 + .2 * i; segs(g, a); });
+      if (hov > .01) glow(g, hx, hy, 110, c.cool(.55), .3 * hov);
       // the points: a quiet spectrum at rest, embers where the pain passes
       const rest = Array.from({ length: 36 }, () => []), lit = Array.from({ length: 6 }, () => []);
       for (let i = 0; i < N; i++) {
         const p = pts[i], e = E[i] + H[i] * .3;
-        rest[Math.min(2, Math.floor(p.edge * 3)) * 12 + Math.floor(p.hue * 12) % 12].push(X[i], Y[i], p.sz * (1 + H[i]));
+        rest[Math.min(2, Math.floor(Math.max(p.edge, H[i]) * 3)) * 12 + Math.floor(p.hue * 12) % 12].push(X[i], Y[i], p.sz * (1 + 1.6 * H[i]));
         if (E[i] > .05) lit[Math.min(5, Math.floor(e * 6))].push(X[i], Y[i], p.sz * (1 + 2.2 * e));
       }
       rest.forEach((a, i) => { g.fillStyle = c.hue((i % 12 + .5) / 12); g.globalAlpha = .12 + .2 * Math.floor(i / 12); dotsR(g, a); });
@@ -250,7 +259,7 @@ export default (K) => {
       // where it hurts
       for (const q of pulses) {
         const age = t - q.at;
-        if (age < 0 || age > 6) continue;
+        if (age < 0 || age > 6 || q.k < 1) continue;
         const f = Math.exp(-age * .7);
         glow(g, q.x, q.y, 140 * f + 30, c.mark, .5 * f);
         spark(g, q.x, q.y, 1.5 + 4 * f, c.mark, f, c.heat(1));
@@ -261,7 +270,8 @@ export default (K) => {
   },
 
   // Families of lives, each a small constellation, tied by threads to the others. A shock at one life runs along the
-  // threads to every cluster, flaring as it goes. Hover lights the threads of the nearest life; a touch sends a shock from it.
+  // threads to every cluster, flaring as it goes. A hand near a life lights it, its family and the threads that leave it, two
+  // steps out, and they lean toward the hand. A touch strikes the nearest life: the shock leaves from it, stronger, to everyone.
   ripple() {
     const r = rng(19), centres = [];
     for (let tries = 0; centres.length < 11 && tries < 5000; tries++) {
@@ -307,9 +317,9 @@ export default (K) => {
     };
     const sources = [0, 1, 2, 3, 4, 5].map(() => Math.floor(r() * N)), dist = sources.map(spread), PERIOD = 7.5;
     const stars = sky(91, 120), click = clicked();
-    let shock = null, near = -1, show = 0;
-    const wave = (pos, d, age) => nodes.forEach((p, i) => {
-      const front = age * 95, x = (d[i] - front) / 40, w = Math.exp(-x * x) * Math.exp(-age / 6.5);
+    let shock = null, near = -1, show = 0, px = 300, py = 300;
+    const wave = (pos, d, age, gain = 1) => nodes.forEach((p, i) => {
+      const front = age * 95, x = (d[i] - front) / 40, w = gain * Math.exp(-x * x) * Math.exp(-age / 6.5);
       const sh = w * Math.sin((d[i] - front) / 10) * 8;
       pos[i][0] += p.dx * sh; pos[i][1] += p.dy * sh; pos[i][2] += w;
     });
@@ -317,15 +327,18 @@ export default (K) => {
       const k = Math.floor(t / PERIOD), cl = click(s);
       const nearest = (x, y) => { let b = 0; nodes.forEach((p, i) => { if (Math.hypot(p.x - x, p.y - y) < Math.hypot(nodes[b].x - x, nodes[b].y - y)) b = i; }); return b; };
       if (cl) { const src = nearest(cl[0], cl[1]); shock = { src, d: spread(src), t0: t }; }
-      if (s.x != null) { const b = nearest(s.x, s.y); if (Math.hypot(nodes[b].x - s.x, nodes[b].y - s.y) < 70) near = b; }
-      show = ease(s, show, s.x != null && near >= 0 && Math.hypot(nodes[near].x - s.x, nodes[near].y - s.y) < 70 ? 1 : 0, .06);
+      if (s.x != null) { near = nearest(s.x, s.y); px = ease(s, px, s.x, .3); py = ease(s, py, s.y, .3); }
+      show = ease(s, show, s.x != null ? 1 : 0, .14);
       const pos = nodes.map((p, i) => [p.x + 1.5 * Math.sin(t * .4 + i), p.y + 1.5 * Math.cos(t * .33 + i * 1.7), 0]);
       for (let j = k - 2; j <= k; j++) wave(pos, dist[mod(j, 6)], t - j * PERIOD);
       if (shock && (t < shock.t0 || t - shock.t0 > 20)) shock = null;
-      if (shock) wave(pos, shock.d, t - shock.t0);
-      // hover: the threads around one life, two steps out
-      const ring = new Map();
-      if (show > .02 && near >= 0) { ring.set(near, 1); for (const j of adj[near]) { ring.set(j, Math.max(ring.get(j) || 0, .7)); for (const m of adj[j]) if (!ring.has(m)) ring.set(m, .35); } }
+      if (shock) wave(pos, shock.d, t - shock.t0, 1.7);
+      // hover: the life under the hand, its family, and the threads around it two steps out, leaning toward the hand
+      const ring = new Map(), fam = show > .02 && near >= 0 ? nodes[near].ci : -1;
+      if (fam >= 0) {
+        ring.set(near, 1); for (const j of adj[near]) { ring.set(j, Math.max(ring.get(j) || 0, .7)); for (const m of adj[j]) if (!ring.has(m)) ring.set(m, .35); }
+        for (const [i, v] of ring) { const lean = .14 * v * show; pos[i][0] += (px - pos[i][0]) * lean; pos[i][1] += (py - pos[i][1]) * lean; }
+      }
       night(g, c, t, stars, .8);
       light(g);
       centres.forEach(([x, y, hue]) => glow(g, x, y, 110, c.hue(hue), .12));
@@ -342,7 +355,7 @@ export default (K) => {
       g.lineWidth = .6;
       base.forEach((a, i) => { if (a.length) { g.strokeStyle = c.hue((i + .5) / 12); g.lineWidth = 3; g.globalAlpha = .03; curves(a); g.lineWidth = .6; g.globalAlpha = .26; curves(a); } });
       hotL.forEach((a, i) => { if (a.length) { g.strokeStyle = c.heat(.45 + .1 * i); g.lineWidth = .6 + .3 * i; g.globalAlpha = .15 + .13 * i; curves(a); } });
-      if (mine.length) { g.strokeStyle = c.cool(.75); g.lineWidth = 1.1; g.globalAlpha = .55 * show; curves(mine); }
+      if (mine.length) { g.strokeStyle = c.cool(.8); for (const [w, a] of [[5, .08], [1.3, .8]]) { g.lineWidth = w; g.globalAlpha = a * show; curves(mine); } }
       // the lives: small lights in their family's colour, flaring when the shock reaches them
       const nb = Array.from({ length: 24 }, () => []), fl = Array.from({ length: 5 }, () => []);
       nodes.forEach((p, i) => {
@@ -358,10 +371,18 @@ export default (K) => {
       });
       fl.forEach((a, i) => { g.fillStyle = c.heat(.55 + .1 * i); g.globalAlpha = .06 + .03 * i; dotsR(g, a, 4); g.globalAlpha = .6 + .1 * i; dotsR(g, a); });
       g.fillStyle = c.heat(1); g.globalAlpha = .9; dotsR(g, fl.flat(), .45);
-      if (show > .02 && near >= 0) spark(g, pos[near][0], pos[near][1], 2.2, c.cool(.7), show, c.heat(1));
+      if (fam >= 0) {
+        const kin = [], close = [];
+        nodes.forEach((p, i) => { if (ring.has(i)) close.push(pos[i][0], pos[i][1], 1.4 + 1.8 * ring.get(i)); else if (p.ci === fam) kin.push(pos[i][0], pos[i][1], 2); });
+        g.fillStyle = c.hue(centres[fam][2]); g.globalAlpha = .12 * show; dotsR(g, kin, 4); g.globalAlpha = .8 * show; dotsR(g, kin);
+        g.fillStyle = c.cool(.85); g.globalAlpha = .14 * show; dotsR(g, close, 4); g.globalAlpha = .95 * show; dotsR(g, close);
+        glow(g, centres[fam][0], centres[fam][1], 130, c.hue(centres[fam][2]), .4 * show);
+        glow(g, px, py, 70, c.cool(.6), .25 * show);
+        spark(g, pos[near][0], pos[near][1], 2.6, c.cool(.7), show, c.heat(1));
+      }
       const own = shock && shock.t0 > k * PERIOD, start = own ? shock.t0 : k * PERIOD;
       const src = own ? shock.src : sources[mod(k, 6)], [sx, sy] = pos[src];
-      ember(g, c, sx, sy, .55 + .7 * Math.exp(-(t - start) * .6), 1);
+      ember(g, c, sx, sy, (.55 + .7 * Math.exp(-(t - start) * .6)) * (own ? 1 + .8 * Math.exp(-(t - start) * 1.5) : 1), 1);
       light(g, false);
       g.globalAlpha = 1;
     };
@@ -369,7 +390,9 @@ export default (K) => {
 
   // Evil. The Source sends its fibres everywhere; one part has closed on itself. It turns inward, a vortex that drinks the
   // light around it, and it has cut its own fibre (two red ends, a gap that stays) and the fibres of its neighbours.
-  // At its heart a dim ember remains: still a part of the Source, and still answerable. Hover looks at it; a touch sends light.
+  // At its heart a dim ember remains: still a part of the Source, and still answerable. A hand draws the Source's fibres toward
+  // it, brighter and longer, and near the dark the vortex slows and its ember looks back. A touch sends light down every fibre:
+  // it reaches the dark, the vortex flares, sparks leap at the cut without closing it, and the ember at its heart answers.
   shadow() {
     const r = rng(131), S = [270, 262], D = [400, 392], dx0 = D[0] - S[0], dy0 = D[1] - S[1], DR = Math.hypot(dx0, dy0), DA = Math.atan2(dy0, dx0);
     const VR = 70, CUT1 = 72, CUT2 = 102, N = 340, CAP = Math.asin(VR / DR);
@@ -387,13 +410,19 @@ export default (K) => {
     const ash = Array.from({ length: 26 }, () => [r(), r() * 2 - 1, r()]);
     const stars = sky(43, 140, (x, y) => Math.hypot(x - D[0], y - D[1]) > 150);
     const click = clicked(), PULSE = 6;
-    let look = 0, held = 0, last = null, burst = -99;
+    let look = 0, held = 0, last = null, burst = -99, hov = 0, px = 300, py = 300;
     return (g, c, t, s) => {
       if (click(s)) burst = t;
-      look = ease(s, look, s.x == null ? 0 : smooth(220, 60, Math.hypot(s.x - D[0], s.y - D[1])), .04);
+      if (burst > t) burst = -99;
+      look = ease(s, look, s.x == null ? 0 : smooth(250, 50, Math.hypot(s.x - D[0], s.y - D[1])), .1);
+      hov = ease(s, hov, s.x == null ? 0 : 1, .12);
+      if (s.x != null) { px = ease(s, px, s.x, .3); py = ease(s, py, s.y, .3); }
       const dt = last == null ? 0 : clamp(t - last, 0, .1);
       last = t;
       held += look * dt;
+      // the hand: the direction it is in, seen from the Source, and how far
+      const pa = Math.atan2(py - S[1], px - S[0]), pr = Math.hypot(px - S[0], py - S[1]), lit = [[], [], []];
+      const answer = Math.exp(-(((t - burst - 1.4) / .55) ** 2)), flash = clamp(1 - (t - burst) / 1.6) ** 2;
       const ux = Math.cos(DA), uy = Math.sin(DA);
       night(g, c, t, stars, .75);
       light(g);
@@ -401,10 +430,13 @@ export default (K) => {
       // the Source's fibres; near the closed part they bend toward it and their light drains away
       const HB = 16, buckets = Array.from({ length: HB * 3 }, () => ({ lines: [], runs: [], tips: [] })), cutEnds = [], ghosts = [], lost = [];
       const sent = clamp(1 - (t - burst) / 2.2);
-      const rot = -(t * TAU) / 46 + held * .9, rim = .25 * Math.exp(-(((t - burst - 1.3) / .5) ** 2));
+      const rot = -(t * TAU) / 46 + held * .9, rim = .45 * answer;
       for (const f of fibres) {
         const ca = Math.cos(f.a), sa = Math.sin(f.a), sway = 9 * f.curl + 6 * Math.sin((t * TAU) / 26 + f.a * 3);
+        let near = 0;
+        if (hov > .01) { const da = Math.atan2(Math.sin(f.a - pa), Math.cos(f.a - pa)); near = hov * Math.exp(-((da / .2) ** 2)); }
         let L = f.len * (1 + .02 * Math.sin((t * TAU) / 10 + f.a)), tx = S[0] + ca * L, ty = S[1] + sa * L;
+        if (near > .01 && !f.cut && !f.cap) { L += (Math.max(L, Math.min(pr, f.len * 1.35)) - L) * near; tx = S[0] + ca * L; ty = S[1] + sa * L; }
         let qx = S[0] + ca * L * .5 - sa * sway, qy = S[1] + sa * L * .5 + ca * sway, dim = 0;
         const along = DR * Math.cos(f.da), pd = DR * Math.abs(Math.sin(f.da));
         if (f.cut) {
@@ -428,12 +460,13 @@ export default (K) => {
           qx += (cx + (D[0] - cx) * .55 * bend - qx) * bend; qy += (cy + (D[1] - cy) * .55 * bend - qy) * bend;
           dim = .45 * bend;
         }
+        if (near > .08 && !f.cut) lit[Math.min(2, Math.floor(near * 3))].push(qx, qy, tx, ty);
         const lvl = dim > .7 ? 0 : dim > .2 ? 1 : 2;
         const h = wrap(f.hue - t / 40), b = buckets[lvl * HB + Math.floor(h * HB)];
         b.lines.push(qx, qy, tx, ty);
         const ph = mod(t - f.pulse, PULSE) / PULSE, u = Math.max(ph < .6 ? ph / .6 : -1, sent > 0 ? 1 - sent : -1);
         if (u >= 0 && u <= 1 && !(dim > .7 && u > .5)) { const a = 1 - u; b.runs.push(a * a * S[0] + 2 * a * u * qx + u * u * tx, a * a * S[1] + 2 * a * u * qy + u * u * ty); }
-        if (!f.cut && !f.cap) b.tips.push(tx, ty, (ph >= .6 ? 1 - (ph - .6) / .4 : 0) * .6 + sent * .8);
+        if (!f.cut && !f.cap) b.tips.push(tx, ty, (ph >= .6 ? 1 - (ph - .6) / .4 : 0) * .6 + sent * .8 + near * 1.4);
       }
       buckets.forEach((b, i) => {
         if (!b.lines.length) return;
@@ -444,6 +477,7 @@ export default (K) => {
         g.beginPath();
         for (let j = 0; j < b.lines.length; j += 4) { g.moveTo(S[0], S[1]); g.quadraticCurveTo(b.lines[j], b.lines[j + 1], b.lines[j + 2], b.lines[j + 3]); }
         g.stroke();
+        if (flash > .01) { g.strokeStyle = c.heat(.9); g.globalAlpha = .35 * flash * k; g.stroke(); g.strokeStyle = col; }
         g.globalAlpha = .55 * k; dots(g, b.runs, 2);
         for (const [rad, a0] of [[9, .06], [3.2, .26]]) {
           g.globalAlpha = a0 * k;
@@ -457,6 +491,15 @@ export default (K) => {
         for (let j = 0; j < b.tips.length; j += 3) { const q = 1 + 1.2 * b.tips[j + 2]; g.moveTo(b.tips[j] + q, b.tips[j + 1]); g.arc(b.tips[j], b.tips[j + 1], q, 0, TAU); }
         g.fill();
       });
+      // the fibres the hand draws toward it
+      lit.forEach((a, i) => {
+        if (!a.length) return;
+        g.strokeStyle = c.heat(.75 + .1 * i);
+        g.beginPath();
+        for (let j = 0; j < a.length; j += 4) { g.moveTo(S[0], S[1]); g.quadraticCurveTo(a[j], a[j + 1], a[j + 2], a[j + 3]); }
+        for (const [w, al] of [[4, .05], [1, .3]]) { g.lineWidth = w; g.globalAlpha = al * (1 + i); g.stroke(); }
+      });
+      if (hov > .01) glow(g, px, py, 80, c.heat(.55), .3 * hov);
       // the neighbours' severed remainders: ash-grey, no light runs there any more
       g.strokeStyle = g.fillStyle = c.ink; g.lineWidth = .5; g.globalAlpha = .07; segs(g, ghosts);
       // where their light would have reached: grey, unlit
@@ -495,6 +538,13 @@ export default (K) => {
         g.moveTo(G2[0], G2[1]); g.quadraticCurveTo(RIM[0] + 20, RIM[1] - 18, RIM[0], RIM[1]);
         g.stroke();
       }
+      // light sent across the cut leaps at the gap and falls short: the wound stays
+      if (answer > .02) for (let m = 0; m < 5; m++) {
+        const f = mod((t - burst) * 1.6 + m / 5, 1), reach = .3 + .45 * ((m * .37) % 1);
+        if (f > reach) continue;
+        const fx = G1[0] + (G2[0] - G1[0]) * f, fy = G1[1] + (G2[1] - G1[1]) * f - 14 * Math.sin(Math.PI * f / reach);
+        spark(g, fx, fy, 1.2, c.mark, answer * (1 - f / reach), c.heat(1));
+      }
       // the cut ends still glow, and shed a little ash
       const ends = [...cutEnds, G2[0], G2[1]];
       for (let i = 0; i < ends.length; i += 2) {
@@ -513,16 +563,18 @@ export default (K) => {
       for (const [rad, a] of [[44, .35], [30, .5], [18, .6]]) { g.globalAlpha = a; g.beginPath(); g.arc(D[0], D[1], rad, 0, TAU); g.fill(); }
       light(g);
       const slow = .5 + .5 * Math.sin((t * TAU) / 9);
-      glow(g, D[0], D[1], 46 + 30 * look, c.mark, .1 + .06 * slow + .3 * look);
-      spark(g, D[0], D[1], 1.2 + .5 * look, c.heat(.3), .35 + .15 * slow + .5 * look, c.heat(.55 + .3 * look));
-      ember(g, c, S[0], S[1], beat(t), 1);
+      const seen = clamp(look + answer);
+      glow(g, D[0], D[1], 46 + 30 * look + 50 * answer, c.mark, .1 + .06 * slow + .35 * seen);
+      spark(g, D[0], D[1], 1.2 + .7 * seen, c.heat(.3 + .4 * answer), .35 + .15 * slow + .6 * seen, c.heat(.55 + .4 * seen));
+      ember(g, c, S[0], S[1], beat(t) * (1 + .7 * flash), 1);
       light(g, false);
       g.globalAlpha = 1;
     };
   },
 
   // A rope of light tied in a knot. The knot loosens and gives way thread by thread; freed threads cool and carry light again,
-  // and where the knot was, a faint red trace remains. Then another knot is tied. Hover leans the knot; a touch runs light along every thread.
+  // and where the knot was, a faint red trace remains. Then another knot is tied. A hand leans the knot and parts the threads
+  // under it, which brighten; a touch tugs the knot open a little and sends light both ways along every thread from that point.
   mend() {
     const PERIOD = 48, FIBRES = 44, DS = 5, r = rng(66);
     const fibres = Array.from({ length: FIBRES }, (_, f) => ({ strand: f % 3, a: r() * TAU, q: 1 + r() * 4.4, at: 0, spread: 0, wave: r() * TAU, dir: r() < .5 }));
@@ -556,13 +608,18 @@ export default (K) => {
       return out;
     };
     const stars = sky(17, 120), click = clicked();
-    let lean = 0, sent = -99;
+    let lean = 0, sent = -99, sentAt = [300, 300], hov = 0, px = 300, py = 300;
     return (g, c, t, s) => {
-      if (click(s)) sent = t;
-      lean = ease(s, lean, s.x == null ? 0 : clamp((s.x - 300) / 300, -1, 1) * 22, .04);
-      const k = Math.floor(t / PERIOD), u = t / PERIOD - k;
+      const cl = click(s);
+      if (cl) { sent = t; sentAt = cl; }
+      if (sent > t) sent = -99;
+      lean = ease(s, lean, s.x == null ? 0 : clamp((s.x - 300) / 300, -1, 1) * 22, .06);
+      hov = ease(s, hov, s.x == null ? 0 : 1, .12);
+      if (s.x != null) { px = ease(s, px, s.x, .3); py = ease(s, py, s.y, .3); }
+      const k = Math.floor(t / PERIOD), u = t / PERIOD - k, age = t - sent;
       const fade = smooth(0, .04, u) * (1 - smooth(.95, 1, u));
-      const loose = smooth(.04, .3, u), S = 60 + 22 * loose;
+      const tug = age < 2.6 ? Math.sin(Math.PI * Math.min(1, age / 2.6)) ** 2 : 0;
+      const loose = smooth(.04, .3, u), S = 60 + 22 * loose + 16 * tug * (1 - loose);
       const P = centre(S, 6 * Math.sin(t * .13) + lean), M = P.length;
       const normal = P.map((_, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(M - 1, i + 1)], d = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [-(b[1] - a[1]) / d, (b[0] - a[0]) / d]; });
       const events = [], STEP = 3;
@@ -593,11 +650,14 @@ export default (K) => {
       const V = Float64Array.from({ length: M }, (_, i) => i / (M - 1));
       const MID = V.map((v) => Math.exp(-(((v - .5) / .13) ** 2))), ARC = V.map((v) => Math.sin(Math.PI * v));
       const crimpC = V.map((v) => Math.cos(v * 34)), crimpS = V.map((v) => Math.sin(v * 34)), driftC = V.map((v) => Math.cos(v * 7 + t * .05)), driftS = V.map((v) => Math.sin(v * 7 + t * .05));
-      const pulseAt = t - sent < 3.5 ? Math.round(((t - sent) / 3.5) * (M - 1)) : -1;
+      // a touch: light leaves the nearest point of the rope both ways along every thread
+      let from = 0;
+      if (age < 3) { let b = 1e9; for (let i = 0; i < M; i += 2) { const d = (P[i][0] - sentAt[0]) ** 2 + (P[i][1] - sentAt[1]) ** 2; if (d < b) { b = d; from = i; } } }
+      const reachI = age < 3 ? (age / 3) ** .8 * M : -1, BAND = 14, pulse = [[], [], []];
       for (let f = 0; f < FIBRES; f++) {
         const fb = fibres[f], pull = clamp((u - fb.at) / .08), sc = strandC[fb.strand], ss = strandS[fb.strand];
         const ca = Math.cos(fb.a), sa = Math.sin(fb.a), cw = Math.cos(fb.wave), sw = Math.sin(fb.wave);
-        const runAt = Math.floor(mod(t / 7 + fb.wave / TAU, 1) * M);
+        const runAt = Math.floor(mod(t / 7 + fb.wave / TAU, 1) * M), reachF = reachI - (fb.wave / TAU) * M * .12;
         let open = false, lastList = null;
         for (let i = 0; i < M; i++) {
           const c2 = ca * twistC[i] + sa * twistS[i], s2 = sa * twistC[i] - ca * twistS[i];
@@ -610,7 +670,13 @@ export default (K) => {
             const ly = 340 + 10 * arc + fb.spread * (30 + 22 * arc) + 5 * (driftS[i] * cw + driftC[i] * sw) + 11 * mid * crimpSin;
             x += (lx - x) * free; y += (ly - y) * free;
           }
-          if ((i === runAt && free > .9) || i === pulseAt) runs.push(x, y);
+          if (hov > .01) {
+            // the threads part under the hand
+            const dx = x - px, dy = y - py, d2 = dx * dx + dy * dy;
+            if (d2 < 8100) { const d = Math.sqrt(d2) || 1, p = hov * (1 - d / 90) ** 2; x += (dx / d) * 16 * p; y += (dy / d) * 16 * p; if (p > .12 && (i & 1)) pulse[Math.min(2, Math.floor(p * 4))].push(x, y); }
+          }
+          if (i === runAt && free > .9) runs.push(x, y);
+          if (reachF >= 0) { const z = Math.abs(Math.abs(i - from) - reachF); if (z < BAND && (i & 1)) pulse[Math.min(2, Math.floor((1 - z / BAND) * (1 - age / 3) * 3.4))].push(x, y); }
           if (free < .5 && under[i]) { open = false; continue; }
           const side = depth > 0 || free > .5 ? 0 : 1, list = lists[side * 6 + lane * 3 + fb.strand];
           if (open && list === lastList) list.push(x, y);
@@ -644,23 +710,33 @@ export default (K) => {
       g.fillStyle = c.heat(.9);
       g.globalAlpha = .12 * fade; dots(g, runs, 6);
       g.globalAlpha = .85 * fade; dots(g, runs, 1.5);
+      pulse.forEach((a, i) => { g.fillStyle = c.heat(.8 + .1 * i); g.globalAlpha = .04 + .04 * i; dots(g, a, 5); g.globalAlpha = .5 + .25 * i; dots(g, a, 1.1 + .4 * i); });
+      if (hov > .01) glow(g, px, py, 90, c.heat(.5), .22 * hov);
+      g.globalAlpha = .85 * fade; // the ember below is drawn at this alpha
       // the heart of the knot: what was held there, quieter as the threads let go
       const settle = smooth(.15, 0, hold);
-      ember(g, c, 300 + (6 * Math.sin(t * .13) + lean) * (1 - settle), 262 + 88 * settle, (.45 + .45 * hold) * (.3 + .7 * fade) * beat(t), fade);
+      ember(g, c, 300 + (6 * Math.sin(t * .13) + lean) * (1 - settle), 262 + 88 * settle, (.45 + .45 * hold) * (.3 + .7 * fade) * beat(t) * (1 + .5 * tug), fade);
       light(g, false);
       g.globalAlpha = 1;
     };
   },
 
   // A knot seen up close: a tube of rainbow threads twisting through a trefoil. It loosens slowly until the loop lies open
-  // around the ember it held. Hover near the heart loosens it a little more; a touch sends light around the loop.
+  // around the ember it held. A hand hooks the nearest part of the rope and draws it toward itself (near the heart it also
+  // loosens the knot); a touch loosens it at once and sends two fronts of light from that point, around the loop, to the ember.
   knot() {
     const N = 360, PERIOD = 30, W = 8, F = 10, stars = sky(37, 110), click = clicked();
-    let extra = 0, sent = -99;
+    let extra = 0, sent = -99, from = 0, hov = 0, px = 300, py = 300, hook = 0, prev = null;
+    const idx = (x, y) => { let b = 1e9, m = 0; if (prev) for (let i = 0; i < N; i += 2) { const d = (prev[i][0] - x) ** 2 + (prev[i][1] - y) ** 2; if (d < b) { b = d; m = i; } } return m; };
     return (g, c, t, s) => {
-      if (click(s)) sent = t;
-      extra = ease(s, extra, s.x == null ? 0 : .3 * smooth(240, 60, Math.hypot(s.x - 300, s.y - 300)), .04);
-      const u = (t % PERIOD) / PERIOD, loose = clamp(smooth(.15, .72, u) + extra * (1 - smooth(.72, .9, u))), fade = smooth(0, .05, u) * (1 - smooth(.9, .99, u));
+      const cl = click(s);
+      if (cl) { sent = t; from = idx(cl[0], cl[1]); }
+      if (sent > t) sent = -99;
+      const age = t - sent, tug = age < 3.5 ? .3 * Math.sin(Math.PI * Math.min(1, age / 3.5)) ** .6 : 0;
+      extra = ease(s, extra, s.x == null ? 0 : .3 * smooth(240, 60, Math.hypot(s.x - 300, s.y - 300)), .06);
+      hov = ease(s, hov, s.x == null ? 0 : 1, .12);
+      if (s.x != null) { px = ease(s, px, s.x, .3); py = ease(s, py, s.y, .3); hook = idx(px, py); }
+      const u = (t % PERIOD) / PERIOD, loose = clamp(smooth(.15, .72, u) + (extra + tug) * (1 - smooth(.72, .9, u))), fade = smooth(0, .05, u) * (1 - smooth(.9, .99, u));
       const A = 2 - 1.75 * loose, S = 232 / (1 + A), rot = .12 * Math.sin(t * .1) - Math.PI / 2, ca = Math.cos(rot), sa = Math.sin(rot);
       const P = [], Z = [];
       for (let i = 0; i < N; i++) {
@@ -668,6 +744,12 @@ export default (K) => {
         P.push([300 + S * (x * ca - y * sa), 300 + S * (x * sa + y * ca)]);
         Z.push(-Math.sin(3 * q));
       }
+      // the hand hooks the rope where it is nearest, and draws it a little toward itself
+      if (hov > .01 && prev) {
+        const [hx, hy] = P[hook], dx = px - hx, dy = py - hy, d = Math.hypot(dx, dy) || 1, pull = Math.min(d, 60) * hov;
+        for (let n = -40; n <= 40; n++) { const i = (hook + n + N) % N, w = Math.exp(-((n / 20) ** 2)) * pull / d; P[i][0] += dx * w; P[i][1] += dy * w; }
+      }
+      prev = P;
       const hide = new Uint8Array(N);
       for (let i = 0; i < N; i++) {
         const [ax, ay] = P[i], [bx, by] = P[(i + 1) % N];
@@ -716,13 +798,33 @@ export default (K) => {
         polys(g, a);
       });
       // light running around the loop
-      const runs = [], pulse = t - sent < 3 ? (t - sent) / 3 : -1;
+      const runs = [], pulse = age < 2.6 ? age / 2.6 : -1;
       for (let m = 0; m < 7; m++) { const i = Math.floor(mod(t / 14 + m / 7, 1) * N); if (!hide[i]) runs.push(P[i][0], P[i][1]); }
-      if (pulse >= 0) for (let m = 0; m < 3; m++) { const i = Math.floor(mod(pulse + m / 3, 1) * N); if (!hide[i]) runs.push(P[i][0], P[i][1]); }
       g.fillStyle = c.heat(.95);
       g.globalAlpha = .1 * fade; dots(g, runs, 9);
       g.globalAlpha = .9 * fade; dots(g, runs, 1.8);
-      ember(g, c, 300, 300, (.5 + .45 * loose) * (.4 + .6 * fade) * beat(t), .5 + .5 * fade);
+      // a touch: two fronts of light leave the touched point and run around the loop until they meet
+      if (pulse >= 0 && pulse < 1) {
+        const head = Math.round(((1 - (1 - pulse) ** 2) * N) / 2), tail = 34, vis = Math.max(.35, fade) * (1 - smooth(.75, 1, pulse));
+        g.strokeStyle = c.heat(.9);
+        for (const dir of [1, -1]) {
+          const pts = [];
+          for (let n = Math.max(0, head - tail); n <= head; n++) { const i = (from + dir * n + N * 2) % N; pts.push(hide[i] ? NaN : P[i][0], hide[i] ? NaN : P[i][1]); }
+          for (const [w, a] of [[16, .07], [6, .16], [2.4, .9]]) {
+            g.lineWidth = w; g.globalAlpha = a * vis;
+            g.beginPath();
+            let pen = false;
+            for (let j = 0; j < pts.length; j += 2) { if (Number.isNaN(pts[j])) { pen = false; continue; } if (pen) g.lineTo(pts[j], pts[j + 1]); else { g.moveTo(pts[j], pts[j + 1]); pen = true; } }
+            g.stroke();
+          }
+          const i = (from + dir * head + N * 2) % N;
+          spark(g, P[i][0], P[i][1], 3, c.mark, vis, c.heat(1));
+        }
+        if (pulse < .3) spark(g, P[from][0], P[from][1], 3, c.mark, 1 - pulse / .3, c.heat(1));
+      }
+      if (hov > .01 && prev) { glow(g, px, py, 70, c.heat(.5), .2 * hov); spark(g, P[hook][0], P[hook][1], 2.4, c.heat(.8), hov, c.heat(1)); }
+      const meet = pulse >= 0 ? Math.exp(-(((pulse - .82) / .12) ** 2)) : 0;
+      ember(g, c, 300, 300, (.5 + .45 * loose) * (.4 + .6 * fade) * beat(t) * (1 + .8 * meet), .5 + .5 * fade + .5 * meet);
       light(g, false);
       g.globalAlpha = 1;
     };
@@ -730,7 +832,8 @@ export default (K) => {
 
   // A life: a braid of warm light drawn from the left, an ember at its head. Then the ember goes out, and truly: the braid
   // comes apart from its end backward, and its dust drifts into a vast field of other lights, which it brightens for a while.
-  // Hover lights the field where you look; a touch sends a ring through it.
+  // A hand lights the field around it, and the lights there lean toward it; near the life, the ember answers the gaze and
+  // the braid brightens. A touch sends a ring through the field: each light it passes flares, as if remembering.
   death() {
     const r = rng(61), PERIOD = 26, X0 = 26, END = 318, Y = 300, golden = Math.PI * (3 - Math.sqrt(5)), FC = [356, 300];
     const field = Array.from({ length: 1500 }, (_, i) => {
@@ -746,34 +849,37 @@ export default (K) => {
     return (g, c, t, s) => {
       const cl = click(s);
       if (cl) { rings.push({ x: cl[0], y: cl[1], at: t }); if (rings.length > 3) rings.shift(); }
-      if (s.x != null) { hx = ease(s, hx, s.x, .12); hy = ease(s, hy, s.y, .12); }
-      hov = ease(s, hov, s.x == null ? 0 : 1, .05);
+      if (s.x != null) { hx = ease(s, hx, s.x, .3); hy = ease(s, hy, s.y, .3); }
+      hov = ease(s, hov, s.x == null ? 0 : 1, .12);
       const u = mod(t, PERIOD) / PERIOD;
       const grow = smooth(0, .42, u) ** .85, out = smooth(.44, .6, u), cut = u < .5 ? 1 : 1 - (u - .5) / .3;
       const vEnd = Math.min(grow, cut), xEnd = X0 + (END - X0) * vEnd, settled = 1 - smooth(.82, 1, u);
       // the field of other lights
-      const fb = Array.from({ length: 12 }, () => []), near = [];
+      const fb = Array.from({ length: 12 }, () => []), near = [[], [], []];
       for (const [x, y, sz, ph, hue] of field) {
-        const tw = .6 + .4 * Math.sin(t * .5 + ph), X = x + .8 * Math.sin(t * .3 + ph), Yy = y + .8 * Math.cos(t * .27 + ph);
+        const tw = .6 + .4 * Math.sin(t * .5 + ph);
+        let X = x + .8 * Math.sin(t * .3 + ph), Yy = y + .8 * Math.cos(t * .27 + ph), h = 0;
+        if (hov > .01) { const d2 = (x - hx) ** 2 + (y - hy) ** 2; if (d2 < 60000) { h = hov * Math.exp(-d2 / 6000); X += (hx - x) * .12 * h; Yy += (hy - y) * .12 * h; } }
         fb[Math.floor(hue * 12) % 12].push(X, Yy, sz * tw);
-        let h = hov * Math.exp(-(((x - hx) ** 2 + (y - hy) ** 2) / 4000));
-        for (const q of rings) { const age = t - q.at, d = Math.hypot(x - q.x, y - q.y); if (age >= 0 && age < 6) h += Math.exp(-(((d - age * 110) / 22) ** 2)) * (1 - age / 6); }
-        if (h > .08) near.push(X, Yy, sz * (1 + 1.5 * Math.min(1, h)));
+        for (const q of rings) { const age = t - q.at, d = Math.hypot(x - q.x, y - q.y); if (age >= 0 && age < 6) h += 1.2 * Math.exp(-(((d - age * 120) / 22) ** 2)) * (1 - age / 6); }
+        if (h > .08) near[Math.min(2, Math.floor(h * 3))].push(X, Yy, sz * (1 + 1.6 * Math.min(1, h)));
       }
       light(g);
       glow(g, FC[0], FC[1], 360, c.cool(.25), .35);
       glow(g, FC[0], FC[1], 140, c.cool(.4), .15);
       fb.forEach((a, i) => { g.fillStyle = i % 4 ? c.cool(.45 + i * .04) : c.hue((i + .5) / 12); g.globalAlpha = .05; dotsR(g, a, 3.5); g.globalAlpha = .4; dotsR(g, a); });
-      g.fillStyle = c.cool(.85); g.globalAlpha = .12; dotsR(g, near, 4); g.globalAlpha = .8; dotsR(g, near);
+      near.forEach((a, i) => { g.fillStyle = c.cool(.75 + .1 * i); g.globalAlpha = .03 + .025 * i; dotsR(g, a, 4); g.globalAlpha = .5 + .22 * i; dotsR(g, a); });
+      if (hov > .01) glow(g, hx, hy, 110, c.cool(.6), .4 * hov);
+      for (const q of rings) { const age = t - q.at; if (age >= 0 && age < 1.2) { const f = 1 - age / 1.2; glow(g, q.x, q.y, 40 + 80 * age, c.cool(.8), .5 * f); spark(g, q.x, q.y, 2.4, c.cool(.7), f, c.heat(1)); } }
       // the life, a braid that thins toward its head
       if (vEnd > .003) {
         g.lineCap = g.lineJoin = 'round';
-        const STEPS = 60;
+        const STEPS = 60, held = hov * Math.exp(-((hy - lifeY(clamp(hx, X0, xEnd), t)) ** 2) / 3000) * smooth(X0 - 60, X0, hx) * smooth(xEnd + 60, xEnd, hx);
         strands.forEach((st) => {
           g.strokeStyle = c.hue(st.hue);
           g.beginPath();
           for (let i = 0; i <= STEPS; i++) { const v = (i / STEPS) * vEnd, x = X0 + (END - X0) * v, y = strandY(st, x, v, t); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
-          for (const [w, a] of [[5, .05], [.9, .45]]) { g.lineWidth = w; g.globalAlpha = a * (u < .5 ? 1 : .5 + .5 * cut); g.stroke(); }
+          for (const [w, a] of [[5, .05], [.9, .45]]) { g.lineWidth = w; g.globalAlpha = a * (u < .5 ? 1 : .5 + .5 * cut) * (1 + 1.2 * held); g.stroke(); }
         });
         // light running toward the head while it lives
         const runs = [];
@@ -805,8 +911,10 @@ export default (K) => {
       // the head: an ember while it lives, nothing after
       const life = 1 - out;
       if (life > .01) {
-        const hxE = X0 + (END - X0) * Math.min(grow, 1);
-        ember(g, c, hxE, lifeY(hxE, t), (.7 + .35 * grow) * beat(t) * (.4 + .6 * life), life);
+        const hxE = X0 + (END - X0) * Math.min(grow, 1), hyE = lifeY(hxE, t);
+        // looked at, the life answers while it lasts
+        const gaze = hov * Math.exp(-((hx - hxE) ** 2 + (hy - hyE) ** 2) / 22000);
+        ember(g, c, hxE, hyE, (.7 + .35 * grow) * beat(t) * (.4 + .6 * life) * (1 + .45 * gaze), life);
       }
       light(g, false);
       g.globalAlpha = 1;
@@ -814,7 +922,9 @@ export default (K) => {
   },
 
   // Leaves of light fall and lie down; slowly they come apart into the ground, a deep bed of embers made of all the leaves
-  // before them. Roots draw that light up, and from it a sprout rises with a new ember at its tip. Hover is a wind; a touch drops a leaf.
+  // before them. Roots draw that light up, and from it a sprout rises with a new ember at its tip. A hand is a wind: it pushes
+  // the falling leaves, lifts the lying ones, stirs the embers of the ground and bends the sprout. A touch lets a leaf fall
+  // from there; where it lands it melts into the ground in a flare, and its light runs up the roots to the sprout's ember.
   leaves() {
     const PERIOD = 30, GROUND = 468, N = 17, r = rng(83);
     const soil = Array.from({ length: 1300 }, () => { const x = 300 + gauss(r) * 150; return [x, GROUND + 5 + r() ** 1.8 * 115, .4 + r() * 1.1, r(), r() * TAU, 3 + r() * 6]; }).filter(([x]) => x > 20 && x < 580);
@@ -842,19 +952,43 @@ export default (K) => {
     let wx = 300, wy = 300, wind = 0;
     return (g, c, t, s) => {
       const cl = click(s);
-      if (cl) { dropped.push({ x: cl[0], y: Math.min(cl[1], GROUND - 30), at: t, rot: t * 7 % TAU }); if (dropped.length > 4) dropped.shift(); }
-      if (s.x != null) { wx = ease(s, wx, s.x, .08); wy = ease(s, wy, s.y, .08); }
-      wind = ease(s, wind, s.x == null ? 0 : 1, .04);
+      if (cl) {
+        const y0 = Math.min(cl[1], GROUND - 40), x0 = clamp(cl[0], 40, 560);
+        dropped.push({ x: x0, y: y0, at: t, rot: t * 7 % TAU, dur: .7 + 1.5 * (GROUND - y0) / GROUND });
+        if (dropped.length > 5) dropped.shift();
+      }
+      if (s.x != null) { wx = ease(s, wx, s.x, .25); wy = ease(s, wy, s.y, .25); }
+      wind = ease(s, wind, s.x == null ? 0 : 1, .1);
       const k = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD;
-      const blow = (x, y) => wind * 70 * Math.sign(x - wx || 1) * Math.exp(-(((x - wx) / 110) ** 2) - (((y - wy) / 160) ** 2));
+      const blow = (x, y) => wind * 80 * Math.sign(x - wx || 1) * Math.exp(-(((x - wx) / 120) ** 2) - (((y - wy) / 190) ** 2));
+      // how strongly the wind reaches the ground at x
+      const gust = (x) => wind * Math.exp(-(((x - wx) / 90) ** 2)) * smooth(GROUND + 160, GROUND - 60, wy);
+      // a dropped leaf, once landed, melts into the ground: a flare there, then light up the roots
+      let feed = 0;
+      const flares = [];
+      for (const d of dropped) {
+        const land = t - d.at - d.dur;
+        if (land < 0 || land > 4) continue;
+        flares.push(d.x, land);
+        feed = Math.max(feed, Math.exp(-(((land - 1.6) / .5) ** 2)));
+      }
       const grow = smooth(.36, .9, u), open = smooth(.62, .92, u), gone = 1 - smooth(.95, 1, u);
       night(g, c, t, stars, .8);
       light(g);
       glow(g, 300, GROUND + 40, 320, c.heat(.3), .4);
       // the ground: a bed of embers, the leaves of every year before
       const sb = Array.from({ length: 8 }, () => []);
-      for (const [x, y, sz, v, ph, per] of soil) sb[Math.floor(v * 4) * 2 + (Math.sin((t * TAU) / per + ph) > .3 ? 1 : 0)].push(x, y, sz);
+      const stir = [[], [], []];
+      for (const [x, y, sz, v, ph, per] of soil) {
+        let e = 0;
+        if (wind > .01) e = gust(x) * Math.exp(-(y - GROUND) / 50);
+        for (let j = 0; j < flares.length; j += 2) { const land = flares[j + 1], d = Math.hypot(x - flares[j], (y - GROUND) * 1.6); e += Math.exp(-(((d - land * 70) / 26) ** 2)) * Math.exp(-land * .8) * 1.5; }
+        if (e > .1) { stir[Math.min(2, Math.floor(e * 3))].push(x + 3 * e * Math.sin(t * 9 + ph), y - 10 * e * (.6 + .4 * Math.sin(t * 5 + ph * 3)), sz * (1 + .8 * Math.min(1, e))); continue; }
+        sb[Math.floor(v * 4) * 2 + (Math.sin((t * TAU) / per + ph) > .3 ? 1 : 0)].push(x, y, sz);
+      }
       sb.forEach((a, i) => { g.fillStyle = c.heat(.25 + .13 * (i >> 1)); g.globalAlpha = .05; dotsR(g, a, 3.5); g.globalAlpha = (i & 1) ? .7 : .35; dotsR(g, a); });
+      stir.forEach((a, i) => { g.fillStyle = c.heat(.7 + .12 * i); g.globalAlpha = .07 + .03 * i; dotsR(g, a, 3.5); g.globalAlpha = .65 + .15 * i; dotsR(g, a); });
+      for (let j = 0; j < flares.length; j += 2) { const land = flares[j + 1]; glow(g, flares[j], GROUND + 10, 60 + 50 * land, c.heat(.7), .55 * Math.exp(-land * 1.1)); }
       g.strokeStyle = c.heat(.6);
       g.lineCap = g.lineJoin = 'round';
       for (const [w, a] of [[6, .05], [1, .35]]) { g.lineWidth = w; g.globalAlpha = a; g.beginPath(); g.moveTo(30, GROUND); g.lineTo(570, GROUND); g.stroke(); }
@@ -862,7 +996,8 @@ export default (K) => {
       g.fillStyle = c.heat(.75);
       for (const [x0, , sz, v, ph] of motes) { const f = mod(t / (14 + 10 * v) + ph, 1); g.globalAlpha = .55 * Math.sin(Math.PI * f); g.beginPath(); g.arc(x0 + 14 * Math.sin(f * 5 + ph * 9), GROUND - 4 - f * 230, sz * .8, 0, TAU); g.fill(); }
       // roots draw the light of the ground up toward the seed
-      const rootGrow = smooth(.25, .6, u) * gone, sap = [];
+      const rootGrow = Math.max(smooth(.25, .6, u) * gone, .6 * feed), sap = [];
+      if (feed > .02) { g.strokeStyle = c.heat(.85); g.lineWidth = 1.4; g.globalAlpha = .5 * feed; g.beginPath(); for (const rt of roots) { g.moveTo(rt.pts[0], rt.pts[1]); for (let j = 1; j <= 14; j++) g.lineTo(rt.pts[j * 2], rt.pts[j * 2 + 1]); } g.stroke(); }
       if (rootGrow > .01) {
         g.strokeStyle = c.heat(.55); g.lineWidth = .7; g.globalAlpha = .35 * rootGrow;
         g.beginPath();
@@ -889,14 +1024,17 @@ export default (K) => {
         const x = L.x + L.sway * Math.sin(swing) + (f < 1 ? blow(L.x, y) : 0), fall = L.rot + .8 * Math.sin(swing + 1);
         const st = fallen(L, f, x, y, fall, Math.max(.72, L.start + L.dur + .06));
         if (st.melt >= 1) continue;
-        lb[L.col].push([x, y + 6 * st.melt, st.a, L.size * (1 - .5 * st.melt), st.settle, 1 - st.melt]);
+        const lift = f >= 1 ? gust(L.x) * (1 - st.melt) : 0, flut = lift * Math.sin(t * 7 + L.ph);
+        lb[L.col].push([x + 10 * lift * Math.sign(L.x - wx || 1), y + 6 * st.melt - 16 * lift * (.7 + .3 * flut), st.a + .5 * flut, L.size * (1 - .5 * st.melt), st.settle * (1 - .7 * lift), 1 - st.melt]);
         if (st.melt > 0) for (let j = 0; j < 6; j++) { const q = mod(st.melt * 2 + j / 6, 1); crumbs.push(x + (j - 2.5) * L.size * .3, y + 4 + q * 40, 1 - q); }
       }
       for (const d of dropped) {
-        const age = t - d.at, f = age / 4;
-        if (age < 0 || age > 12) continue;
-        const y = f < 1 ? d.y + (GROUND - 4 - d.y) * f : GROUND - 4, swing = Math.min(f, 1) * 2.5 * TAU, melt = smooth(6, 12, age);
-        lb[0].push([d.x + 20 * Math.sin(swing), y, d.rot + .8 * Math.sin(swing + 1) * (1 - smooth(1, 1.3, f)), 17 * (1 - .5 * melt), smooth(1, 1.3, f), 1 - melt]);
+        const age = t - d.at, f = age / d.dur;
+        if (age < 0 || f > 2.4) continue;
+        const y = f < 1 ? d.y + (GROUND - 4 - d.y) * f * f : GROUND - 4, swing = Math.min(f, 1) * 1.6 * TAU, melt = smooth(1.05, 2.4, f), x = d.x + 16 * Math.sin(swing) * Math.min(1, f * 4);
+        lb[3].push([x, y + 6 * melt, d.rot + .8 * Math.sin(swing + 1) * (1 - smooth(1, 1.2, f)), 18 * (1 - .5 * melt), smooth(1, 1.2, f), 1 - melt]);
+        if (f < .25) spark(g, d.x, d.y, 2.4, c.heat(.8), 1 - f * 4, c.heat(1));
+        if (melt > 0) for (let j = 0; j < 6; j++) { const q = mod(melt * 2 + j / 6, 1); crumbs.push(d.x + 16 * Math.sin(1.6 * TAU) + (j - 2.5) * 5, GROUND + q * 40, 1 - q); }
       }
       const cols = [.55, .65, .75, .85];
       lb.forEach((list, ci) => {
@@ -912,7 +1050,7 @@ export default (K) => {
       for (let i = 0; i < crumbs.length; i += 3) { g.globalAlpha = .6 * crumbs[i + 2]; g.beginPath(); g.arc(crumbs[i], crumbs[i + 1], 1, 0, TAU); g.fill(); }
       // a sprout rises from the ground the leaves became
       const top = GROUND + 12 - 170 * grow;
-      const stem = (v) => [300 + 9 * Math.sin(v * 2.6) * grow + blow(300, top) * .08 * v, GROUND + 12 - (GROUND + 12 - top) * v];
+      const stem = (v) => [300 + 9 * Math.sin(v * 2.6) * grow + blow(300, top) * .3 * v * v, GROUND + 12 - (GROUND + 12 - top) * v];
       if (grow > .005) {
         g.strokeStyle = c.hue(.4);
         g.beginPath();
@@ -929,30 +1067,35 @@ export default (K) => {
         }
       }
       const [sx, sy] = stem(1);
-      ember(g, c, sx, sy, (.35 + .25 * grow) * (.4 + .6 * gone) * beat(t), .5 + .5 * gone);
+      ember(g, c, sx, sy, (.35 + .25 * grow) * (.4 + .6 * gone) * beat(t) * (1 + .9 * feed), Math.min(1, .5 + .5 * gone + feed));
       light(g, false);
       g.globalAlpha = 1;
     };
   },
 
   // A night sea of light. A drop falls, carrying glints of what it passed through, and opens rings whose crests take its
-  // colours; where earlier drops fell, a faint coloured light stays on the water. Hover chooses where the next drop falls; a touch lets one fall there.
+  // colours; where earlier drops fell, a faint coloured light stays on the water. A hand resting over the sea troubles it:
+  // small rings open under it and take colour, and the next drop will fall on that side. A touch lets a drop fall from there.
   drop() {
-    const PERIOD = 8, ROWS = 54, COLS = 100, HORIZON = 292, Z0 = .42;
+    const PERIOD = 8, FALL = .6, ROWS = 54, COLS = 100, HORIZON = 292, Z0 = .42;
     const stars = sky(11, 150, (x, y) => y < HORIZON - 6), click = clicked(), placed = new Map(), extra = [];
-    let aim = 0;
+    let aim = 0, hov = 0, tz = Z0, tnx = 0;
     const persp = (z) => .2 + .8 * z ** 1.25;
     const sx = (nx, z) => 300 + nx * 300 * (.86 + persp(z) * .4);
     const sy = (z) => HORIZON + 292 * z ** 1.55;
+    // the point of the water under a screen point (above the horizon: where it would fall)
+    const zOf = (y) => (y <= HORIZON + 8 ? Z0 : clamp(((y - HORIZON) / 292) ** (1 / 1.55), .08, 1));
     return (g, c, t, s) => {
       aim = ease(s, aim, s.x == null ? 0 : clamp(((s.x - 300) / 300) * 1.1, -.75, .75), .05);
+      hov = ease(s, hov, s.x == null ? 0 : 1, .12);
+      if (s.x != null) { const z = zOf(s.y); tz = ease(s, tz, z, .3); tnx = ease(s, tnx, clamp((s.x - 300) / (300 * (.86 + persp(z) * .4)), -1, 1), .3); }
       const cl = click(s);
-      if (cl) { extra.push({ nx: clamp(((cl[0] - 300) / 300) * 1.1, -.75, .75), at: t - .3 * PERIOD * .55 }); if (extra.length > 3) extra.shift(); }
+      if (cl) { extra.push({ nx: clamp(((cl[0] - 300) / 300) * 1.1, -.75, .75), at: t, top: clamp(cl[1], 20, sy(Z0) - 60) }); if (extra.length > 3) extra.shift(); }
       const k = Math.floor(t / PERIOD), u = (t % PERIOD) / PERIOD;
       const nxOf = (j) => { if (!placed.has(j)) placed.set(j, s.snap ? 0 : aim); if (placed.size > 40) placed.delete(placed.keys().next().value); return placed.get(j); };
       const drops = [];
       for (let j = k; j >= k - 2; j--) drops.push({ nx: nxOf(j), age: t - (j + .3) * PERIOD, j });
-      for (const e of extra) drops.push({ nx: e.nx, age: t - e.at - .3 * PERIOD * .45, j: -1 });
+      for (const e of extra) drops.push({ nx: e.nx, age: t - e.at - FALL, j: -1 });
       const live = drops.filter((d) => d.age > 0 && d.age < 30);
       night(g, c, t, stars, .85);
       light(g);
@@ -973,6 +1116,11 @@ export default (K) => {
             const v = w * Math.sin((dd - front) * 30);
             h += v;
             if (v > ring) { ring = v; ang = Math.atan2(z - Z0, nx - d.nx); }
+          }
+          if (hov > .01) {
+            // a hand over the water: small rings, always opening under it
+            const dz = (z - tz) * 1.55, dd = Math.hypot(nx - tnx, dz);
+            if (dd < .6) { const v = hov * .75 * Math.exp(-((dd / .26) ** 2)) * Math.sin(dd * 36 - t * 6); h += v * .8; if (v > ring) { ring = v; ang = Math.atan2(dz, nx - tnx) + t * .3; } }
           }
           cur.push(sx(nx, z), y0 - h * 58 * p, ring, ang);
         }
@@ -1007,9 +1155,9 @@ export default (K) => {
         }
       }
       // the drop, and its reflection
-      for (const d of [{ nx: nxOf(k), f: u / .3 }, ...extra.map((e) => ({ nx: e.nx, f: (t - e.at) / (.3 * PERIOD * .45) }))]) {
+      for (const d of [{ nx: nxOf(k), f: u / .3, top: 30 }, ...extra.map((e) => ({ nx: e.nx, f: (t - e.at) / FALL, top: e.top }))]) {
         if (d.f < 0 || d.f >= 1) continue;
-        const x = sx(d.nx, Z0), top = d.nx === nxOf(k) && d.f === u / .3 ? 30 : 60, y = top + (iy - top) * d.f * d.f;
+        const x = sx(d.nx, Z0), top = d.top, y = top + (iy - top) * d.f * d.f;
         g.strokeStyle = c.heat(.7); g.lineWidth = 1; g.globalAlpha = .35;
         g.beginPath(); g.moveTo(x, y - 30 - 60 * d.f); g.lineTo(x, y); g.stroke();
         glow(g, x, y, 70, c.mark, .5);
@@ -1020,6 +1168,8 @@ export default (K) => {
       // the impact: the ember where the drop joins the sea
       const ix = sx(nxOf(k), Z0), since = u - .3;
       if (since > 0) ember(g, c, ix, iy, .4 + .6 * Math.exp(-since * 6), Math.exp(-since * 2.5));
+      for (const e of extra) { const a = t - e.at - FALL; if (a > 0 && a < 4) ember(g, c, sx(e.nx, Z0), iy, .4 + .6 * Math.exp(-a * 3), Math.exp(-a * 1.2)); }
+      if (hov > .01) { glow(g, sx(tnx, tz), sy(tz), 70 + 60 * persp(tz), c.cool(.6), .4 * hov); spark(g, sx(tnx, tz), sy(tz), 1.6, c.cool(.7), .8 * hov, c.heat(1)); }
       light(g, false);
       g.globalAlpha = 1;
     };

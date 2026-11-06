@@ -85,7 +85,7 @@ def chapter(ch, i, lang, ui, chapters):
       <p class="count"><a href="#{ch['id']}" class="anchor" title="{ui['copyLink']}">{i + 1:02d}</a><span> · {e(part, lang)} · {e(t['title'], lang)}</span><span class="time"> · {minutes(t)} min</span></p>
       <h2 class="ask" id="ask-{ch['id']}">{e(t['thesis'], lang)}</h2>
     </header>
-    <figure class="fig"><div class="stage">{figure}<button type="button" class="expand" data-expand hidden aria-label="{ui['expand']}"><span aria-hidden="true">⤢</span></button></div>{extra}<figcaption class="hint" hidden>{ui['hint']}</figcaption></figure>
+    <figure class="fig"><div class="stage">{figure}<button type="button" class="expand" data-expand hidden aria-label="{ui['expand']}"><span aria-hidden="true">⤢</span></button></div>{extra}<figcaption class="hint" hidden>{e(t.get('hint', ui['hint']), lang)}</figcaption></figure>
     <div class="text">
         {body}
       {f'<p class="caveat"><span>{ui["unknown"]}</span> {e(t["open"], lang)}</p>' if t['open'] else ''}
