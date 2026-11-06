@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Look at figures without the site: render scenes to PNG on their night, and time them.
-// Usage (after npm i --no-save playwright): node scripts/shoot.cjs <outdir> name[:t1,t2,...][@x,y] ...
+// Usage (after npm i --no-save playwright): node scripts/shoot.cjs <outdir> name[:t1,t2,...][@x,y][!t,x,y] ...
+// @x,y hovers the whole time; !t,x,y clicks at time t.
 // Writes <outdir>/<name>-<t>.png (900 px) and prints the mean draw time per frame (budget: < 8 ms).
 const http = require('http'), fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
@@ -24,10 +25,10 @@ const server = http.createServer((q, r) => {
 body{margin:0;background:#07080c}</style></head><body><canvas id="c" width="900" height="900"></canvas><i style="font-family:Spectral">x</i></body></html>`);
   await p.evaluate(() => document.fonts.ready);
   for (const spec of specs) {
-    const m = spec.match(/^([\w-]+)(?::([\d.,]+))?(?:@([\d.]+),([\d.]+))?$/);
+    const m = spec.match(/^([\w-]+)(?::([\d.,]+))?(?:@([\d.]+),([\d.]+))?(?:!([\d.]+),([\d.]+),([\d.]+))?$/);
     if (!m) { console.log('bad spec', spec); continue; }
-    const [, name, times, px, py] = m;
-    const res = await p.evaluate(async ({ name, times, px, py }) => {
+    const [, name, times, px, py, ct, cx, cy] = m;
+    const res = await p.evaluate(async ({ name, times, px, py, ct, cx, cy }) => {
       const { createScene, FROZEN, makeColors } = await import('/assets/scenes.mjs');
       const labels = { you: 'une vie', past: 'passé', future: 'futur', large: 'infiniment grand', small: 'infiniment petit', everything: 'tout', nothing: 'rien', knowing: 'savoir', living: 'vivre' };
       if (!(name in FROZEN)) return { error: `no FROZEN entry for ${name}` };
@@ -42,12 +43,13 @@ body{margin:0;background:#07080c}</style></head><body><canvas id="c" width="900"
       for (let t = 0; t <= Math.max(...ts) + 1e-9; t += 1 / 30) {
         g.setTransform(1.5, 0, 0, 1.5, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
         g.fillStyle = '#07080c'; g.fillRect(0, 0, 600, 600); g.fillStyle = g.strokeStyle = c.ink;
+        if (ct != null && !s.click && t >= +ct) s.click = [+cx, +cy];
         draw(g, c, FROZEN[name] + t, s); n++;
         if (ts.some((x) => Math.abs(x - t) < 1 / 60)) shots.push([t, cv.toDataURL('image/png')]);
         if (n > 900) break;
       }
       return { ms: (performance.now() - t0) / n, shots };
-    }, { name, times, px, py });
+    }, { name, times, px, py, ct, cx, cy });
     if (res.error) { console.log(name, res.error); continue; }
     for (const [t, url] of res.shots) {
       const file = path.join(out, `${name}-${t.toFixed(1)}.png`);

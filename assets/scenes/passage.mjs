@@ -38,7 +38,8 @@ export default (K) => {
 
   return {
   // A balance of light that never settles. Its pans hold the warm and the cold; sparks cross from one to the other through
-  // the ember at the pivot, and the needle searches the measure along a graduated arc. Hover weighs on a side; a touch drops a spark.
+  // the ember at the pivot, and the needle searches the measure along a graduated arc. A hand on a pan weighs it down; a
+  // touch drops a weight in the pan on that side, which sinks and swings, then the Source carries the excess across.
   balance() {
     const r = rng(7), P = [300, 196], ARM = 200, DROP = 150, TICKS = 97, A0 = -Math.PI / 2 - .86, A1 = -Math.PI / 2 + .86;
     const heap = () => Array.from({ length: 300 }, () => {
@@ -46,19 +47,26 @@ export default (K) => {
       return [u * 60, rise, .7 + r() * 1.5, r(), r() * TAU, 3 + r() * 5];
     }).sort((a, b) => a[1] - b[1]);
     const pans = [heap(), heap()], stars = sky(71, 130), click = clicked();
-    let lean = 0;
-    const drops = [];
+    // what each pan holds; a touch drops a weight in the pan under it, and the Source slowly carries the excess across
+    const w = [1.5, 1.5], drops = [], DROPT = .7;
+    let tilt = 0, vel = 0, last = null, press = 0, bowls = [[100, 346], [500, 346]];
     return (g, c, t, s) => {
-      lean = ease(s, lean, s.x == null ? 0 : clamp((s.x - 300) / 240, -1, 1) * .07, .04);
+      const dt = last == null ? 0 : clamp(t - last, 0, .05);
+      last = t;
       const k = click(s);
-      if (k) { drops.push({ x: k[0], y: k[1], side: k[0] < 300 ? 0 : 1, at: t }); if (drops.length > 5) drops.shift(); }
-      const share = .5 + .15 * Math.sin((t * TAU) / 31) + .06 * Math.sin((t * TAU) / 13 + 2);
-      let extra = 0;
-      for (const d of drops) { const age = t - d.at - .9; if (age > 0) extra += (d.side ? 1 : -1) * .1 * Math.exp(-age / 6) * (1 + .5 * Math.sin(age * 2.4) * Math.exp(-age)); }
-      const tilt = (share - .5) * .95 + extra + lean + .012 * Math.sin((t * TAU) / 7);
+      if (k) { drops.push({ x: k[0], y: k[1], side: k[0] < 300 ? 0 : 1, at: t, done: false }); if (drops.length > 8) drops.shift(); }
+      for (const d of drops) if (!d.done && t - d.at >= DROPT) { d.done = true; w[d.side] = Math.min(3.4, w[d.side] + .55); vel += d.side ? .7 : -.7; }
+      const flow = (w[1] - w[0]) * .09 * dt;
+      w[1] -= flow; w[0] += flow;
+      // a hand resting on a pan weighs on it
+      let want = 0;
+      if (s.x != null) bowls.forEach(([bx, by], side) => { if (Math.hypot(s.x - bx, s.y - by + 20) < 100) want = side ? 1 : -1; });
+      press = ease(s, press, want, .08);
+      const target = clamp((w[1] - w[0]) * .3 + .09 * Math.sin((t * TAU) / 31) + .035 * Math.sin((t * TAU) / 13 + 2) + .14 * press, -.42, .42);
+      if (s.snap || !dt) { tilt = target; vel = 0; } else { vel += (26 * (target - tilt) - 2.6 * vel) * dt; tilt += vel * dt; }
       const ca = Math.cos(tilt), sa = Math.sin(tilt);
       const ends = [-1, 1].map((d) => [P[0] + d * ARM * ca, P[1] + d * ARM * sa]);
-      const bowls = ends.map(([x, y], side) => [x + 2.5 * Math.sin(t * .9 + side * 2) - tilt * 14, y + DROP]);
+      bowls = ends.map(([x, y], side) => [x + 2.5 * Math.sin(t * .9 + side * 2) - vel * 10, y + DROP]);
       const tone = (side, u) => (side ? c.cool(u) : c.heat(u));
       night(g, c, t, stars, .8);
       light(g);
@@ -75,7 +83,7 @@ export default (K) => {
       g.beginPath(); g.moveTo(200, 550); g.lineTo(400, 550); g.stroke();
       glow(g, 300, 552, 120, c.heat(.45), .3);
       // the graduated arc: the measure, searched
-      const needle = -Math.PI / 2 + tilt * 3;
+      const needle = -Math.PI / 2 + clamp(tilt * 2.2, -.84, .84);
       const tb = Array.from({ length: 8 }, () => []), hot = [];
       for (let i = 0; i < TICKS; i++) {
         const a = A0 + ((A1 - A0) * i) / (TICKS - 1), len = i % 12 === 0 ? 16 : i % 6 === 0 ? 10 : 5;
@@ -137,7 +145,7 @@ export default (K) => {
         for (let i = 1; i <= 30; i++) { const u = i / 15 - 1; g.lineTo(bx + u * 72, by + 20 * (1 - u * u)); }
         for (const [w, a] of [[6, .07], [1.4, .8]]) { g.lineWidth = w; g.globalAlpha = a; g.stroke(); }
         // its heap: the amount varies with what is lived
-        const n = Math.round(300 * clamp(side ? share + extra * .8 : 1 - share - extra * .8, .08, .95));
+        const n = Math.round(clamp(88 * w[side], 20, 300));
         const hb = Array.from({ length: 8 }, () => []);
         for (let i = 0; i < n; i++) {
           const [dx, rise, sz, v, ph, per] = pans[side][i], u = dx / 60;
@@ -154,7 +162,7 @@ export default (K) => {
       for (let m = 0; m < 5; m++) {
         const per = 9.4, ph = mod(t + m * 1.88, per), cyc = Math.floor((t + m * 1.88) / per), f = ph / 4.2;
         if (f > 1) continue;
-        const from = (cyc + m) & 1, to = 1 - from, A = bowls[from], B = bowls[to];
+        const from = Math.abs(w[1] - w[0]) > .12 ? (w[1] > w[0] ? 1 : 0) : (cyc + m) & 1, to = 1 - from, A = bowls[from], B = bowls[to];
         const e = f * f * (3 - 2 * f), half = e < .5;
         const u = half ? e * 2 : e * 2 - 1, a0 = half ? [A[0], A[1] - 18] : P, a1 = half ? P : [B[0], B[1] - 18];
         const cx = half ? (A[0] + P[0]) / 2 : (B[0] + P[0]) / 2, cy = Math.min(a0[1], a1[1]) - 70;
@@ -162,7 +170,7 @@ export default (K) => {
         spark(g, x, y, 1.5, tone(half ? from : to, .7), .9 * Math.sin(Math.PI * f) ** .4, c.heat(1));
       }
       for (const d of drops) {
-        const f = (t - d.at) / .9;
+        const f = (t - d.at) / DROPT;
         if (f < 0 || f > 1) continue;
         const [bx, by] = bowls[d.side];
         spark(g, d.x + (bx - d.x) * f * f, d.y + (by - d.y) * f * f, 2, tone(d.side, .75), 1, c.heat(1));
