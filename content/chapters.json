@@ -779,7 +779,8 @@
     "thesis": "Toutes les pages du livre existent en même temps.",
     "body": [
      "Nous lisons un livre page après page, et c'est ainsi que nous vivons le temps. Mais le lecteur qui avance n'empêche pas les autres pages d'être là, ensemble, entre les deux couvertures.",
-     "Les physiciens ont une image voisine. Depuis Einstein, le temps n'est plus un fleuve unique qui coule pour tous au même rythme : deux événements simultanés pour l'un ne le sont pas pour l'autre. Certains en concluent que passé, présent et futur sont également réels, comme les lieux d'une carte. Ce n'est qu'une interprétation, discutée. Elle montre pourtant que l'intuition du livre n'a rien d'absurde.",
+     "Même le temps que nous comptons n'est pas tout à fait ce qu'il paraît. Nous datons nos jours depuis la naissance de Jésus, et pourtant il serait né « avant Jésus-Christ ». Au VIe siècle, un moine, Denys le Petit, chercha l'année de l'Incarnation pour dresser ses tables de Pâques. Il se serait trompé de quelques années : selon les Évangiles, Jésus naît sous Hérode, et Hérode serait mort vers 4 av. J.-C. L'an 2000 aurait donc été fêté avec quelques années de retard. On le sait depuis des siècles, et personne ne corrige : changer de compte coûterait plus que l'erreur. Le calendrier tient parce que tout le monde s'en sert, non parce qu'il est exact. Le nombre écrit en haut d'une lettre est une convention ; le temps lui-même est autre chose.",
+     "Les physiciens vont plus loin, avec une image voisine du livre. Depuis Einstein, le temps n'est plus un fleuve unique qui coule pour tous au même rythme : deux événements simultanés pour l'un ne le sont pas pour l'autre. Certains en concluent que passé, présent et futur sont également réels, comme les lieux d'une carte. Ce n'est qu'une interprétation, discutée. Elle montre pourtant que l'intuition du livre n'a rien d'absurde.",
      "@pages",
      "À l'échelle d'une âme, le passé, le présent et le futur pourraient avoir cette simultanéité. Des vies séparées par des siècles seraient voisines : deux pages d'un même volume, qui ne se lisent pas l'une l'autre.",
      "Chacun en a eu le pressentiment. Une chanson entendue par hasard dans un magasin, et pendant une seconde on n'est pas en train de se souvenir d'un été d'enfance : on y est. Le passé ne revient pas de loin. Il était tout près, à une page.",
@@ -796,6 +797,11 @@
       "Passé et avenir n'existent que présents à l'esprit : mémoire, attention, attente."
      ],
      [
+      "Denys le Petit",
+      "*Tables pascales*, 525",
+      "Il fixe l'an 1 à la naissance du Christ, et se trompe de quelques années."
+     ],
+     [
       "Hermann Minkowski",
       "*Espace et temps*, 1908",
       "Le temps devient une dimension parmi quatre, et toute une histoire tient sur une seule ligne."
@@ -808,7 +814,8 @@
     "thesis": "Every page of the book exists at the same time.",
     "body": [
      "We read a book page after page, and that is how we live time. But the reader moving forward does not stop the other pages from being there, together, between the two covers.",
-     "Physicists have a similar image. Since Einstein, time is no longer a single river flowing for everyone at the same pace: two events that are simultaneous for one are not for another. Some conclude that past, present and future are equally real, like the places on a map. This is only an interpretation, and a debated one. Yet it shows that the book's intuition is not absurd.",
+     "Even the time we count is not quite what it seems. We date our days from the birth of Jesus, and yet he would have been born 'before Christ'. In the sixth century a monk, Dionysius Exiguus, worked out the year of the Incarnation to draw up his Easter tables. He seems to have missed by a few years: according to the Gospels, Jesus is born under Herod, and Herod probably died around 4 BC. The year 2000 would then have been celebrated a few years late. This has been known for centuries, and no one corrects it: changing the count would cost more than the error. The calendar holds because everyone uses it, not because it is exact. The number written at the top of a letter is a convention; time itself is something else.",
+     "Physicists go further, with an image close to the book. Since Einstein, time is no longer a single river flowing for everyone at the same pace: two events that are simultaneous for one are not for another. Some conclude that past, present and future are equally real, like the places on a map. This is only an interpretation, and a debated one. Yet it shows that the book's intuition is not absurd.",
      "@pages",
      "At the scale of a soul, past, present and future could have this simultaneity. Lives separated by centuries would be neighbours: two pages of one volume, which do not read each other.",
      "Everyone has had an inkling of this. A song heard by chance in a shop, and for a second one is not remembering a childhood summer: one is there. The past does not come back from far away. It was very close, one page over.",
@@ -823,6 +830,11 @@
       "Augustine",
       "*Confessions*, book XI, c. 400",
       "Past and future exist only as present to the mind: memory, attention, expectation."
+     ],
+     [
+      "Dionysius Exiguus",
+      "*Easter tables*, 525",
+      "He sets year 1 at the birth of Christ, and misses by a few years."
      ],
      [
       "Hermann Minkowski",
